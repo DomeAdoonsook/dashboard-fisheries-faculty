@@ -1,0 +1,14 @@
+# Excel temp files
+~$*.xlsx
+~$*.xls
+
+# Python temp output
+_*.txt
+*.txt
+
+# Claude internal
+.claude/
+
+# OS
+Thumbs.db
+desktop.ini

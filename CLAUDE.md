@@ -44,6 +44,11 @@
 | 4 | Technology Development and Innovation University | 3 |
 | 5 | Financial Stability and Sustainable Growth | 8 |
 
+## Git & GitHub
+- Remote: https://github.com/DomeAdoonsook/dashboard-fisheries-faculty (private)
+- **ทุกครั้งที่จบ session หรือทำงานสำคัญเสร็จ ให้ remind user ว่า commit และ push ด้วยเสมอ**
+- คำสั่ง push: `git add -A && git commit -m "..." && git push`
+
 ## สิ่งที่ทำไปแล้ว
 - [x] อ่านและสำรวจโครงสร้างไฟล์ Excel ครบทุก Sheet
 - [x] นับ 46 ตัวชี้วัด และยืนยันรายการทั้งหมด

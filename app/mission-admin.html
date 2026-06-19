@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>จัดการภาระกิจประจำ — Dashboard คณะประมง</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- SheetJS สำหรับอ่าน Excel -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:       #1e3a5f;
+      --primary-light: #2563eb;
+      --accent:        #3b82f6;
+      --text:          #0f172a;
+      --text-muted:    #64748b;
+      --border:        #e2e8f0;
+      --bg:            #f8fafc;
+      --white:         #ffffff;
+      --success:       #10b981;
+      --warning:       #f59e0b;
+      --danger:        #ef4444;
+    }
+
+    body {
+      font-family: 'Inter', 'Sarabun', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: url('assets/images/Logo3D_2.PNG') center center / 52% auto no-repeat;
+      opacity: 1;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ===== Navbar ===== */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 96px;
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border-bottom: 1px solid rgba(255,255,255,0.4);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--text);
+    }
+    .navbar-brand img { height: 90px; width: auto; }
+    .navbar-brand-text { line-height: 1.3; }
+    .navbar-brand-text .title { font-size: 22px; font-weight: 700; }
+    .navbar-brand-text .subtitle { font-size: 13px; font-weight: 500; color: #64748b; }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .year-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 10px;
+      padding: 6px 12px;
+    }
+    .year-selector label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+    .year-select {
+      background: transparent;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      color: var(--primary);
+      cursor: pointer;
+      outline: none;
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 99px;
+      padding: 6px 16px 6px 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .user-avatar {
+      width: 30px; height: 30px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: white; font-weight: 700;
+    }
+
+    .btn-back {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn-back:hover { background: rgba(255,255,255,0.55); color: var(--text); }
+
+    .btn-logout {
+      background: rgba(255,255,255,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-logout:hover { background: rgba(239,68,68,0.1); color: #dc2626; border-color: rgba(239,68,68,0.3); }
+
+    /* ===== Layout ===== */
+    .page-body {
+      flex: 1;
+      display: flex;
+      position: relative;
+      z-index: 1;
+      padding: 24px;
+      gap: 20px;
+      min-height: 0;
+    }
+
+    /* ===== Sidebar (Liquid Glass) ===== */
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.35);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(255,255,255,0.85);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(30,58,95,0.10), 0 1px 0 rgba(255,255,255,0.9) inset;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-self: flex-start;
+      position: sticky;
+      top: 116px;
+    }
+
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 0 8px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.18s;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+    }
+
+    .sidebar-item:hover {
+      background: rgba(255,255,255,0.5);
+      color: var(--text);
+    }
+
+    .sidebar-item.active {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-color: rgba(37,99,235,0.2);
+      color: var(--primary);
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(30,58,95,0.08);
+    }
+
+    .sidebar-item .icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 15px;
+    }
+
+    .sidebar-item.active .icon { background: rgba(37,99,235,0.12); }
+    .sidebar-item:not(.active) .icon { background: rgba(0,0,0,0.04); }
+
+    .sidebar-divider {
+      height: 1px;
+      background: rgba(0,0,0,0.07);
+      margin: 8px 0;
+    }
+
+    /* Quarter selector in sidebar */
+    .quarter-group {
+      padding: 0 8px;
+      margin-top: 4px;
+    }
+    .quarter-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .quarter-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .q-btn {
+      padding: 6px 4px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.5);
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .q-btn:hover { background: rgba(255,255,255,0.8); color: var(--text); }
+    .q-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    /* ===== Content Area ===== */
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-width: 0;
+    }
+
+    /* ===== Panel (Liquid Glass) ===== */
+    .panel {
+      background: rgba(255,255,255,0.45);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(255,255,255,0.85);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(30,58,95,0.10), 0 1px 0 rgba(255,255,255,0.9) inset;
+      padding: 28px 32px;
+      display: none;
+    }
+    .panel.active { display: block; }
+
+    .panel-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .panel-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* ===== Tab 1: Import ===== */
+    .import-area {
+      border: 2px dashed rgba(37,99,235,0.3);
+      border-radius: 16px;
+      padding: 48px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(255,255,255,0.3);
+    }
+    .import-area:hover, .import-area.drag-over {
+      border-color: var(--primary-light);
+      background: rgba(37,99,235,0.05);
+    }
+    .import-icon { font-size: 48px; margin-bottom: 12px; }
+    .import-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .import-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+    .import-input { display: none; }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 24px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary:hover { background: #162d4a; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(30,58,95,0.25); }
+
+    .btn-success {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 24px;
+      background: var(--success);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-success:hover { background: #059669; transform: translateY(-1px); }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 24px;
+      background: transparent;
+      color: var(--primary-light);
+      border: 1.5px solid var(--primary-light);
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover { background: rgba(37,99,235,0.08); }
+
+    .btn-danger-sm {
+      padding: 5px 10px;
+      background: rgba(239,68,68,0.1);
+      color: #dc2626;
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-danger-sm:hover { background: rgba(239,68,68,0.2); }
+
+    .btn-edit-sm {
+      padding: 5px 10px;
+      background: rgba(37,99,235,0.1);
+      color: var(--primary-light);
+      border: 1px solid rgba(37,99,235,0.2);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-edit-sm:hover { background: rgba(37,99,235,0.2); }
+
+    /* Import preview */
+    .preview-box {
+      margin-top: 20px;
+      display: none;
+    }
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .preview-info {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .preview-info strong { color: var(--text); }
+    .preview-actions { display: flex; gap: 10px; }
+
+    /* ===== Table ===== */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead th {
+      background: rgba(30,58,95,0.85);
+      color: white;
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    thead th:first-child { border-radius: 12px 0 0 0; }
+    thead th:last-child { border-radius: 0 12px 0 0; }
+
+    tbody tr { border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.15s; }
+    tbody tr:hover { background: rgba(37,99,235,0.04); }
+    tbody td { padding: 10px 14px; vertical-align: top; }
+
+    .strategy-row td {
+      background: rgba(30,58,95,0.06);
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--primary);
+      padding: 8px 14px;
+    }
+
+    /* ===== Tab 2: กรอก/แก้ไข ===== */
+    .edit-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .edit-toolbar .toolbar-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    input[type="text"], input[type="number"], textarea, select {
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .td-input {
+      width: 100%;
+      border: 1px solid transparent;
+      background: transparent;
+      padding: 4px 6px;
+      border-radius: 6px;
+      transition: all 0.15s;
+      min-width: 80px;
+    }
+    .td-input:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      background: white;
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.1);
+    }
+
+    textarea.td-input {
+      resize: vertical;
+      min-height: 52px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge-success { background: rgba(16,185,129,0.15); color: #059669; }
+    .badge-warning { background: rgba(245,158,11,0.15); color: #d97706; }
+    .badge-danger  { background: rgba(239,68,68,0.15);  color: #dc2626; }
+    .badge-gray    { background: rgba(100,116,139,0.12); color: #64748b; }
+
+    /* ===== Tab 3: PDF ===== */
+    .pdf-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .pdf-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 12px;
+      padding: 12px 16px;
+    }
+
+    .pdf-item-left { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+    .pdf-code { font-size: 12px; font-weight: 700; color: var(--primary); }
+    .pdf-name { font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .pdf-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+    .pdf-status-none { font-size: 12px; color: var(--text-muted); }
+    .pdf-status-ok { font-size: 12px; color: var(--success); font-weight: 600; }
+
+    .btn-upload-pdf {
+      padding: 5px 12px;
+      background: rgba(37,99,235,0.1);
+      border: 1px solid rgba(37,99,235,0.25);
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--primary-light);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-upload-pdf:hover { background: rgba(37,99,235,0.2); }
+
+    .btn-view-pdf {
+      padding: 5px 12px;
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.25);
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      color: #059669;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+
+    /* ===== Alert ===== */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .alert-success { background: rgba(16,185,129,0.1); border-left: 4px solid #10b981; color: #065f46; }
+    .alert-error   { background: rgba(239,68,68,0.1);  border-left: 4px solid #ef4444; color: #991b1b; }
+    .alert.show { display: block; }
+
+    /* ===== Modal แก้ไขรายตัว ===== */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: rgba(255,255,255,0.80);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.9);
+      border-radius: 20px;
+      box-shadow: 0 16px 48px rgba(30,58,95,0.18);
+      padding: 32px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(12px);
+      transition: transform 0.2s;
+    }
+    .modal-overlay.active .modal { transform: translateY(0); }
+
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .modal-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .form-control {
+      width: 100%;
+      border: none;
+      border-bottom: 1.5px solid #cbd5e1;
+      background: transparent;
+      padding: 8px 0;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-control:focus { border-bottom-color: var(--primary-light); }
+    textarea.form-control { resize: vertical; min-height: 64px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 8px; }
+    textarea.form-control:focus { border-color: var(--primary-light); }
+
+    .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+    .btn-cancel {
+      flex: 1; padding: 12px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .btn-cancel:hover { border-color: #94a3b8; color: var(--text); }
+    .btn-confirm {
+      flex: 1; padding: 12px;
+      background: var(--primary);
+      border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      color: white; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-confirm:hover { background: #162d4a; }
+
+    /* ===== Footer ===== */
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 40px;
+      border-top: 1px solid rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      position: sticky;
+      bottom: 0;
+      z-index: 50;
+    }
+    .footer-copy { font-size: 12px; color: #94a3b8; }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .page-body { flex-direction: column; padding: 16px; }
+      .sidebar { width: 100%; position: static; }
+      .navbar { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <img src="assets/images/Logo.PNG" alt="Logo" onerror="this.style.display='none'">
+      <div class="navbar-brand-text">
+        <div class="title">ภาระกิจประจำ</div>
+        <div class="subtitle">คณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ มหาวิทยาลัยแม่โจ้</div>
+      </div>
+    </div>
+    <div class="navbar-right">
+      <div class="year-selector">
+        <label>ปีงบประมาณ</label>
+        <select class="year-select" id="year-select" onchange="onYearChange(this.value)"></select>
+      </div>
+      <a href="dashboard-main.html" class="btn-back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        กลับ
+      </a>
+      <div class="user-badge">
+        <div class="user-avatar" id="user-avatar">A</div>
+        <span id="user-name">เจ้าหน้าที่</span>
+      </div>
+      <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
+    </div>
+  </nav>
+
+  <!-- Body -->
+  <div class="page-body">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-title">เมนูจัดการ</div>
+
+      <button class="sidebar-item active" onclick="switchTab('import')" id="tab-import">
+        <div class="icon">📥</div>
+        <span>นำเข้าข้อมูล</span>
+      </button>
+
+      <button class="sidebar-item" onclick="switchTab('edit')" id="tab-edit">
+        <div class="icon">✏️</div>
+        <span>กรอก / แก้ไข</span>
+      </button>
+
+      <button class="sidebar-item" onclick="switchTab('pdf')" id="tab-pdf">
+        <div class="icon">📎</div>
+        <span>แนบ PDF</span>
+      </button>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="quarter-group">
+        <div class="quarter-label">ไตรมาส</div>
+        <div class="quarter-btns">
+          <button class="q-btn" onclick="setQuarter(1)" id="q1">Q1</button>
+          <button class="q-btn" onclick="setQuarter(2)" id="q2">Q2</button>
+          <button class="q-btn active" onclick="setQuarter(3)" id="q3">Q3</button>
+          <button class="q-btn" onclick="setQuarter(4)" id="q4">Q4</button>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--text-muted);text-align:center" id="quarter-label-text">
+          ต.ค. 68 – มิ.ย. 69
+        </div>
+      </div>
+    </aside>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- ===== Tab: Import ===== -->
+      <div class="panel active" id="panel-import">
+        <div class="panel-title">นำเข้าข้อมูลจาก Excel</div>
+        <div class="panel-sub">อัปโหลดไฟล์ Excel เพื่อนำเข้าตัวชี้วัดภาระกิจประจำ รองรับไฟล์ .xlsx</div>
+
+        <div class="alert alert-success" id="import-success">นำเข้าข้อมูลสำเร็จ!</div>
+        <div class="alert alert-error"   id="import-error">เกิดข้อผิดพลาด กรุณาตรวจสอบรูปแบบไฟล์</div>
+
+        <div class="import-area" id="import-area"
+          onclick="document.getElementById('file-input').click()"
+          ondragover="onDragOver(event)"
+          ondragleave="onDragLeave(event)"
+          ondrop="onDrop(event)">
+          <div class="import-icon">📊</div>
+          <div class="import-title">คลิกหรือลากไฟล์มาวางที่นี่</div>
+          <div class="import-sub">รองรับไฟล์ .xlsx จากระบบรายงานตัวชี้วัดภาระกิจประจำ</div>
+          <button class="btn-primary" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            เลือกไฟล์
+          </button>
+          <input type="file" id="file-input" class="import-input" accept=".xlsx,.xls" onchange="handleFile(event)">
+        </div>
+
+        <div class="preview-box" id="preview-box">
+          <div class="preview-header">
+            <div>
+              <div style="font-size:15px;font-weight:700;color:var(--text)" id="preview-title">Preview</div>
+              <div class="preview-info" id="preview-info"></div>
+            </div>
+            <div class="preview-actions">
+              <button class="btn-outline" onclick="resetImport()">ยกเลิก</button>
+              <button class="btn-success" onclick="confirmImport()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                บันทึกข้อมูล
+              </button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:100px">รหัส</th>
+                  <th>ตัวชี้วัด</th>
+                  <th style="width:80px">หน่วย</th>
+                  <th style="width:80px">เป้าหมาย</th>
+                  <th style="width:80px">ผลงาน</th>
+                  <th style="width:80px">ร้อยละ</th>
+                </tr>
+              </thead>
+              <tbody id="preview-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Tab: Edit ===== -->
+      <div class="panel" id="panel-edit">
+        <div class="panel-title">กรอก / แก้ไขข้อมูล</div>
+        <div class="panel-sub" id="edit-sub">แก้ไขผลการดำเนินงานรายตัวชี้วัด สำหรับไตรมาสที่เลือก</div>
+
+        <div class="alert alert-success" id="edit-success">บันทึกข้อมูลสำเร็จ!</div>
+
+        <div class="edit-toolbar">
+          <span class="toolbar-label">ยุทธศาสตร์:</span>
+          <select id="strategy-filter" onchange="renderEditTable()" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,0.6);font-family:inherit;font-size:13px;outline:none;">
+            <option value="all">ทั้งหมด</option>
+            <option value="1">ยุทธศาสตร์ที่ 1</option>
+            <option value="2">ยุทธศาสตร์ที่ 2</option>
+            <option value="3">ยุทธศาสตร์ที่ 3</option>
+            <option value="4">ยุทธศาสตร์ที่ 4</option>
+            <option value="5">ยุทธศาสตร์ที่ 5</option>
+          </select>
+          <button class="btn-success" onclick="saveEditData()" style="margin-left:auto">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            บันทึกทั้งหมด
+          </button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:90px">รหัส</th>
+                <th>ตัวชี้วัด</th>
+                <th style="width:70px">หน่วย</th>
+                <th style="width:80px">เป้าหมาย</th>
+                <th style="width:90px">ผลงาน</th>
+                <th style="width:80px">ร้อยละ</th>
+                <th style="width:60px">สถานะ</th>
+                <th style="width:200px">รายละเอียด</th>
+                <th style="width:80px">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="edit-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== Tab: PDF ===== -->
+      <div class="panel" id="panel-pdf">
+        <div class="panel-title">แนบ PDF หลักฐาน</div>
+        <div class="panel-sub">อัปโหลดไฟล์ PDF หลักฐานประกอบการรายงานแต่ละตัวชี้วัด</div>
+
+        <div class="alert alert-success" id="pdf-success">อัปโหลด PDF สำเร็จ!</div>
+
+        <div class="pdf-list" id="pdf-list"></div>
+        <input type="file" id="pdf-input" accept=".pdf" style="display:none" onchange="handlePdfUpload(event)">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-copy">© 2569 คณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ มหาวิทยาลัยแม่โจ้</div>
+  </footer>
+
+  <!-- Modal: แก้ไขรายตัว -->
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal">
+      <div class="modal-title" id="modal-kpi-code">แก้ไขตัวชี้วัด</div>
+      <div class="modal-sub" id="modal-kpi-name"></div>
+
+      <div class="form-group">
+        <label class="form-label">ผลการดำเนินงาน</label>
+        <input type="number" class="form-control" id="modal-result" step="0.01" placeholder="กรอกผลงาน">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ร้อยละความสำเร็จ (%)</label>
+        <input type="number" class="form-control" id="modal-percent" step="0.01" placeholder="กรอกร้อยละ (หรือคำนวณอัตโนมัติ)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">รายละเอียดการดำเนินงาน</label>
+        <textarea class="form-control" id="modal-detail" rows="3" placeholder="อธิบายการดำเนินงาน"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeEditModal()">ยกเลิก</button>
+        <button class="btn-confirm" onclick="saveModalData()">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== Auth =====
+    const auth = sessionStorage.getItem('auth');
+    if (!auth || JSON.parse(auth).role !== 'admin') window.location.href = 'index.html';
+    const user = JSON.parse(auth);
+    document.getElementById('user-name').textContent = user.name;
+    document.getElementById('user-avatar').textContent = user.name.charAt(0);
+
+    // ===== Year =====
+    const DEFAULT_YEAR = 2569;
+    function getYears() { return JSON.parse(localStorage.getItem('kpi_years') || '[2569]'); }
+    function getCurrentYear() { return parseInt(sessionStorage.getItem('current_year') || DEFAULT_YEAR); }
+    function onYearChange(y) { sessionStorage.setItem('current_year', y); loadData(); }
+
+    function renderYearSelect() {
+      const sel = document.getElementById('year-select');
+      const cur = getCurrentYear();
+      sel.innerHTML = '';
+      getYears().sort((a,b)=>b-a).forEach(y => {
+        const o = document.createElement('option');
+        o.value = y; o.textContent = y;
+        if (y === cur) o.selected = true;
+        sel.appendChild(o);
+      });
+    }
+
+    // ===== Quarter =====
+    let currentQuarter = 3;
+    const quarterLabels = {1:'ต.ค. – ธ.ค.', 2:'ต.ค. – มี.ค.', 3:'ต.ค. – มิ.ย.', 4:'ต.ค. – ก.ย.'};
+
+    function setQuarter(q) {
+      currentQuarter = q;
+      [1,2,3,4].forEach(i => document.getElementById('q'+i).classList.toggle('active', i===q));
+      document.getElementById('quarter-label-text').textContent =
+        (currentQuarter === 2 ? 'ต.ค. 68 – มี.ค. 69' :
+         currentQuarter === 3 ? 'ต.ค. 68 – มิ.ย. 69' :
+         currentQuarter === 1 ? 'ต.ค. – ธ.ค. 68' : 'ต.ค. 68 – ก.ย. 69');
+      renderEditTable();
+      renderPdfList();
+    }
+
+    // ===== Data Storage =====
+    function storageKey() { return `mission_${getCurrentYear()}`; }
+
+    function getData() {
+      return JSON.parse(localStorage.getItem(storageKey()) || '{"kpis":[]}');
+    }
+
+    function saveData(data) {
+      localStorage.setItem(storageKey(), JSON.stringify(data));
+    }
+
+    // ===== Tab Switch =====
+    function switchTab(tab) {
+      ['import','edit','pdf'].forEach(t => {
+        document.getElementById('panel-'+t).classList.toggle('active', t===tab);
+        document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+      });
+      if (tab === 'edit') renderEditTable();
+      if (tab === 'pdf') renderPdfList();
+    }
+
+    // ===== Import Excel =====
+    let previewData = [];
+
+    function onDragOver(e) { e.preventDefault(); document.getElementById('import-area').classList.add('drag-over'); }
+    function onDragLeave(e) { document.getElementById('import-area').classList.remove('drag-over'); }
+    function onDrop(e) {
+      e.preventDefault();
+      document.getElementById('import-area').classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) parseExcel(file);
+    }
+
+    function handleFile(e) {
+      const file = e.target.files[0];
+      if (file) parseExcel(file);
+    }
+
+    function parseExcel(file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const wb = XLSX.read(e.target.result, {type:'array'});
+          // เลือก sheet ตาม quarter
+          const sheetMap = {1: wb.SheetNames[0], 2: wb.SheetNames[1], 3: wb.SheetNames[3], 4: wb.SheetNames[0]};
+          const sheetName = sheetMap[currentQuarter] || wb.SheetNames[0];
+          const ws = wb.Sheets[sheetName];
+          const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+
+          previewData = [];
+          rows.forEach(row => {
+            const code = String(row[0] || '').trim();
+            if (/^\d+\.\d+\.\d+/.test(code)) {
+              previewData.push({
+                code: code,
+                name: String(row[0] || '').trim(),
+                unit: String(row[1] || '').trim(),
+                target: row[2] !== '' ? row[2] : '',
+                result: row[3] !== '' ? row[3] : '',
+                percent: row[4] !== '' ? row[4] : '',
+                detail: String(row[5] || '').trim(),
+                criteria: String(row[6] || '').trim(),
+                strategy: detectStrategy(code),
+              });
+            }
+          });
+
+          if (previewData.length === 0) {
+            showAlert('import-error', 'ไม่พบข้อมูลตัวชี้วัดในไฟล์ กรุณาตรวจสอบรูปแบบไฟล์');
+            return;
+          }
+
+          showPreview(file.name);
+        } catch(err) {
+          showAlert('import-error', 'ไม่สามารถอ่านไฟล์ได้: ' + err.message);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function detectStrategy(code) {
+      const num = parseInt(code.split('.')[0]);
+      return num >= 1 && num <= 5 ? num : 0;
+    }
+
+    function showPreview(filename) {
+      document.getElementById('preview-title').textContent = `Preview: ${filename}`;
+      document.getElementById('preview-info').innerHTML =
+        `พบ <strong>${previewData.length}</strong> ตัวชี้วัด — Q${currentQuarter} (${quarterLabels[currentQuarter]})`;
+
+      const tbody = document.getElementById('preview-tbody');
+      tbody.innerHTML = '';
+      let lastStrategy = 0;
+
+      previewData.forEach(kpi => {
+        if (kpi.strategy !== lastStrategy) {
+          lastStrategy = kpi.strategy;
+          const tr = document.createElement('tr');
+          tr.className = 'strategy-row';
+          tr.innerHTML = `<td colspan="6">ยุทธศาสตร์ที่ ${kpi.strategy}</td>`;
+          tbody.appendChild(tr);
+        }
+        const pct = parseFloat(kpi.percent);
+        const badge = isNaN(pct) ? 'gray' : pct >= 100 ? 'success' : pct >= 50 ? 'warning' : 'danger';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span style="font-size:11px;font-weight:700;color:var(--primary)">${kpi.code}</span></td>
+          <td style="font-size:12px">${kpi.name}</td>
+          <td style="font-size:12px">${kpi.unit}</td>
+          <td style="font-size:12px;text-align:center">${kpi.target}</td>
+          <td style="font-size:12px;text-align:center">${kpi.result}</td>
+          <td style="text-align:center"><span class="badge badge-${badge}">${isNaN(pct)?'-':pct.toFixed(1)+'%'}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('preview-box').style.display = 'block';
+      document.getElementById('import-area').style.display = 'none';
+    }
+
+    function confirmImport() {
+      const data = getData();
+      // merge ข้อมูลตาม quarter
+      previewData.forEach(kpi => {
+        let existing = data.kpis.find(k => k.code === kpi.code);
+        if (!existing) {
+          existing = { code: kpi.code, name: kpi.name, unit: kpi.unit, target: kpi.target, strategy: kpi.strategy, criteria: kpi.criteria, quarters: {} };
+          data.kpis.push(existing);
+        }
+        existing.quarters[`Q${currentQuarter}`] = {
+          result: kpi.result,
+          percent: kpi.percent,
+          detail: kpi.detail,
+        };
+      });
+      saveData(data);
+      showAlert('import-success', `นำเข้า ${previewData.length} ตัวชี้วัด Q${currentQuarter} สำเร็จ!`);
+      resetImport();
+    }
+
+    function resetImport() {
+      previewData = [];
+      document.getElementById('preview-box').style.display = 'none';
+      document.getElementById('import-area').style.display = '';
+      document.getElementById('file-input').value = '';
+    }
+
+    // ===== Edit Table =====
+    function renderEditTable() {
+      const data = getData();
+      const filter = document.getElementById('strategy-filter').value;
+      const tbody = document.getElementById('edit-tbody');
+      tbody.innerHTML = '';
+
+      const kpis = filter === 'all' ? data.kpis : data.kpis.filter(k => String(k.strategy) === filter);
+
+      if (kpis.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">ยังไม่มีข้อมูล — กรุณานำเข้าจาก Excel หรือเพิ่มตัวชี้วัดก่อน</td></tr>`;
+        return;
+      }
+
+      let lastStrategy = 0;
+      kpis.forEach((kpi, idx) => {
+        if (kpi.strategy !== lastStrategy) {
+          lastStrategy = kpi.strategy;
+          const tr = document.createElement('tr');
+          tr.className = 'strategy-row';
+          tr.innerHTML = `<td colspan="9">ยุทธศาสตร์ที่ ${kpi.strategy}</td>`;
+          tbody.appendChild(tr);
+        }
+
+        const q = kpi.quarters?.[`Q${currentQuarter}`] || {};
+        const pct = parseFloat(q.percent);
+        const badge = isNaN(pct) ? 'gray' : pct >= 100 ? 'success' : pct >= 50 ? 'warning' : 'danger';
+        const statusText = isNaN(pct) ? '-' : pct >= 100 ? 'ผ่าน' : pct >= 50 ? 'กำลังดำเนินการ' : 'ต้องเร่ง';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span style="font-size:11px;font-weight:700;color:var(--primary)">${kpi.code}</span></td>
+          <td style="font-size:12px;max-width:200px">${kpi.name}</td>
+          <td style="font-size:12px;text-align:center">${kpi.unit||'-'}</td>
+          <td style="font-size:12px;text-align:center">${kpi.target||'-'}</td>
+          <td><input class="td-input" type="number" value="${q.result||''}" placeholder="-" data-code="${kpi.code}" data-field="result" step="0.01" oninput="onFieldChange(this)"></td>
+          <td><input class="td-input" type="number" value="${q.percent||''}" placeholder="%" data-code="${kpi.code}" data-field="percent" step="0.01" oninput="onFieldChange(this)"></td>
+          <td><span class="badge badge-${badge}">${statusText}</span></td>
+          <td><textarea class="td-input" placeholder="รายละเอียด..." data-code="${kpi.code}" data-field="detail" oninput="onFieldChange(this)">${q.detail||''}</textarea></td>
+          <td>
+            <button class="btn-edit-sm" onclick="openEditModal('${kpi.code}')">แก้ไข</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function onFieldChange(input) {
+      const data = getData();
+      const kpi = data.kpis.find(k => k.code === input.dataset.code);
+      if (!kpi) return;
+      if (!kpi.quarters) kpi.quarters = {};
+      if (!kpi.quarters[`Q${currentQuarter}`]) kpi.quarters[`Q${currentQuarter}`] = {};
+      kpi.quarters[`Q${currentQuarter}`][input.dataset.field] = input.value;
+      saveData(data);
+    }
+
+    function saveEditData() {
+      showAlert('edit-success', 'บันทึกข้อมูลสำเร็จ!');
+    }
+
+    // ===== Modal Edit =====
+    let editingCode = '';
+
+    function openEditModal(code) {
+      const data = getData();
+      const kpi = data.kpis.find(k => k.code === code);
+      if (!kpi) return;
+      const q = kpi.quarters?.[`Q${currentQuarter}`] || {};
+      editingCode = code;
+      document.getElementById('modal-kpi-code').textContent = code;
+      document.getElementById('modal-kpi-name').textContent = kpi.name;
+      document.getElementById('modal-result').value = q.result || '';
+      document.getElementById('modal-percent').value = q.percent || '';
+      document.getElementById('modal-detail').value = q.detail || '';
+      document.getElementById('edit-modal').classList.add('active');
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').classList.remove('active');
+      editingCode = '';
+    }
+
+    function saveModalData() {
+      const data = getData();
+      const kpi = data.kpis.find(k => k.code === editingCode);
+      if (!kpi) return;
+      if (!kpi.quarters) kpi.quarters = {};
+      kpi.quarters[`Q${currentQuarter}`] = {
+        result: document.getElementById('modal-result').value,
+        percent: document.getElementById('modal-percent').value,
+        detail: document.getElementById('modal-detail').value,
+      };
+      saveData(data);
+      closeEditModal();
+      renderEditTable();
+      showAlert('edit-success', 'บันทึกข้อมูลสำเร็จ!');
+    }
+
+    document.getElementById('edit-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeEditModal();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEditModal(); });
+
+    // ===== PDF List =====
+    function renderPdfList() {
+      const data = getData();
+      const list = document.getElementById('pdf-list');
+      list.innerHTML = '';
+
+      if (data.kpis.length === 0) {
+        list.innerHTML = `<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">ยังไม่มีข้อมูลตัวชี้วัด — กรุณานำเข้าจาก Excel ก่อน</div>`;
+        return;
+      }
+
+      data.kpis.forEach(kpi => {
+        const pdfKey = `pdf_mission_${getCurrentYear()}_${kpi.code}_Q${currentQuarter}`;
+        const hasPdf = !!localStorage.getItem(pdfKey);
+        const div = document.createElement('div');
+        div.className = 'pdf-item';
+        div.innerHTML = `
+          <div class="pdf-item-left">
+            <div class="pdf-code">${kpi.code}</div>
+            <div class="pdf-name">${kpi.name}</div>
+          </div>
+          <div class="pdf-actions">
+            ${hasPdf
+              ? `<span class="pdf-status-ok">✓ แนบแล้ว</span>
+                 <a class="btn-view-pdf" href="${localStorage.getItem(pdfKey)}" target="_blank">ดู PDF</a>
+                 <button class="btn-danger-sm" onclick="removePdf('${kpi.code}')">ลบ</button>`
+              : `<span class="pdf-status-none">ยังไม่มีไฟล์</span>
+                 <button class="btn-upload-pdf" onclick="triggerPdfUpload('${kpi.code}')">+ แนบ PDF</button>`
+            }
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    let uploadingCode = '';
+    function triggerPdfUpload(code) {
+      uploadingCode = code;
+      document.getElementById('pdf-input').click();
+    }
+
+    function handlePdfUpload(e) {
+      const file = e.target.files[0];
+      if (!file || !uploadingCode) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const pdfKey = `pdf_mission_${getCurrentYear()}_${uploadingCode}_Q${currentQuarter}`;
+        try {
+          localStorage.setItem(pdfKey, ev.target.result);
+          showAlert('pdf-success', `แนบ PDF สำหรับ ${uploadingCode} สำเร็จ!`);
+          renderPdfList();
+        } catch(err) {
+          showAlert('pdf-success', 'ไม่สามารถบันทึก PDF ได้ (ขนาดไฟล์อาจใหญ่เกิน)');
+        }
+        uploadingCode = '';
+        e.target.value = '';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removePdf(code) {
+      const pdfKey = `pdf_mission_${getCurrentYear()}_${code}_Q${currentQuarter}`;
+      localStorage.removeItem(pdfKey);
+      renderPdfList();
+    }
+
+    // ===== Alert Helper =====
+    function showAlert(id, msg) {
+      const el = document.getElementById(id);
+      if (msg) el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    function logout() {
+      sessionStorage.removeItem('auth');
+      sessionStorage.removeItem('current_year');
+      window.location.href = 'index.html';
+    }
+
+    function loadData() {
+      renderEditTable();
+      renderPdfList();
+    }
+
+    // ===== Init =====
+    renderYearSelect();
+    loadData();
+  </script>
+
+</body>
+</html>

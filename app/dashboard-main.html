@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เลือกระบบ — Dashboard คณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:       #1e3a5f;
+      --primary-light: #2563eb;
+      --accent:        #3b82f6;
+      --text:          #0f172a;
+      --text-muted:    #64748b;
+      --border:        #e2e8f0;
+      --bg:            #f8fafc;
+      --white:         #ffffff;
+      --success:       #10b981;
+      --warning:       #f59e0b;
+      --danger:        #ef4444;
+    }
+
+    body {
+      font-family: 'Inter', 'Sarabun', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: url('assets/images/Logo3D_2.PNG') center center / 52% auto no-repeat;
+      opacity: 1;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .navbar, .main, .footer { position: relative; z-index: 1; }
+
+    /* ===== Navbar ===== */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 96px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .navbar-brand img { height: 90px; width: auto; }
+
+    .navbar-brand-text { line-height: 1.3; }
+    .navbar-brand-text .title { font-size: 22px; font-weight: 700; }
+    .navbar-brand-text .subtitle { font-size: 13px; font-weight: 500; color: #64748b; }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* ===== Year Selector ===== */
+    .year-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 10px;
+      padding: 6px 12px;
+    }
+
+    .year-selector label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .year-select {
+      background: transparent;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      color: var(--primary);
+      cursor: pointer;
+      outline: none;
+      padding-right: 4px;
+    }
+
+    .btn-add-year {
+      background: rgba(37,99,235,0.12);
+      border: 1px solid rgba(37,99,235,0.3);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--primary-light);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+    .btn-add-year:hover { background: rgba(37,99,235,0.2); }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 99px;
+      padding: 6px 16px 6px 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .user-avatar {
+      width: 30px;
+      height: 30px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: white;
+      font-weight: 700;
+    }
+
+    .btn-logout {
+      background: rgba(255,255,255,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-logout:hover { background: rgba(239,68,68,0.1); color: #dc2626; border-color: rgba(239,68,68,0.3); }
+
+    /* ===== Main ===== */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      gap: 40px;
+    }
+
+    .page-header { text-align: center; }
+
+    .page-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .page-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* ===== System Cards ===== */
+    .system-cards {
+      display: flex;
+      gap: 60px;
+      width: 100%;
+      max-width: 820px;
+    }
+
+    .system-card {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(30, 58, 95, 0.10), 0 1px 0 rgba(255,255,255,0.9) inset;
+      padding: 40px 36px;
+      cursor: pointer;
+      transition: all 0.25s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 20px;
+    }
+
+    .system-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(30, 58, 95, 0.16), 0 1px 0 rgba(255,255,255,0.9) inset;
+      background: rgba(255, 255, 255, 0.50);
+    }
+
+    .card-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-icon.blue { background: rgba(37, 99, 235, 0.12); }
+    .card-icon.green { background: rgba(16, 185, 129, 0.12); }
+
+    .card-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .card-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .card-stats {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .card-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .card-stat-num {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    .card-stat-num.green { color: #059669; }
+
+    .card-stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .card-divider {
+      width: 1px;
+      background: rgba(0,0,0,0.08);
+      align-self: stretch;
+    }
+
+    .card-btn {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .card-btn.blue { background: var(--primary); color: white; }
+    .card-btn.blue:hover { background: #162d4a; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(30,58,95,0.25); }
+    .card-btn.green { background: #059669; color: white; }
+    .card-btn.green:hover { background: #047857; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,0.25); }
+
+    /* ===== Footer ===== */
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      position: sticky;
+      bottom: 0;
+      z-index: 50;
+    }
+
+    .footer-copy { font-size: 12px; color: #94a3b8; }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { font-size: 12px; color: #94a3b8; text-decoration: none; }
+    .footer-links a:hover { color: var(--text-muted); }
+
+    /* ===== Modal ===== */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: rgba(255,255,255,0.80);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.9);
+      border-radius: 20px;
+      box-shadow: 0 16px 48px rgba(30,58,95,0.18);
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 400px;
+      transform: translateY(12px);
+      transition: transform 0.2s;
+    }
+    .modal-overlay.active .modal { transform: translateY(0); }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .modal-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+
+    .field { margin-bottom: 20px; }
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .field input, .field select {
+      width: 100%;
+      border: none;
+      border-bottom: 1.5px solid #cbd5e1;
+      background: transparent;
+      padding: 8px 0;
+      font-size: 16px;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus, .field select:focus { border-bottom-color: var(--primary-light); }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 28px;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      padding: 12px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-cancel:hover { border-color: #94a3b8; color: var(--text); }
+
+    .btn-confirm {
+      flex: 1;
+      padding: 12px;
+      background: var(--primary);
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      color: white;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-confirm:hover { background: #162d4a; }
+
+    .modal-error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      color: #dc2626;
+      padding: 8px 12px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .system-cards { flex-direction: column; gap: 20px; }
+      .navbar { padding: 0 16px; height: auto; padding-top: 12px; padding-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+      .footer { padding: 16px 20px; flex-direction: column; gap: 10px; }
+      .page-title { font-size: 22px; }
+      .navbar-right { flex-wrap: wrap; justify-content: flex-end; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <img src="assets/images/Logo.PNG" alt="Logo" onerror="this.style.display='none'">
+      <div class="navbar-brand-text">
+        <div class="title">คณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ</div>
+        <div class="subtitle">มหาวิทยาลัยแม่โจ้</div>
+      </div>
+    </div>
+    <div class="navbar-right">
+
+      <!-- Year Selector -->
+      <div class="year-selector">
+        <label>ปีงบประมาณ</label>
+        <select class="year-select" id="year-select" onchange="onYearChange(this.value)"></select>
+      </div>
+      <button class="btn-add-year" onclick="openAddYearModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        สร้างปีใหม่
+      </button>
+
+      <div class="user-badge">
+        <div class="user-avatar" id="user-avatar">A</div>
+        <span id="user-name">เจ้าหน้าที่</span>
+      </div>
+      <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+
+
+    <div class="system-cards">
+
+      <!-- ภาระกิจประจำ -->
+      <div class="system-card" onclick="goTo('mission-admin.html')">
+        <div class="card-icon blue">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+          </svg>
+        </div>
+        <div class="card-title">ภาระกิจประจำ</div>
+        <div class="card-desc">ตัวชี้วัดภาระกิจประจำ 5 ยุทธศาสตร์<br>รายงาน 4 ไตรมาส (ต.ค. – ก.ย.)</div>
+        <div class="card-stats">
+          <div class="card-stat">
+            <div class="card-stat-num">46</div>
+            <div class="card-stat-label">ตัวชี้วัด</div>
+          </div>
+          <div class="card-divider"></div>
+          <div class="card-stat">
+            <div class="card-stat-num">5</div>
+            <div class="card-stat-label">ยุทธศาสตร์</div>
+          </div>
+          <div class="card-divider"></div>
+          <div class="card-stat">
+            <div class="card-stat-num">4</div>
+            <div class="card-stat-label">ไตรมาส</div>
+          </div>
+        </div>
+        <button class="card-btn blue">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          เข้าสู่ระบบจัดการ
+        </button>
+      </div>
+
+      <!-- เชิงรุก -->
+      <div class="system-card" onclick="goTo('proactive-admin.html')">
+        <div class="card-icon green">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+            <polyline points="16 7 22 7 22 13"/>
+          </svg>
+        </div>
+        <div class="card-title">ตัวชี้วัดเชิงรุก</div>
+        <div class="card-desc">ตัวชี้วัดเชิงรุก 5 ยุทธศาสตร์<br>รอบรายงาน 4 ไตรมาส</div>
+        <div class="card-stats">
+          <div class="card-stat">
+            <div class="card-stat-num green">9</div>
+            <div class="card-stat-label">ตัวชี้วัด</div>
+          </div>
+          <div class="card-divider"></div>
+          <div class="card-stat">
+            <div class="card-stat-num green">5</div>
+            <div class="card-stat-label">ยุทธศาสตร์</div>
+          </div>
+          <div class="card-divider"></div>
+          <div class="card-stat">
+            <div class="card-stat-num green">4</div>
+            <div class="card-stat-label">ไตรมาส</div>
+          </div>
+        </div>
+        <button class="card-btn green">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          เข้าสู่ระบบจัดการ
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-copy">© 2569 คณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ มหาวิทยาลัยแม่โจ้</div>
+    <div class="footer-links">
+      <a href="#">เงื่อนไขการใช้งาน</a>
+      <a href="#">นโยบายความเป็นส่วนตัว</a>
+      <a href="#">ติดต่อเรา</a>
+    </div>
+  </footer>
+
+  <!-- Modal: สร้างปีใหม่ -->
+  <div class="modal-overlay" id="add-year-modal">
+    <div class="modal">
+      <div class="modal-title">สร้างปีงบประมาณใหม่</div>
+      <div class="modal-sub">ระบบจะสร้าง slot ข้อมูลใหม่สำหรับปีที่เลือก</div>
+
+      <div class="modal-error" id="year-error">ปีนี้มีอยู่ในระบบแล้ว</div>
+
+      <div class="field">
+        <label>ปีงบประมาณ (พ.ศ.)</label>
+        <input type="number" id="new-year-input" placeholder="เช่น 2570" min="2560" max="2599">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeAddYearModal()">ยกเลิก</button>
+        <button class="btn-confirm" onclick="confirmAddYear()">สร้างปีใหม่</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== Auth =====
+    const auth = sessionStorage.getItem('auth');
+    if (!auth) {
+      window.location.href = 'index.html';
+    } else {
+      const user = JSON.parse(auth);
+      if (user.role !== 'admin') window.location.href = 'executive-main.html';
+      document.getElementById('user-name').textContent = user.name;
+      document.getElementById('user-avatar').textContent = user.name.charAt(0);
+    }
+
+    // ===== Year Management =====
+    const DEFAULT_YEAR = 2569;
+    const YEARS_KEY = 'kpi_years';
+
+    function getYears() {
+      const stored = localStorage.getItem(YEARS_KEY);
+      return stored ? JSON.parse(stored) : [DEFAULT_YEAR];
+    }
+
+    function saveYears(years) {
+      localStorage.setItem(YEARS_KEY, JSON.stringify(years));
+    }
+
+    function getCurrentYear() {
+      return parseInt(sessionStorage.getItem('current_year') || DEFAULT_YEAR);
+    }
+
+    function setCurrentYear(year) {
+      sessionStorage.setItem('current_year', year);
+    }
+
+    function renderYearSelect() {
+      const years = getYears();
+      const currentYear = getCurrentYear();
+      const sel = document.getElementById('year-select');
+      sel.innerHTML = '';
+      years.sort((a, b) => b - a).forEach(y => {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = `${y}`;
+        if (y === currentYear) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      updatePageLabel(currentYear);
+    }
+
+    function updatePageLabel(year) {
+      document.getElementById('page-label').textContent =
+        `ระบบรายงานตัวชี้วัด ปีงบประมาณ ${year}`;
+    }
+
+    function onYearChange(year) {
+      setCurrentYear(parseInt(year));
+      updatePageLabel(year);
+    }
+
+    // ===== Modal =====
+    function openAddYearModal() {
+      document.getElementById('add-year-modal').classList.add('active');
+      document.getElementById('new-year-input').value = '';
+      document.getElementById('year-error').style.display = 'none';
+      setTimeout(() => document.getElementById('new-year-input').focus(), 200);
+    }
+
+    function closeAddYearModal() {
+      document.getElementById('add-year-modal').classList.remove('active');
+    }
+
+    function confirmAddYear() {
+      const input = document.getElementById('new-year-input');
+      const year = parseInt(input.value);
+      const errEl = document.getElementById('year-error');
+
+      if (!year || year < 2560 || year > 2599) {
+        errEl.textContent = 'กรุณากรอกปีงบประมาณ พ.ศ. ระหว่าง 2560–2599';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const years = getYears();
+      if (years.includes(year)) {
+        errEl.textContent = 'ปีนี้มีอยู่ในระบบแล้ว';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      years.push(year);
+      saveYears(years);
+      setCurrentYear(year);
+      closeAddYearModal();
+      renderYearSelect();
+    }
+
+    // ปิด modal เมื่อกดนอก
+    document.getElementById('add-year-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeAddYearModal();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAddYearModal(); });
+
+    // ===== Navigation =====
+    function goTo(page) {
+      window.location.href = page;
+    }
+
+    function logout() {
+      sessionStorage.removeItem('auth');
+      sessionStorage.removeItem('current_year');
+      window.location.href = 'index.html';
+    }
+
+    // ===== Init =====
+    renderYearSelect();
+  </script>
+
+</body>
+</html>

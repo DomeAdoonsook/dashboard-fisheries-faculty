@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เข้าสู่ระบบ — Dashboard คณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:       #1e3a5f;
+      --primary-light: #2563eb;
+      --accent:        #3b82f6;
+      --text:          #0f172a;
+      --text-muted:    #64748b;
+      --border:        #e2e8f0;
+      --bg:            #f8fafc;
+      --white:         #ffffff;
+    }
+
+    body {
+      font-family: 'Inter', 'Sarabun', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: url('assets/images/Logo3D_2.PNG') center center / 55% auto no-repeat;
+      opacity: 1;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .navbar, .main, .footer { position: relative; z-index: 1; }
+
+    /* ===== Navbar ===== */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 96px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      text-transform: none;
+      color: var(--text);
+    }
+
+    .navbar-brand img {
+      height: 90px;
+      width: auto;
+    }
+
+    .navbar-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .navbar-links a {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+
+    .navbar-links a:hover { color: var(--text); }
+
+    /* ===== Main ===== */
+    .main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    /* ===== Login Cards wrapper ===== */
+    .login-cards {
+      display: flex;
+      gap: 80px;
+      width: 100%;
+      max-width: 880px;
+      align-items: stretch;
+    }
+
+    /* ===== Login Card (Liquid Glass) ===== */
+    .login-card {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      border-radius: 20px;
+      box-shadow:
+        0 8px 32px rgba(30, 58, 95, 0.10),
+        0 1px 0 rgba(255,255,255,0.9) inset;
+      overflow: hidden;
+    }
+
+    /* ===== Left: เจ้าหน้าที่ ===== */
+    .login-left {
+      padding: 48px 44px;
+    }
+
+    .access-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .access-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 36px;
+      line-height: 1.2;
+    }
+
+    /* Input underline style */
+    .field { margin-bottom: 28px; }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .field input {
+      width: 100%;
+      border: none;
+      border-bottom: 1.5px solid #cbd5e1;
+      background: transparent;
+      padding: 8px 0;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field input::placeholder { color: #cbd5e1; }
+
+    .field input:focus { border-bottom-color: var(--primary-light); }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: var(--white);
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.2s;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-submit:hover {
+      background: #162d4a;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(30,58,95,0.25);
+    }
+
+    .btn-submit:active { transform: translateY(0); }
+
+    .forgot-link {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .forgot-link:hover { color: var(--primary-light); }
+
+    /* Error */
+    .login-error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      color: #dc2626;
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    /* ===== Right: ผู้บริหาร ===== */
+    .login-right {
+      padding: 48px 44px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .login-right .access-label { text-align: center; }
+    .login-right .access-title { font-size: 30px; margin-bottom: 32px; }
+
+    .exec-card {
+      width: 100%;
+      max-width: 280px;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.9);
+      border-radius: 14px;
+      padding: 36px 24px;
+      box-shadow: 0 4px 16px rgba(30,58,95,0.08);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 24px;
+    }
+
+    .exec-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(30,58,95,0.14);
+      border-color: rgba(37,99,235,0.3);
+    }
+
+    .exec-icon {
+      width: 80px;
+      height: 80px;
+      background: #f1f5f9;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 36px;
+    }
+
+    .exec-card-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .exec-card-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .exec-note {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 260px;
+    }
+
+    /* ===== Executive password modal ===== */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.9);
+      border-radius: 16px;
+      box-shadow: 0 16px 48px rgba(30,58,95,0.18);
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 360px;
+      transform: translateY(12px);
+      transition: transform 0.2s;
+    }
+    .modal-overlay.active .modal { transform: translateY(0); }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .modal-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      padding: 12px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-cancel:hover { border-color: #94a3b8; color: var(--text); }
+
+    .btn-confirm {
+      flex: 1;
+      padding: 12px;
+      background: var(--primary);
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--white);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-confirm:hover { background: #162d4a; }
+
+    /* ===== Footer ===== */
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+    }
+
+    .footer-copy {
+      font-size: 12px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      font-size: 12px;
+      color: #94a3b8;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .footer-links a:hover { color: var(--text-muted); }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 680px) {
+      .login-card { grid-template-columns: 1fr; }
+      .login-left { border-right: none; border-bottom: 1px solid rgba(30,58,95,0.08); padding: 36px 28px; }
+      .login-right { padding: 36px 28px; }
+      .navbar { padding: 0 20px; }
+      .footer { padding: 16px 20px; flex-direction: column; gap: 10px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <img src="assets/images/Logo.PNG" alt="Logo" onerror="this.style.display='none'">
+      <div style="line-height:1.3">
+        <div>คณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ</div>
+        <div style="font-size:13px;font-weight:500;color:#64748b">มหาวิทยาลัยแม่โจ้</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="login-cards">
+
+      <!-- Card 1: เจ้าหน้าที่ -->
+      <div class="login-card">
+        <div class="login-left">
+          <div class="access-label" style="text-align:center">Access Level 01</div>
+          <h1 class="access-title" style="text-align:center">เข้าสู่ระบบสำหรับ<br>เจ้าหน้าที่</h1>
+
+          <div class="login-error" id="login-error">
+            ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง
+          </div>
+
+          <form onsubmit="handleAdminLogin(event)">
+            <div class="field">
+              <label>ชื่อผู้ใช้งาน</label>
+              <input type="text" id="username" placeholder="Username" autocomplete="username" required>
+            </div>
+            <div class="field">
+              <label>รหัสผ่าน</label>
+              <input type="password" id="password" placeholder="••••••••••" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="btn-submit" id="login-btn">เข้าสู่ระบบ</button>
+          </form>
+
+          <a href="#" class="forgot-link">ลืมรหัสผ่าน?</a>
+        </div>
+      </div>
+
+      <!-- Card 2: ผู้บริหาร -->
+      <div class="login-card">
+        <div class="login-right">
+          <div class="access-label">Access Level 02</div>
+          <h2 class="access-title">การเข้าถึงสำหรับ<br>ผู้บริหาร</h2>
+
+          <div class="exec-card" onclick="openExecModal()">
+            <div class="exec-icon">
+              <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#1e3a5f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+            </div>
+            <div class="exec-card-title">สำหรับผู้บริหาร</div>
+          </div>
+
+          <p class="exec-note">
+            เฉพาะสมาชิกที่มีสิทธิ์การเข้าถึงระดับสูง<br>
+            เท่านั้น กรุณาตรวจสอบสิทธิ์ก่อนดำเนินการ
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-copy">© 2569 คณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ มหาวิทยาลัยแม่โจ้</div>
+    <div class="footer-links">
+      <a href="#">เงื่อนไขการใช้งาน</a>
+      <a href="#">นโยบายความเป็นส่วนตัว</a>
+      <a href="#">ติดต่อเรา</a>
+    </div>
+  </footer>
+
+  <!-- Executive Modal -->
+  <div class="modal-overlay" id="exec-modal">
+    <div class="modal">
+      <div class="modal-title">เข้าสู่ระบบผู้บริหาร</div>
+      <div class="modal-sub">กรุณากรอกรหัสผ่านเพื่อเข้าถึงระบบ</div>
+
+      <div class="login-error" id="exec-error" style="display:none">
+        รหัสผ่านไม่ถูกต้อง
+      </div>
+
+      <form onsubmit="handleExecLogin(event)">
+        <div class="field">
+          <label>รหัสผ่าน</label>
+          <input type="password" id="exec-password" placeholder="••••••••••" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeExecModal()">ยกเลิก</button>
+          <button type="submit" class="btn-confirm">เข้าสู่ระบบ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ===== Config =====
+    const USERS = {
+      admin:     { password: 'fisheries2569', role: 'admin',     name: 'เจ้าหน้าที่' },
+      executive: { password: 'maejo2569',     role: 'executive', name: 'ผู้บริหาร'  },
+    };
+
+    // redirect ถ้า login อยู่แล้ว
+    if (sessionStorage.getItem('auth')) {
+      window.location.href = 'dashboard-main.html';
+    }
+
+    function saveAndGo(username, role, name) {
+      sessionStorage.setItem('auth', JSON.stringify({ username, role, name }));
+      window.location.href = 'dashboard-main.html';
+    }
+
+    // ===== Admin Login =====
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const err = document.getElementById('login-error');
+      const btn = document.getElementById('login-btn');
+
+      const user = USERS[username];
+      if (!user || user.password !== password || user.role !== 'admin') {
+        err.style.display = 'block';
+        document.getElementById('password').value = '';
+        return;
+      }
+
+      err.style.display = 'none';
+      btn.textContent = 'กำลังเข้าสู่ระบบ...';
+      btn.disabled = true;
+      setTimeout(() => saveAndGo(username, user.role, user.name), 500);
+    }
+
+    // ===== Executive Modal =====
+    function openExecModal() {
+      document.getElementById('exec-modal').classList.add('active');
+      setTimeout(() => document.getElementById('exec-password').focus(), 200);
+    }
+
+    function closeExecModal() {
+      document.getElementById('exec-modal').classList.remove('active');
+      document.getElementById('exec-password').value = '';
+      document.getElementById('exec-error').style.display = 'none';
+    }
+
+    function handleExecLogin(e) {
+      e.preventDefault();
+      const password = document.getElementById('exec-password').value;
+      const err = document.getElementById('exec-error');
+
+      if (password !== USERS.executive.password) {
+        err.style.display = 'block';
+        document.getElementById('exec-password').value = '';
+        return;
+      }
+
+      closeExecModal();
+      saveAndGo('executive', 'executive', 'ผู้บริหาร');
+    }
+
+    // ปิด modal เมื่อกดนอก
+    document.getElementById('exec-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeExecModal();
+    });
+
+    // ปิด modal ด้วย Escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeExecModal();
+    });
+  </script>
+
+</body>
+</html>

@@ -38,8 +38,8 @@
       content: '';
       position: fixed;
       inset: 0;
-      background: url('assets/images/white-unsplash.jpg') center center / cover no-repeat;
-      opacity: 1;
+      background: url('assets/images/background.jpg') center center / cover no-repeat;
+      opacity: 0.75;
       z-index: 0;
       pointer-events: none;
     }
@@ -51,14 +51,14 @@
       justify-content: space-between;
       padding: 0 40px;
       height: 96px;
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid #e2e8f0;
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(32px) saturate(220%);
+      -webkit-backdrop-filter: blur(32px) saturate(220%);
+      border-bottom: 1px solid rgba(255,255,255,0.35);
       position: sticky;
       top: 0;
       z-index: 50;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      box-shadow: 0 2px 16px rgba(30,58,95,0.04);
     }
 
     .navbar-brand {
@@ -82,10 +82,10 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      background: rgba(255,255,255,0.35);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.30);
       border-radius: 10px;
       padding: 6px 12px;
     }
@@ -105,10 +105,10 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      background: rgba(255,255,255,0.35);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.30);
       border-radius: 99px;
       padding: 6px 16px 6px 8px;
       font-size: 13px;
@@ -127,10 +127,10 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      background: rgba(255,255,255,0.35);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.30);
       border-radius: 8px;
       padding: 8px 14px;
       font-size: 13px;
@@ -144,10 +144,10 @@
     .btn-back:hover { background: rgba(255,255,255,0.55); color: var(--text); }
 
     .btn-logout {
-      background: rgba(255,255,255,0.35);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.30);
       border-radius: 8px;
       padding: 8px 16px;
       font-size: 13px;
@@ -174,12 +174,12 @@
     .sidebar {
       width: 220px;
       flex-shrink: 0;
-      background: rgba(255,255,255,0.35);
-      backdrop-filter: blur(20px) saturate(160%);
-      -webkit-backdrop-filter: blur(20px) saturate(160%);
-      border: 1px solid rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(32px) saturate(220%);
+      -webkit-backdrop-filter: blur(32px) saturate(220%);
+      border: 1px solid rgba(255,255,255,0.35);
       border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(30,58,95,0.10), 0 1px 0 rgba(255,255,255,0.9) inset;
+      box-shadow: 0 8px 32px rgba(30,58,95,0.04), 0 1px 0 rgba(255,255,255,0.6) inset;
       padding: 24px 16px;
       display: flex;
       flex-direction: column;
@@ -218,12 +218,12 @@
     }
 
     .sidebar-item:hover {
-      background: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.3);
       color: var(--text);
     }
 
     .sidebar-item.active {
-      background: rgba(255,255,255,0.7);
+      background: rgba(255,255,255,0.45);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       border-color: rgba(37,99,235,0.2);
@@ -271,7 +271,7 @@
       padding: 6px 4px;
       border-radius: 8px;
       border: 1px solid rgba(0,0,0,0.1);
-      background: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.10);
       font-size: 12px;
       font-weight: 600;
       font-family: inherit;
@@ -280,7 +280,7 @@
       transition: all 0.15s;
       text-align: center;
     }
-    .q-btn:hover { background: rgba(255,255,255,0.8); color: var(--text); }
+    .q-btn:hover { background: rgba(255,255,255,0.45); color: var(--text); }
     .q-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
     /* ===== Content Area ===== */
@@ -294,12 +294,12 @@
 
     /* ===== Panel (Liquid Glass) ===== */
     .panel {
-      background: rgba(255,255,255,0.45);
-      backdrop-filter: blur(20px) saturate(160%);
-      -webkit-backdrop-filter: blur(20px) saturate(160%);
-      border: 1px solid rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(32px) saturate(220%);
+      -webkit-backdrop-filter: blur(32px) saturate(220%);
+      border: 1px solid rgba(255,255,255,0.35);
       border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(30,58,95,0.10), 0 1px 0 rgba(255,255,255,0.9) inset;
+      box-shadow: 0 8px 32px rgba(30,58,95,0.04), 0 1px 0 rgba(255,255,255,0.6) inset;
       padding: 28px 32px;
       display: none;
     }
@@ -325,7 +325,7 @@
       text-align: center;
       cursor: pointer;
       transition: all 0.2s;
-      background: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.05);
     }
     .import-area:hover, .import-area.drag-over {
       border-color: var(--primary-light);
@@ -678,8 +678,10 @@
       align-items: center;
       justify-content: space-between;
       padding: 14px 40px;
-      border-top: 1px solid #e2e8f0;
-      background: rgba(255,255,255,0.95);
+      border-top: 1px solid rgba(255,255,255,0.7);
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
       position: sticky;
       bottom: 0;
       z-index: 50;
@@ -1461,7 +1463,7 @@
         div.innerHTML = `
           <div class="pdf-item-left">
             <div class="pdf-code">${kpi.code}</div>
-            <div class="pdf-name">${kpi.name}</div>
+            <div class="pdf-name">${kpi.name.replace(/^\d+\.\d+\.\d+\S*\s*/,'')}</div>
           </div>
           <div class="pdf-actions">
             ${q.link ? `<a class="btn-view-pdf" href="${q.link}" target="_blank">🔗 ลิงก์ ERP</a>` : ''}

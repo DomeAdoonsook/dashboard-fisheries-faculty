@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>จัดการตัวชี้วัดเชิงรุก — Dashboard คณะประมง</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:       #1e3a5f;
+      --primary-light: #2563eb;
+      --accent:        #3b82f6;
+      --text:          #0f172a;
+      --text-muted:    #64748b;
+      --border:        #e2e8f0;
+      --bg:            #f8fafc;
+      --white:         #ffffff;
+      --success:       #10b981;
+      --warning:       #f59e0b;
+      --danger:        #ef4444;
+    }
+    body {
+      font-family: 'Inter', 'Sarabun', sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: url('assets/images/background.jpg') center center / cover no-repeat;
+      opacity: 0.75;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 96px;
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(32px) saturate(220%);
+      -webkit-backdrop-filter: blur(32px) saturate(220%);
+      border-bottom: 1px solid rgba(255,255,255,0.35);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 2px 16px rgba(30,58,95,0.04);
+    }
+    .navbar-brand { display: flex; align-items: center; gap: 14px; color: var(--text); }
+    .navbar-brand img { height: 90px; width: auto; }
+    .navbar-brand-text { line-height: 1.3; }
+    .navbar-brand-text .title { font-size: 22px; font-weight: 700; }
+    .navbar-brand-text .subtitle { font-size: 13px; font-weight: 500; color: #64748b; }
+    .navbar-right { display: flex; align-items: center; gap: 12px; }
+    .year-selector {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.30); border-radius: 10px; padding: 6px 12px;
+    }
+    .year-selector label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+    .year-select { background: transparent; border: none; font-size: 14px; font-weight: 700; font-family: inherit; color: var(--primary); cursor: pointer; outline: none; }
+    .user-badge {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.30); border-radius: 99px; padding: 6px 16px 6px 8px;
+      font-size: 13px; font-weight: 600; color: var(--text);
+    }
+    .user-avatar {
+      width: 30px; height: 30px; background: var(--primary); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: white; font-weight: 700;
+    }
+    .btn-back {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.30); border-radius: 8px; padding: 8px 14px;
+      font-size: 13px; font-weight: 600; font-family: inherit; color: var(--text-muted);
+      cursor: pointer; transition: all 0.2s; text-decoration: none;
+    }
+    .btn-back:hover { background: rgba(255,255,255,0.55); color: var(--text); }
+    .btn-logout {
+      background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.30); border-radius: 8px; padding: 8px 16px;
+      font-size: 13px; font-weight: 600; font-family: inherit; color: var(--text-muted);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-logout:hover { background: rgba(239,68,68,0.1); color: #dc2626; border-color: rgba(239,68,68,0.3); }
+    .page-body {
+      flex: 1; display: flex; position: relative; z-index: 1;
+      padding: 24px; gap: 20px; min-height: 0;
+    }
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(32px) saturate(220%); -webkit-backdrop-filter: blur(32px) saturate(220%);
+      border: 1px solid rgba(255,255,255,0.35); border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(30,58,95,0.04), 0 1px 0 rgba(255,255,255,0.6) inset;
+      padding: 24px 16px; display: flex; flex-direction: column; gap: 6px;
+      align-self: flex-start; position: sticky; top: 116px;
+    }
+    .sidebar-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-muted); padding: 0 8px; margin-bottom: 8px;
+    }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px;
+      cursor: pointer; transition: all 0.18s; font-size: 14px; font-weight: 500;
+      color: var(--text-muted); border: 1px solid transparent; background: transparent;
+      width: 100%; text-align: left; font-family: inherit;
+    }
+    .sidebar-item:hover { background: rgba(255,255,255,0.3); color: var(--text); }
+    .sidebar-item.active {
+      background: rgba(255,255,255,0.45); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      border-color: rgba(37,99,235,0.2); color: var(--primary); font-weight: 700;
+      box-shadow: 0 2px 8px rgba(30,58,95,0.08);
+    }
+    .sidebar-item .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px;
+    }
+    .sidebar-item.active .icon { background: rgba(37,99,235,0.12); }
+    .sidebar-item:not(.active) .icon { background: rgba(0,0,0,0.04); }
+    .sidebar-divider { height: 1px; background: rgba(0,0,0,0.07); margin: 8px 0; }
+    .quarter-group { padding: 0 8px; margin-top: 4px; }
+    .quarter-label {
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px;
+    }
+    .quarter-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .q-btn {
+      padding: 6px 4px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.10); font-size: 12px; font-weight: 600;
+      font-family: inherit; color: var(--text-muted); cursor: pointer; transition: all 0.15s; text-align: center;
+    }
+    .q-btn:hover { background: rgba(255,255,255,0.45); color: var(--text); }
+    .q-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .q-date { font-size: 10px; color: var(--text-muted); text-align: center; margin-top: 6px; }
+    .content { flex: 1; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+    .panel {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(32px) saturate(220%); -webkit-backdrop-filter: blur(32px) saturate(220%);
+      border: 1px solid rgba(255,255,255,0.35); border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(30,58,95,0.04), 0 1px 0 rgba(255,255,255,0.6) inset;
+      padding: 28px 32px; display: none;
+    }
+    .panel.active { display: block; }
+    .panel-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .panel-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+    .import-area {
+      border: 2px dashed rgba(37,99,235,0.3); border-radius: 16px; padding: 48px 32px;
+      text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(255,255,255,0.05);
+    }
+    .import-area:hover, .import-area.drag-over { border-color: var(--primary-light); background: rgba(37,99,235,0.05); }
+    .import-icon { font-size: 48px; margin-bottom: 12px; }
+    .import-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .import-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+    .import-input { display: none; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px; padding: 11px 24px;
+      background: var(--primary); color: white; border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-primary:hover { background: #162d4a; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(30,58,95,0.25); }
+    .btn-success {
+      display: inline-flex; align-items: center; gap: 8px; padding: 11px 24px;
+      background: var(--success); color: white; border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-success:hover { background: #059669; transform: translateY(-1px); }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 8px; padding: 11px 24px;
+      background: transparent; color: var(--primary-light); border: 1.5px solid var(--primary-light);
+      border-radius: 10px; font-size: 14px; font-weight: 700; font-family: inherit;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-outline:hover { background: rgba(37,99,235,0.08); }
+    .btn-danger-sm {
+      padding: 5px 10px; background: rgba(239,68,68,0.1); color: #dc2626;
+      border: 1px solid rgba(239,68,68,0.2); border-radius: 6px;
+      font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-danger-sm:hover { background: rgba(239,68,68,0.2); }
+    .btn-edit-sm {
+      padding: 5px 10px; background: rgba(37,99,235,0.1); color: var(--primary-light);
+      border: 1px solid rgba(37,99,235,0.2); border-radius: 6px;
+      font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-edit-sm:hover { background: rgba(37,99,235,0.2); }
+    .preview-box { margin-top: 20px; display: none; }
+    .preview-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+    .preview-info { font-size: 13px; color: var(--text-muted); }
+    .preview-info strong { color: var(--text); }
+    .preview-actions { display: flex; gap: 10px; }
+    .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(0,0,0,0.06); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      background: rgba(30,58,95,0.85); color: white; padding: 10px 14px;
+      text-align: left; font-weight: 600; font-size: 12px; white-space: nowrap;
+    }
+    thead th:first-child { border-radius: 12px 0 0 0; }
+    thead th:last-child { border-radius: 0 12px 0 0; }
+    tbody tr { border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.15s; }
+    tbody tr:hover { background: rgba(37,99,235,0.04); }
+    tbody td { padding: 10px 14px; vertical-align: top; }
+    .strategy-row td {
+      background: rgba(30,58,95,0.06); font-weight: 700; font-size: 12px;
+      color: var(--primary); padding: 8px 14px;
+    }
+    .edit-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .edit-toolbar .toolbar-label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+    input[type="text"], input[type="number"], textarea, select { font-family: inherit; font-size: 13px; color: var(--text); }
+    .td-input {
+      width: 100%; border: 1px solid transparent; background: transparent;
+      padding: 4px 6px; border-radius: 6px; transition: all 0.15s; min-width: 60px;
+    }
+    .td-input:focus { outline: none; border-color: var(--primary-light); background: white; box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
+    textarea.td-input { resize: vertical; min-height: 52px; }
+
+    /* Score input 1-5 */
+    .score-select {
+      width: 100%; border: 1px solid transparent; background: transparent;
+      padding: 4px 6px; border-radius: 6px; transition: all 0.15s; min-width: 60px;
+      font-family: inherit; font-size: 13px; color: var(--text); cursor: pointer;
+    }
+    .score-select:focus { outline: none; border-color: var(--primary-light); background: white; }
+
+    /* Score badge */
+    .score-dot {
+      display: inline-block; width: 14px; height: 14px; border-radius: 50%;
+    }
+
+    .pdf-list { display: flex; flex-direction: column; gap: 10px; }
+    .pdf-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 12px; padding: 12px 16px;
+    }
+    .pdf-item-left { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+    .pdf-code { font-size: 12px; font-weight: 700; color: var(--primary); }
+    .pdf-name { font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pdf-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .pdf-status-none { font-size: 12px; color: var(--text-muted); }
+    .pdf-status-ok { font-size: 12px; color: var(--success); font-weight: 600; }
+    .btn-upload-pdf {
+      padding: 5px 12px; background: rgba(37,99,235,0.1); border: 1px solid rgba(37,99,235,0.25);
+      border-radius: 7px; font-size: 12px; font-weight: 600; font-family: inherit;
+      color: var(--primary-light); cursor: pointer; transition: all 0.15s;
+    }
+    .btn-upload-pdf:hover { background: rgba(37,99,235,0.2); }
+    .btn-view-pdf {
+      padding: 5px 12px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25);
+      border-radius: 7px; font-size: 12px; font-weight: 600; font-family: inherit;
+      color: #059669; cursor: pointer; transition: all 0.15s; text-decoration: none;
+    }
+    .alert { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; display: none; }
+    .alert-success { background: rgba(16,185,129,0.1); border-left: 4px solid #10b981; color: #065f46; }
+    .alert-error { background: rgba(239,68,68,0.1); border-left: 4px solid #ef4444; color: #991b1b; }
+    .alert.show { display: block; }
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      z-index: 200; display: flex; align-items: center; justify-content: center;
+      padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .modal {
+      background: rgba(255,255,255,0.80);
+      backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.9); border-radius: 20px;
+      box-shadow: 0 16px 48px rgba(30,58,95,0.18); padding: 32px;
+      width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto;
+      transform: translateY(12px); transition: transform 0.2s;
+    }
+    .modal-overlay.active .modal { transform: translateY(0); }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .modal-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .form-control {
+      width: 100%; border: none; border-bottom: 1.5px solid #cbd5e1; background: transparent;
+      padding: 8px 0; font-size: 14px; font-family: inherit; color: var(--text); outline: none; transition: border-color 0.2s;
+    }
+    .form-control:focus { border-bottom-color: var(--primary-light); }
+    textarea.form-control { resize: vertical; min-height: 64px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 8px; }
+    textarea.form-control:focus { border-color: var(--primary-light); }
+    select.form-control { border: none; border-bottom: 1.5px solid #cbd5e1; cursor: pointer; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+    .btn-cancel {
+      flex: 1; padding: 12px; background: transparent; border: 1.5px solid var(--border);
+      border-radius: 10px; font-size: 14px; font-weight: 600; font-family: inherit;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .btn-cancel:hover { border-color: #94a3b8; color: var(--text); }
+    .btn-confirm {
+      flex: 1; padding: 12px; background: var(--primary); border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 600; font-family: inherit; color: white; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-confirm:hover { background: #162d4a; }
+    .footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 40px; border-top: 1px solid rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.10); backdrop-filter: blur(32px) saturate(220%);
+      -webkit-backdrop-filter: blur(32px) saturate(220%); position: sticky; bottom: 0; z-index: 50;
+    }
+    .footer-copy { font-size: 12px; color: #94a3b8; }
+    @media (max-width: 768px) {
+      .page-body { flex-direction: column; padding: 16px; }
+      .sidebar { width: 100%; position: static; }
+      .navbar { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <img src="assets/images/Logo.PNG" alt="Logo" onerror="this.style.display='none'">
+    <div class="navbar-brand-text">
+      <div class="title">ตัวชี้วัดเชิงรุก</div>
+      <div class="subtitle">คณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ มหาวิทยาลัยแม่โจ้</div>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <div class="year-selector">
+      <label>ปีงบประมาณ</label>
+      <select class="year-select" id="yearSelect" onchange="onYearChange()">
+        <option value="2569">2569</option>
+        <option value="2570">2570</option>
+        <option value="2571">2571</option>
+      </select>
+    </div>
+    <a href="dashboard-main.html" class="btn-back">‹ กลับ</a>
+    <div class="user-badge">
+      <div class="user-avatar" id="userInitial">อ</div>
+      <span id="userName">เจ้าหน้าที่</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
+  </div>
+</nav>
+
+<div class="page-body">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">เมนูจัดการ</div>
+    <button class="sidebar-item active" onclick="switchTab('import')" id="tab-import">
+      <span class="icon">📥</span> นำเข้าข้อมูล
+    </button>
+    <button class="sidebar-item" onclick="switchTab('edit')" id="tab-edit">
+      <span class="icon">✏️</span> กรอก / แก้ไข
+    </button>
+    <button class="sidebar-item" onclick="switchTab('pdf')" id="tab-pdf">
+      <span class="icon">📎</span> แนบ PDF
+    </button>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="quarter-group">
+      <div class="quarter-label">ไตรมาส</div>
+      <div class="quarter-btns">
+        <button class="q-btn active" id="qbtn-1" onclick="setQuarter(1)">Q1</button>
+        <button class="q-btn" id="qbtn-2" onclick="setQuarter(2)">Q2</button>
+        <button class="q-btn" id="qbtn-3" onclick="setQuarter(3)">Q3</button>
+        <button class="q-btn" id="qbtn-4" onclick="setQuarter(4)">Q4</button>
+      </div>
+      <div class="q-date" id="qDateLabel">ต.ค. – ธ.ค. 68</div>
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Tab 1: นำเข้าข้อมูล -->
+    <div class="panel active" id="panel-import">
+      <div class="panel-title">นำเข้าข้อมูล</div>
+      <div class="panel-sub">อัปโหลดไฟล์ Excel ตัวชี้วัดเชิงรุก หรือสร้างเทมเพลตใหม่สำหรับปีที่เลือก</div>
+      <div class="alert alert-success" id="alertImport"></div>
+      <div class="alert alert-error" id="alertImportErr"></div>
+
+      <div class="import-area" id="dropzone" onclick="document.getElementById('fileInput').click()"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="onDrop(event)">
+        <div class="import-icon">📊</div>
+        <div class="import-title">คลิกหรือลากไฟล์ Excel มาวางที่นี่</div>
+        <div class="import-sub">รองรับไฟล์ .xlsx / .xls จากแบบฟอร์มตัวชี้วัดเชิงรุก</div>
+        <button class="btn-primary" onclick="event.stopPropagation();document.getElementById('fileInput').click()">เลือกไฟล์</button>
+      </div>
+      <input type="file" id="fileInput" class="import-input" accept=".xlsx,.xls" onchange="onFileSelect(event)">
+
+      <div class="preview-box" id="previewBox">
+        <div class="preview-header">
+          <div class="preview-info" id="previewInfo"></div>
+          <div class="preview-actions">
+            <button class="btn-outline" onclick="cancelImport()">ยกเลิก</button>
+            <button class="btn-success" onclick="confirmImport()">✓ นำเข้าข้อมูล</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="previewTable">
+            <thead><tr>
+              <th>รหัส</th><th>ตัวชี้วัด</th><th>หน่วย</th><th>เป้าหมาย</th>
+              <th>คะแนน (1-5)</th><th>ร้อยละ</th><th>ผู้รับผิดชอบ</th>
+            </tr></thead>
+            <tbody id="previewBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="margin-top:24px; padding-top:20px; border-top:1px solid rgba(0,0,0,0.07);">
+        <div style="font-size:14px; font-weight:700; color:var(--text); margin-bottom:8px;">สร้างเทมเพลตใหม่</div>
+        <div style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">สำหรับปีงบประมาณที่ยังไม่มีข้อมูล ระบบจะสร้าง 10 ตัวชี้วัดให้อัตโนมัติ</div>
+        <button class="btn-outline" onclick="createTemplate()">+ สร้างเทมเพลตสำหรับปีที่เลือก</button>
+      </div>
+    </div>
+
+    <!-- Tab 2: กรอก/แก้ไข -->
+    <div class="panel" id="panel-edit">
+      <div class="panel-title">กรอก / แก้ไขข้อมูล</div>
+      <div class="panel-sub">แก้ไขคะแนน (1–5) และรายละเอียดรายตัวชี้วัด สำหรับไตรมาสที่เลือก</div>
+
+      <div class="edit-toolbar">
+        <span class="toolbar-label">ยุทธศาสตร์:</span>
+        <select id="filterStrategy" onchange="renderEditTable()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:rgba(255,255,255,0.6);font-size:13px;">
+          <option value="0">ทั้งหมด</option>
+        </select>
+        <button class="btn-outline" style="padding:8px 16px;font-size:13px;" onclick="openAddKpiModal()">+ เพิ่มตัวชี้วัด</button>
+        <button class="btn-success" style="padding:8px 16px;font-size:13px;" onclick="saveAll()">✓ บันทึกทั้งหมด</button>
+      </div>
+
+      <!-- สถานะ legend -->
+      <div style="display:flex;align-items:center;gap:18px;margin-bottom:16px;font-size:12px;color:var(--text-muted);">
+        <span style="font-weight:600;">สถานะ:</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#10b981;margin-right:4px;vertical-align:middle;"></span>ผ่าน (≥80%)</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#f59e0b;margin-right:4px;vertical-align:middle;"></span>กำลังดำเนินการ (50–79%)</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ef4444;margin-right:4px;vertical-align:middle;"></span>ต้องเร่ง (&lt;50%)</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#cbd5e1;margin-right:4px;vertical-align:middle;"></span>ยังไม่มีข้อมูล</span>
+      </div>
+
+      <div class="alert alert-success" id="alertEdit"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>รหัส</th>
+            <th>ตัวชี้วัด</th>
+            <th>หน่วย</th>
+            <th>เป้าหมาย</th>
+            <th>คะแนน (1-5)</th>
+            <th>ร้อยละ</th>
+            <th>สถานะ</th>
+            <th>ผู้รับผิดชอบ</th>
+            <th>รายละเอียด</th>
+            <th>จัดการ</th>
+          </tr></thead>
+          <tbody id="editBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 3: แนบ PDF -->
+    <div class="panel" id="panel-pdf">
+      <div class="panel-title">แนบ PDF หลักฐาน</div>
+      <div class="panel-sub">อัปโหลดไฟล์ PDF หลักฐานประกอบการรายงานแต่ละตัวชี้วัด</div>
+      <div class="pdf-list" id="pdfList"></div>
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <span class="footer-copy">© 2569 คณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ มหาวิทยาลัยแม่โจ้</span>
+  <span style="font-size:12px;color:#94a3b8;" id="footerSaved"></span>
+</footer>
+
+<!-- Modal แก้ไขรายตัว -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">แก้ไขตัวชี้วัด</div>
+    <div class="modal-sub" id="modalSub"></div>
+    <div class="form-group">
+      <label class="form-label">ตัวชี้วัด</label>
+      <input class="form-control" id="mName" type="text" placeholder="ชื่อตัวชี้วัด">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="form-group">
+        <label class="form-label">หน่วยนับ</label>
+        <input class="form-control" id="mUnit" type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">เป้าหมาย</label>
+        <input class="form-control" id="mTarget" type="text">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="form-group">
+        <label class="form-label">คะแนน (1-5)</label>
+        <select class="form-control" id="mScore">
+          <option value="">-- ยังไม่ได้กรอก --</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ผู้รับผิดชอบ</label>
+        <input class="form-control" id="mOwner" type="text" placeholder="ชื่อผู้รับผิดชอบ">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">รายละเอียดการดำเนินงาน</label>
+      <textarea class="form-control" id="mDetail" rows="3" placeholder="อธิบายผลการดำเนินงาน..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-confirm" onclick="saveModal()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal เพิ่มตัวชี้วัด -->
+<div class="modal-overlay" id="addKpiModal">
+  <div class="modal">
+    <div class="modal-title">เพิ่มตัวชี้วัดใหม่</div>
+    <div class="modal-sub">กรอกข้อมูลตัวชี้วัดเชิงรุกที่ต้องการเพิ่ม</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="form-group">
+        <label class="form-label">รหัสตัวชี้วัด</label>
+        <input class="form-control" id="nCode" type="text" placeholder="เช่น 1.1.4">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ยุทธศาสตร์</label>
+        <select class="form-control" id="nStrategy"></select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ชื่อตัวชี้วัด</label>
+      <input class="form-control" id="nName" type="text" placeholder="ชื่อตัวชี้วัด">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="form-group">
+        <label class="form-label">หน่วยนับ</label>
+        <input class="form-control" id="nUnit" type="text" placeholder="ระดับ / ชิ้นงาน">
+      </div>
+      <div class="form-group">
+        <label class="form-label">เป้าหมาย</label>
+        <input class="form-control" id="nTarget" type="text" placeholder="ระดับ 3">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ผู้รับผิดชอบ</label>
+      <input class="form-control" id="nOwner" type="text" placeholder="ชื่อผู้รับผิดชอบ">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAddModal()">ยกเลิก</button>
+      <button class="btn-confirm" onclick="confirmAddKpi()">เพิ่มตัวชี้วัด</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="pdfFileInput" accept=".pdf" style="display:none" onchange="onPdfSelected(event)">
+
+<script>
+// ===== Constants =====
+const DEFAULT_STRATEGIES = [
+  {id:1, name:'Professional Immersive Learning'},
+  {id:2, name:'Digital Intelligence'},
+  {id:3, name:'Green & Smart Faculty (FTAR-IWA)'},
+  {id:4, name:'Global Partnership'},
+  {id:5, name:'Knowledge and Innovation Revenue Generation'},
+];
+
+// Q3 data seeded into Q1, Q2, Q3
+const Q_DATA_2569 = {
+  '1.1.1': { score: 1, percent: 33.33, owner: 'รองวิชาการ' },
+  '1.1.2': { score: 9, percent: 100,   owner: 'รองวิจัย' },
+  '1.1.3': { score: 2, percent: 66.67, owner: 'รองวิชาการ / รองพัฒนานักศึกษา' },
+  '2.2.1': { score: 2, percent: 66.67, owner: 'รองพัฒนานักศึกษา' },
+  '2.2.2': { score: 4, percent: 100,   owner: 'รองวิชาการ / รองพัฒนานักศึกษา' },
+  '2.2.3': { score: 5, percent: 100,   owner: 'รองวิจัย' },
+  '3.3.1': { score: 1, percent: 33.33, owner: 'เลขา/ผู้อำนวยการสำนักงานคณะ' },
+  '3.3.2': { score: 4, percent: 100,   owner: 'เลขา/ผู้อำนวยการสำนักงานคณะ' },
+  '4.4.1': { score: 3, percent: 100,   owner: 'เลขา' },
+  '5.5.1': { score: 5, percent: 100,   owner: 'เลขา/ผู้อำนวยการสำนักงานคณะ' },
+};
+
+const TEMPLATE_2569 = [
+  {code:'1.1.1', name:'ระบบบันทึกและประเมินนักศึกษาที่ผ่านภาคปฏิบัติ / ฝึกงาน / ปฏิบัติงานภาคสนาม / ห้องปฏิบัติการมาตรฐานตามที่หลักสูตรกำหนด', unit:'ระดับ', target:'3', strategy:1},
+  {code:'1.1.2', name:'จำนวนผลงาน Practice-based Project / Problem-based Project / Area based Project', unit:'ชิ้นงาน', target:'3', strategy:1},
+  {code:'1.1.3', name:'มีการจัดทำผลตอบแทนแผนพัฒนานักศึกษาจากการเป็นผู้ประกอบการ พัฒนาบัตรและการบริหารจัดการทรัพยากร ตามมาตรฐานของหลักสูตร', unit:'ระดับ', target:'3', strategy:1},
+  {code:'2.2.1', name:'ระดับการบูรณาการเทคโนโลยีดิจิทัล ปัญญาประดิษฐ์ (AI) ในพันธกิจหลักขององค์กร', unit:'ระดับ', target:'3', strategy:2},
+  {code:'2.2.2', name:'ระดับประสิทธิผลของการแก้ไขรับฟังตอบสนองความต้องการผู้รับบริการผู้มีส่วนได้เสียเพื่อการพัฒนาการเรียนการสอนและการบริหารจัดการสร้างความร่วมมือ', unit:'ระดับ', target:'3', strategy:2},
+  {code:'2.2.3', name:'ระดับความโดดเด่นของผลงานวิจัยและนวัตกรรมที่สามารถใช้ประโยชน์และสร้างผลกระทบต่อยุทธศาสตร์คณะ', unit:'ระดับ', target:'3', strategy:2},
+  {code:'3.3.1', name:'ระดับความสามารถขององค์กรระบุบุคลากรกับ Job Description ตามมาตรฐานวิชาชีพ', unit:'ระดับ', target:'3', strategy:3},
+  {code:'3.3.2', name:'ระดับความโดดเด่นหน้าการพัฒนา FTAR-IWA สู่การเป็น Green & Professional Living Faculty', unit:'ระดับ', target:'3', strategy:3},
+  {code:'4.4.1', name:'ระดับบทบาทของ FTAR ในการเป็นศูนย์กลางเครือข่ายความร่วมมือสนับสนุนการประมงและทรัพยากรน้ำระดับนานาชาติ', unit:'ระดับ', target:'3', strategy:4},
+  {code:'5.5.1', name:'ระดับขีดความสามารถของ FTAR ในการสร้างรายได้จากบริการวิชาการ นวัตกรรม และธุรกิจวิชาชีพที่สนับสนุนธุรกิจหลักขององค์กร', unit:'ระดับ', target:'3', strategy:5},
+];
+
+// ===== State =====
+let currentTab = 'import';
+let currentQuarter = 1;
+let pendingImport = null;
+let currentEditIdx = null;
+let currentPdfCode = null;
+
+const Q_DATES = {1:'ต.ค. – ธ.ค. 68', 2:'ต.ค. – มี.ค. 69', 3:'ต.ค. – มิ.ย. 69', 4:'ต.ค. – ก.ย. 69'};
+const Q_MONTHS = {1:'Q1 (ต.ค.)', 2:'Q2 (ม.ค.)', 3:'Q3 (เม.ย.)', 4:'Q4 (ก.ค.)'};
+
+// ===== Auth =====
+function getCurrentYear() { return parseInt(document.getElementById('yearSelect').value); }
+function storageKey() { return `proactive_${getCurrentYear()}`; }
+function pdfKey(code, q) { return `pdf_proactive_${getCurrentYear()}_${code}_Q${q}`; }
+
+window.onload = function() {
+  const auth = JSON.parse(sessionStorage.getItem('auth') || 'null');
+  if (!auth || auth.role !== 'admin') { location.href = 'index.html'; return; }
+  document.getElementById('userName').textContent = auth.name || 'เจ้าหน้าที่';
+  document.getElementById('userInitial').textContent = (auth.name || 'อ')[0];
+  const savedYear = sessionStorage.getItem('current_year');
+  if (savedYear) document.getElementById('yearSelect').value = savedYear;
+  setQuarter(1);
+  renderEditTable();
+  renderPdfList();
+};
+
+function logout() { sessionStorage.clear(); location.href = 'index.html'; }
+function onYearChange() {
+  sessionStorage.setItem('current_year', getCurrentYear());
+  renderEditTable();
+  renderPdfList();
+  updateStrategyFilter();
+}
+
+// ===== Data =====
+function getData() {
+  const raw = localStorage.getItem(storageKey());
+  if (raw) return JSON.parse(raw);
+  if (getCurrentYear() === 2569) {
+    const data = {
+      kpis: TEMPLATE_2569.map(k => {
+        const qd = Q_DATA_2569[k.code] || {};
+        const q = { score: qd.score ?? '', percent: qd.percent ?? '', detail: '', owner: qd.owner || '' };
+        return { ...k, quarters: { Q1: {...q}, Q2: {...q}, Q3: {...q}, Q4: { score:'', percent:'', detail:'', owner: qd.owner || '' } } };
+      })
+    };
+    saveData(data);
+    return data;
+  }
+  return { kpis: [] };
+}
+
+function saveData(data) { localStorage.setItem(storageKey(), JSON.stringify(data)); }
+
+function getStrategies() {
+  return JSON.parse(localStorage.getItem(`pro_strategies_${getCurrentYear()}`) || JSON.stringify(DEFAULT_STRATEGIES));
+}
+function saveStrategies(s) { localStorage.setItem(`pro_strategies_${getCurrentYear()}`, JSON.stringify(s)); }
+
+// ===== Tab =====
+function switchTab(tab) {
+  currentTab = tab;
+  ['import','edit','pdf'].forEach(t => {
+    document.getElementById(`panel-${t}`).classList.toggle('active', t===tab);
+    document.getElementById(`tab-${t}`).classList.toggle('active', t===tab);
+  });
+  if (tab === 'edit') renderEditTable();
+  if (tab === 'pdf') renderPdfList();
+}
+
+// ===== Quarter =====
+function setQuarter(q) {
+  currentQuarter = q;
+  [1,2,3,4].forEach(i => document.getElementById(`qbtn-${i}`).classList.toggle('active', i===q));
+  document.getElementById('qDateLabel').textContent = Q_DATES[q];
+  if (currentTab === 'edit') renderEditTable();
+  if (currentTab === 'pdf') renderPdfList();
+}
+
+// ===== Strategy Filter =====
+function updateStrategyFilter() {
+  const sel = document.getElementById('filterStrategy');
+  const strategies = getStrategies();
+  sel.innerHTML = '<option value="0">ทั้งหมด</option>' +
+    strategies.map(s => `<option value="${s.id}">${s.id}. ${s.name}</option>`).join('');
+}
+
+// ===== Render Edit Table =====
+function renderEditTable() {
+  updateStrategyFilter();
+  const data = getData();
+  const filterVal = parseInt(document.getElementById('filterStrategy').value || '0');
+  const strategies = getStrategies();
+  const Q = `Q${currentQuarter}`;
+  let html = '';
+  let lastStrat = null;
+
+  data.kpis.forEach((kpi, idx) => {
+    if (filterVal !== 0 && kpi.strategy !== filterVal) return;
+    if (kpi.strategy !== lastStrat) {
+      const s = strategies.find(x => x.id === kpi.strategy);
+      html += `<tr class="strategy-row"><td colspan="10">ยุทธศาสตร์ที่ ${kpi.strategy}: ${s ? s.name : ''}</td></tr>`;
+      lastStrat = kpi.strategy;
+    }
+    const q = kpi.quarters?.[Q] || {};
+    const score = q.score ?? '';
+    const pct = parseFloat(q.percent);
+    const dotColor = score === '' ? '#cbd5e1' : pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
+    const statusText = score === '' ? 'ยังไม่มีข้อมูล' : pct >= 80 ? 'ผ่าน' : pct >= 50 ? 'กำลังดำเนินการ' : 'ต้องเร่ง';
+    const pctDisplay = score === '' ? '-' : pct.toFixed(2);
+
+    html += `<tr>
+      <td style="font-weight:700;color:var(--primary);white-space:nowrap;">${kpi.code}</td>
+      <td style="min-width:220px;">
+        <input class="td-input" value="${escHtml(kpi.name)}" onchange="onMetaChange(${idx},'name',this.value)" style="min-width:200px;">
+      </td>
+      <td><input class="td-input" value="${escHtml(kpi.unit||'')}" onchange="onMetaChange(${idx},'unit',this.value)"></td>
+      <td><input class="td-input" value="${escHtml(kpi.target||'')}" onchange="onMetaChange(${idx},'target',this.value)"></td>
+      <td>
+        <select class="score-select" onchange="onScoreChange(${idx},this.value)">
+          <option value="">-</option>
+          ${[1,2,3,4,5].map(v=>`<option value="${v}" ${String(score)===String(v)?'selected':''}>${v}</option>`).join('')}
+        </select>
+      </td>
+      <td style="text-align:center;">${pctDisplay}${score!==''?'%':''}</td>
+      <td style="text-align:center;">
+        <span title="${statusText}" style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${dotColor}"></span>
+      </td>
+      <td><input class="td-input" value="${escHtml(q.owner||kpi.owner||'')}" onchange="onFieldChange(${idx},'owner',this.value)" placeholder="ผู้รับผิดชอบ"></td>
+      <td style="min-width:160px;">
+        <textarea class="td-input" onchange="onFieldChange(${idx},'detail',this.value)" placeholder="รายละเอียด...">${escHtml(q.detail||'')}</textarea>
+      </td>
+      <td style="white-space:nowrap;">
+        <button class="btn-edit-sm" onclick="openEditModal(${idx})">แก้ไข</button>
+        <button class="btn-danger-sm" style="margin-left:4px;" onclick="deleteKpi(${idx})">ลบ</button>
+      </td>
+    </tr>`;
+  });
+
+  document.getElementById('editBody').innerHTML = html;
+}
+
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function onMetaChange(idx, field, val) {
+  const data = getData();
+  data.kpis[idx][field] = val;
+  saveData(data);
+}
+
+function onScoreChange(idx, val) {
+  const data = getData();
+  const Q = `Q${currentQuarter}`;
+  if (!data.kpis[idx].quarters) data.kpis[idx].quarters = {};
+  if (!data.kpis[idx].quarters[Q]) data.kpis[idx].quarters[Q] = {};
+  data.kpis[idx].quarters[Q].score = val;
+  // คำนวณ percent จาก score/target*100 (target คือคะแนนที่คาดหวัง default 3, max 5)
+  if (val !== '') {
+    const target = parseFloat(data.kpis[idx].target) || 5;
+    data.kpis[idx].quarters[Q].percent = (parseFloat(val) / target * 100).toFixed(2);
+  } else {
+    data.kpis[idx].quarters[Q].percent = '';
+  }
+  saveData(data);
+  renderEditTable();
+}
+
+function onFieldChange(idx, field, val) {
+  const data = getData();
+  const Q = `Q${currentQuarter}`;
+  if (!data.kpis[idx].quarters) data.kpis[idx].quarters = {};
+  if (!data.kpis[idx].quarters[Q]) data.kpis[idx].quarters[Q] = {};
+  data.kpis[idx].quarters[Q][field] = val;
+  saveData(data);
+}
+
+function deleteKpi(idx) {
+  if (!confirm('ยืนยันการลบตัวชี้วัดนี้?')) return;
+  const data = getData();
+  data.kpis.splice(idx, 1);
+  saveData(data);
+  renderEditTable();
+}
+
+function saveAll() {
+  showAlert('alertEdit', 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
+  document.getElementById('footerSaved').textContent = `บันทึกล่าสุด: ${new Date().toLocaleTimeString('th-TH')}`;
+}
+
+// ===== Modal แก้ไข =====
+function openEditModal(idx) {
+  currentEditIdx = idx;
+  const data = getData();
+  const kpi = data.kpis[idx];
+  const Q = `Q${currentQuarter}`;
+  const q = kpi.quarters?.[Q] || {};
+  document.getElementById('modalTitle').textContent = `แก้ไข ${kpi.code}`;
+  document.getElementById('modalSub').textContent = `ไตรมาส ${Q_MONTHS[currentQuarter]}`;
+  document.getElementById('mName').value = kpi.name || '';
+  document.getElementById('mUnit').value = kpi.unit || '';
+  document.getElementById('mTarget').value = kpi.target || '';
+  document.getElementById('mScore').value = q.score ?? '';
+  document.getElementById('mOwner').value = q.owner || kpi.owner || '';
+  document.getElementById('mDetail').value = q.detail || '';
+  document.getElementById('editModal').classList.add('active');
+}
+
+function closeModal() { document.getElementById('editModal').classList.remove('active'); }
+
+function saveModal() {
+  const data = getData();
+  const Q = `Q${currentQuarter}`;
+  const kpi = data.kpis[currentEditIdx];
+  kpi.name = document.getElementById('mName').value;
+  kpi.unit = document.getElementById('mUnit').value;
+  kpi.target = document.getElementById('mTarget').value;
+  if (!kpi.quarters) kpi.quarters = {};
+  if (!kpi.quarters[Q]) kpi.quarters[Q] = {};
+  const score = document.getElementById('mScore').value;
+  kpi.quarters[Q].score = score;
+  if (score !== '') {
+    const target = parseFloat(kpi.target) || 5;
+    kpi.quarters[Q].percent = (parseFloat(score) / target * 100).toFixed(2);
+  } else {
+    kpi.quarters[Q].percent = '';
+  }
+  kpi.quarters[Q].owner = document.getElementById('mOwner').value;
+  kpi.quarters[Q].detail = document.getElementById('mDetail').value;
+  saveData(data);
+  closeModal();
+  renderEditTable();
+}
+
+// ===== Modal เพิ่มตัวชี้วัด =====
+function openAddKpiModal() {
+  const strategies = getStrategies();
+  document.getElementById('nStrategy').innerHTML = strategies.map(s=>`<option value="${s.id}">${s.id}. ${s.name}</option>`).join('');
+  document.getElementById('addKpiModal').classList.add('active');
+}
+function closeAddModal() { document.getElementById('addKpiModal').classList.remove('active'); }
+function confirmAddKpi() {
+  const code = document.getElementById('nCode').value.trim();
+  const name = document.getElementById('nName').value.trim();
+  if (!code || !name) { alert('กรุณากรอกรหัสและชื่อตัวชี้วัด'); return; }
+  const data = getData();
+  data.kpis.push({
+    code, name,
+    unit: document.getElementById('nUnit').value,
+    target: document.getElementById('nTarget').value,
+    strategy: parseInt(document.getElementById('nStrategy').value),
+    owner: document.getElementById('nOwner').value,
+    quarters: { Q1:{score:'',percent:'',detail:'',owner:document.getElementById('nOwner').value},
+                Q2:{score:'',percent:'',detail:'',owner:document.getElementById('nOwner').value},
+                Q3:{score:'',percent:'',detail:'',owner:document.getElementById('nOwner').value},
+                Q4:{score:'',percent:'',detail:'',owner:document.getElementById('nOwner').value} }
+  });
+  saveData(data);
+  closeAddModal();
+  renderEditTable();
+}
+
+// ===== Template =====
+function createTemplate() {
+  if (getData().kpis.length > 0) {
+    if (!confirm('มีข้อมูลอยู่แล้ว ต้องการสร้างเทมเพลตใหม่และล้างข้อมูลเดิมหรือไม่?')) return;
+  }
+  const blank = { kpis: TEMPLATE_2569.map(k => ({
+    ...k, quarters: {
+      Q1:{score:'',percent:'',detail:'',owner:''},
+      Q2:{score:'',percent:'',detail:'',owner:''},
+      Q3:{score:'',percent:'',detail:'',owner:''},
+      Q4:{score:'',percent:'',detail:'',owner:''},
+    }
+  }))};
+  saveData(blank);
+  showAlert('alertImport', `สร้างเทมเพลต 10 ตัวชี้วัดสำหรับปี ${getCurrentYear()} เรียบร้อยแล้ว`, 'success');
+  renderEditTable();
+}
+
+// ===== Import Excel =====
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+}
+function onFileSelect(e) { if (e.target.files[0]) processFile(e.target.files[0]); }
+
+function processFile(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, {type:'array'});
+      // หา sheet ที่มีข้อมูลตัวชี้วัด (sheet แรกหรือที่ชื่อมีคำว่า ตัวชี้วัด/เชิงรุก)
+      let sheetName = wb.SheetNames[0];
+      for (const sn of wb.SheetNames) {
+        if (sn.includes('ตัวชี้วัด') || sn.includes('เชิงรุก')) { sheetName = sn; break; }
+      }
+      const ws = wb.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+      const kpiPattern = /^\d+\.\d+\.\d+/;
+      const imported = [];
+      rows.forEach(row => {
+        const cell0 = String(row[0]||'').trim();
+        if (kpiPattern.test(cell0)) {
+          const m = cell0.match(/^(\d+\.\d+\.\d+)/);
+          const code = m ? m[1] : cell0;
+          const name = cell0.replace(/^\d+\.\d+\.\d+\S*\s*/,'').trim() || cell0;
+          const unit = String(row[1]||'ระดับ').trim();
+          const target = String(row[2]||'3').trim();
+          const score = row[3] !== undefined && row[3] !== '' ? String(row[3]).trim() : '';
+          const pct = row[4] !== undefined && row[4] !== '' ? parseFloat(row[4]) : '';
+          const strat = parseInt(code.split('.')[0]) || 1;
+          imported.push({code, name, unit, target, strategy:strat, score, percent: pct !== '' ? pct.toFixed(2) : ''});
+        }
+      });
+      if (imported.length === 0) { showAlert('alertImportErr','ไม่พบข้อมูลตัวชี้วัดในไฟล์นี้','error'); return; }
+      pendingImport = imported;
+      showPreview(imported);
+    } catch(err) { showAlert('alertImportErr','ไม่สามารถอ่านไฟล์ได้: '+err.message,'error'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function showPreview(kpis) {
+  const tbody = document.getElementById('previewBody');
+  tbody.innerHTML = kpis.map(k => `<tr>
+    <td>${escHtml(k.code)}</td>
+    <td>${escHtml(k.name)}</td>
+    <td>${escHtml(k.unit)}</td>
+    <td>${escHtml(k.target)}</td>
+    <td>${k.score !== '' ? k.score : '-'}</td>
+    <td>${k.percent !== '' ? k.percent+'%' : '-'}</td>
+    <td>-</td>
+  </tr>`).join('');
+  document.getElementById('previewInfo').innerHTML = `พบ <strong>${kpis.length}</strong> ตัวชี้วัด`;
+  document.getElementById('previewBox').style.display = 'block';
+}
+
+function cancelImport() { pendingImport = null; document.getElementById('previewBox').style.display = 'none'; }
+
+function confirmImport() {
+  if (!pendingImport) return;
+  const Q = `Q${currentQuarter}`;
+  const data = { kpis: pendingImport.map(k => ({
+    code: k.code, name: k.name, unit: k.unit, target: k.target, strategy: k.strategy,
+    quarters: {
+      Q1: {score:k.score, percent:k.percent, detail:'', owner:''},
+      Q2: {score:k.score, percent:k.percent, detail:'', owner:''},
+      Q3: {score:k.score, percent:k.percent, detail:'', owner:''},
+      Q4: {score:'', percent:'', detail:'', owner:''},
+    }
+  }))};
+  saveData(data);
+  pendingImport = null;
+  document.getElementById('previewBox').style.display = 'none';
+  showAlert('alertImport', `นำเข้า ${data.kpis.length} ตัวชี้วัดเรียบร้อยแล้ว`, 'success');
+  renderEditTable();
+}
+
+// ===== PDF =====
+function renderPdfList() {
+  const data = getData();
+  const html = data.kpis.map(kpi => {
+    const pdfData = localStorage.getItem(pdfKey(kpi.code, currentQuarter));
+    const hasFile = !!pdfData;
+    return `<div class="pdf-item">
+      <div class="pdf-item-left">
+        <div class="pdf-code">${kpi.code}</div>
+        <div class="pdf-name">${escHtml(kpi.name.replace(/^\d+\.\d+\.\d+\S*\s*/,''))}</div>
+      </div>
+      <div class="pdf-actions">
+        ${hasFile
+          ? `<span class="pdf-status-ok">✓ มีไฟล์แล้ว</span>
+             <a class="btn-view-pdf" href="${pdfData}" target="_blank">ดู PDF</a>
+             <button class="btn-danger-sm" onclick="removePdf('${kpi.code}')">ลบ</button>`
+          : `<span class="pdf-status-none">ยังไม่มีไฟล์</span>`}
+        <button class="btn-upload-pdf" onclick="triggerPdfUpload('${kpi.code}')">+ แนบ PDF</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('pdfList').innerHTML = html;
+}
+
+function triggerPdfUpload(code) {
+  currentPdfCode = code;
+  document.getElementById('pdfFileInput').value = '';
+  document.getElementById('pdfFileInput').click();
+}
+
+function onPdfSelected(e) {
+  const file = e.target.files[0];
+  if (!file || !currentPdfCode) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    localStorage.setItem(pdfKey(currentPdfCode, currentQuarter), ev.target.result);
+    renderPdfList();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePdf(code) {
+  if (!confirm('ต้องการลบไฟล์ PDF นี้หรือไม่?')) return;
+  localStorage.removeItem(pdfKey(code, currentQuarter));
+  renderPdfList();
+}
+
+// ===== Alert =====
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = `alert alert-${type} show`;
+  setTimeout(() => { el.classList.remove('show'); }, 3500);
+}
+</script>
+</body>
+</html>

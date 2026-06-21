@@ -580,6 +580,16 @@ const DEFAULT_STRATEGIES = [
 ];
 
 // Q3 data seeded into Q1, Q2, Q3
+const LINKS = {
+  '1.1.2': 'https://erp.mju.ac.th/openFile.aspx?id=Nzk1Mzk1&method=inline',
+  '1.1.3': 'https://erp.mju.ac.th/openFile.aspx?id=Nzk1MjUw&method=inline',
+  '2.2.2': 'https://erp.mju.ac.th/openFile.aspx?id=Nzk1MjE1&method=inline',
+  '2.2.3': 'https://erp.mju.ac.th/openFile.aspx?id=Nzk1MzU0&method=inline',
+  '3.3.2': 'https://erp.mju.ac.th/openFile.aspx?id=Nzk1MzYx&method=inline',
+  '4.4.1': 'https://erp.mju.ac.th/openFile.aspx?id=Nzk1MjMy&method=inline',
+  '5.5.1': 'https://erp.mju.ac.th/openFile.aspx?id=Nzk1MjQ5&method=inline',
+};
+
 const Q_DATA_2569 = {
   '1.1.1': { score: 1, percent: 33.33, owner: 'รองวิชาการ', detail: 'มีการประชุมผู้เกี่ยวข้องร่างเอกสารเพื่อจัดทำระบบบันทึกและประเมินผลการเรียนรู้เชิงปฏิบัติ' },
   '1.1.2': { score: 9, percent: 100,   owner: 'รองวิจัย',   detail: 'ชิ้นงานที่นักศึกษาสร้างสรรค์ขึ้นโดยใช้การเรียนรู้ผ่านการปฏิบัติ การแก้ปัญหา หรือการตอบโจทย์ความต้องการของพื้นที่/ชุมชน จำนวน 9 ชิ้นงาน' },
@@ -654,8 +664,9 @@ function getData() {
     const data = {
       kpis: TEMPLATE_2569.map(k => {
         const qd = Q_DATA_2569[k.code] || {};
-        const q = { score: qd.score ?? '', percent: qd.percent ?? '', detail: qd.detail || '', owner: qd.owner || '' };
-        return { ...k, quarters: { Q1: {...q}, Q2: {...q}, Q3: {...q}, Q4: { score:'', percent:'', detail:'', owner: qd.owner || '' } } };
+        const link = LINKS[k.code] || '';
+        const q = { score: qd.score ?? '', percent: qd.percent ?? '', detail: qd.detail || '', owner: qd.owner || '', link };
+        return { ...k, quarters: { Q1: {...q}, Q2: {...q}, Q3: {...q}, Q4: { score:'', percent:'', detail:'', owner: qd.owner || '', link:'' } } };
       })
     };
     saveData(data);
@@ -745,6 +756,7 @@ function renderEditTable() {
         <textarea class="td-input" onchange="onFieldChange(${idx},'detail',this.value)" placeholder="รายละเอียด...">${escHtml(q.detail||'')}</textarea>
       </td>
       <td style="white-space:nowrap;">
+        ${q.link ? `<a href="${q.link}" target="_blank" style="margin-right:4px;text-decoration:none;font-size:14px;" title="ดูเอกสารอ้างอิง">🔗</a>` : ''}
         <button class="btn-edit-sm" onclick="openEditModal(${idx})">แก้ไข</button>
         <button class="btn-danger-sm" style="margin-left:4px;" onclick="deleteKpi(${idx})">ลบ</button>
       </td>
@@ -984,6 +996,7 @@ function renderPdfList() {
         <div class="pdf-name">${escHtml(kpi.name.replace(/^\d+\.\d+\.\d+\S*\s*/,''))}</div>
       </div>
       <div class="pdf-actions">
+        ${LINKS[kpi.code] ? `<a class="btn-view-pdf" href="${LINKS[kpi.code]}" target="_blank">🔗 ลิงก์</a>` : ''}
         ${hasFile
           ? `<span class="pdf-status-ok">✓ มีไฟล์แล้ว</span>
              <a class="btn-view-pdf" href="${pdfData}" target="_blank">ดู PDF</a>

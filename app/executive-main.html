@@ -113,16 +113,18 @@
       border-radius: 18px;
       padding: 22px 24px;
       box-shadow: 0 4px 20px rgba(30,58,95,0.06);
-      display: flex; flex-direction: column; gap: 8px;
+      display: flex; flex-direction: column; gap: 10px;
     }
+    .stat-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .stat-card-left { display: flex; flex-direction: column; gap: 6px; }
+    .stat-icon { font-size: 26px; }
     .stat-card-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-    .stat-card-value { font-size: 36px; font-weight: 800; line-height: 1; }
+    .stat-card-value { font-size: 64px; font-weight: 800; line-height: 1; }
     .stat-card-sub { font-size: 12px; color: var(--text-muted); }
     .stat-card.green .stat-card-value { color: var(--success); }
     .stat-card.orange .stat-card-value { color: var(--warning); }
     .stat-card.red .stat-card-value { color: var(--danger); }
     .stat-card.blue .stat-card-value { color: var(--primary-light); }
-    .stat-icon { font-size: 28px; margin-bottom: 4px; }
 
     /* ===== Chart grid ===== */
     .chart-grid {
@@ -151,12 +153,12 @@
     .chart-wrap-sm { position: relative; height: 220px; }
 
     /* ===== Progress bars ===== */
-    .progress-list { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
-    .progress-item { display: flex; flex-direction: column; gap: 5px; }
+    .progress-list { display: flex; flex-direction: column; gap: 18px; margin-top: 4px; }
+    .progress-item { display: flex; flex-direction: column; gap: 7px; }
     .progress-header { display: flex; justify-content: space-between; align-items: center; }
-    .progress-label { font-size: 12px; font-weight: 600; color: var(--text); }
-    .progress-pct { font-size: 12px; font-weight: 700; color: var(--primary-light); }
-    .progress-bar-bg { background: rgba(0,0,0,0.07); border-radius: 99px; height: 8px; overflow: hidden; }
+    .progress-label { font-size: 13px; font-weight: 600; color: var(--text); }
+    .progress-pct { font-size: 14px; font-weight: 700; }
+    .progress-bar-bg { background: rgba(0,0,0,0.07); border-radius: 99px; height: 16px; overflow: hidden; }
     .progress-bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
 
     /* ===== Traffic light table ===== */
@@ -360,13 +362,13 @@ function computeStats(kpis, q) {
     const hasVal = currentSystem === 'mission'
       ? (qd.result !== undefined && qd.result !== '' && qd.result !== '0')
       : (qd.score !== undefined && qd.score !== '');
-    if (!hasVal || isNaN(pct)) { nodata++; return; }
+    if (!hasVal || isNaN(pct)) { urgent++; return; }
     const threshold = currentSystem === 'mission' ? 100 : 80;
     if (pct >= threshold) pass++;
     else if (pct >= 50) progress++;
     else urgent++;
   });
-  return { pass, progress, urgent, nodata, total: kpis.length };
+  return { pass, progress, urgent, nodata: 0, total: kpis.length };
 }
 
 function getPct(kpi, q) {
@@ -406,32 +408,40 @@ function render() {
 function renderStats(s, total) {
   const isMission = currentSystem === 'mission';
   const threshold = isMission ? '≥100%' : '≥80%';
-  document.getElementById('statGrid').innerHTML = `
-    <div class="stat-card blue">
-      <div class="stat-icon">📋</div>
-      <div class="stat-card-label">ตัวชี้วัดทั้งหมด</div>
-      <div class="stat-card-value">${total}</div>
-      <div class="stat-card-sub">${isMission ? '5 ยุทธศาสตร์' : '5 ยุทธศาสตร์'}</div>
-    </div>
-    <div class="stat-card green">
-      <div class="stat-icon">✅</div>
-      <div class="stat-card-label">ผ่านแล้ว (${threshold})</div>
-      <div class="stat-card-value">${s.pass}</div>
-      <div class="stat-card-sub">คิดเป็น ${total ? Math.round(s.pass/total*100) : 0}%</div>
-    </div>
-    <div class="stat-card orange">
-      <div class="stat-icon">🔄</div>
-      <div class="stat-card-label">กำลังดำเนินการ</div>
-      <div class="stat-card-value">${s.progress}</div>
-      <div class="stat-card-sub">50–${isMission?'99':'79'}%</div>
-    </div>
-    <div class="stat-card red">
-      <div class="stat-icon">⚠️</div>
-      <div class="stat-card-label">ต้องเร่งดำเนินการ</div>
-      <div class="stat-card-value">${s.urgent}</div>
-      <div class="stat-card-sub">ต่ำกว่า 50%</div>
-    </div>
-  `;
+  const pctPass     = total ? Math.round(s.pass/total*100) : 0;
+  const pctProgress = total ? Math.round(s.progress/total*100) : 0;
+  const pctUrgent   = total ? Math.round(s.urgent/total*100) : 0;
+  const hasData = total - s.nodata;
+  const mkCard = (cls, icon, label, value, color, barPct, barColor, sub) => `
+    <div class="stat-card ${cls}">
+      <div class="stat-card-top">
+        <div class="stat-card-left">
+          <div class="stat-icon">${icon}</div>
+          <div class="stat-card-label">${label}</div>
+        </div>
+        <div class="stat-card-value">${value}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);">
+          <span>สัดส่วน</span><span style="font-weight:700;color:${barColor};">${barPct}%</span>
+        </div>
+        <div style="background:rgba(0,0,0,0.07);border-radius:99px;height:6px;overflow:hidden;">
+          <div style="width:${barPct}%;height:100%;background:${barColor};border-radius:99px;transition:width 0.8s;"></div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);">${sub}</div>
+      </div>
+    </div>`;
+
+  document.getElementById('statGrid').innerHTML =
+    mkCard('blue','📋','ตัวชี้วัดทั้งหมด', total, '#2563eb',
+      pctPass, '#2563eb',
+      `ผ่านแล้ว ${s.pass} · ดำเนินการ ${s.progress} · ต้องเร่ง ${s.urgent}`) +
+    mkCard('green','✅',`ผ่านแล้ว (${threshold})`, s.pass, '#10b981',
+      pctPass, '#10b981', `จาก ${total} ตัวชี้วัดทั้งหมด`) +
+    mkCard('orange','🔄','กำลังดำเนินการ', s.progress, '#f59e0b',
+      pctProgress, '#f59e0b', `ช่วง 50–${isMission?'99':'79'}%`) +
+    mkCard('red','⚠️','ต้องเร่งดำเนินการ', s.urgent, '#ef4444',
+      pctUrgent, '#ef4444', 'ต่ำกว่า 50% ต้องติดตาม');
 }
 
 // ===== Donut chart =====
@@ -441,10 +451,10 @@ function renderDonut(s) {
   charts.donut = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['ผ่านแล้ว','กำลังดำเนินการ','ต้องเร่ง','ยังไม่มีข้อมูล'],
+      labels: ['ผ่านแล้ว','กำลังดำเนินการ','ต้องเร่ง'],
       datasets: [{
-        data: [s.pass, s.progress, s.urgent, s.nodata],
-        backgroundColor: ['#10b981','#f59e0b','#ef4444','#cbd5e1'],
+        data: [s.pass, s.progress, s.urgent],
+        backgroundColor: ['#10b981','#f59e0b','#ef4444'],
         borderWidth: 2, borderColor: '#fff',
       }]
     },
@@ -489,7 +499,7 @@ function renderBar(kpis, strategies) {
     options: {
       responsive: true, maintainAspectRatio: false,
       scales: {
-        y: { min: 0, max: 110, ticks: { callback: v => v+'%' }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        y: { min: 0, max: 100, ticks: { callback: v => v+'%' }, grid: { color: 'rgba(0,0,0,0.05)' } },
         x: { grid: { display: false } }
       },
       plugins: {
@@ -531,7 +541,7 @@ function renderRadar(kpis, strategies) {
       responsive: true, maintainAspectRatio: false,
       scales: {
         r: {
-          min: 0, max: 110,
+          min: 0, max: 100,
           ticks: { stepSize: 25, callback: v => v+'%', font: { size: 10 } },
           pointLabels: { font: { family: 'Sarabun', size: 11 } },
           grid: { color: 'rgba(0,0,0,0.08)' },

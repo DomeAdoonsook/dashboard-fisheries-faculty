@@ -998,7 +998,8 @@
     if (!auth || JSON.parse(auth).role !== 'admin') window.location.href = 'index.html';
     const user = JSON.parse(auth);
     document.getElementById('user-name').textContent = user.name;
-    document.getElementById('user-avatar').textContent = user.name.charAt(0);
+    const roleInitials = {'admin':'A','executive':'E'};
+    document.getElementById('user-avatar').textContent = roleInitials[user.role] || user.name.replace(/^เ/,'').charAt(0) || 'A';
 
     // ===== Year =====
     const DEFAULT_YEAR = 2569;

@@ -71,6 +71,7 @@
       border: 1px solid rgba(255,255,255,0.18);
       box-shadow: 0 0 20px rgba(0,0,0,0.12), inset 0 0 10px rgba(255,255,255,0.04);
       position: absolute; left: 50%; transform: translateX(-50%);
+      white-space: nowrap;
     }
     .main-tab-btn {
       padding: 10px 22px; border: none; background: transparent;
@@ -175,11 +176,26 @@
       font-size: 12px; color: #94a3b8; display: flex; justify-content: space-between;
     }
 
+    @media (max-width: 1100px) {
+      /* navbar เป็น 2 แถว: แถวบน brand+right, แถวล่าง tabs กึ่งกลาง */
+      .navbar {
+        flex-wrap: wrap; height: auto;
+        padding: 10px 24px 10px;
+        gap: 8px;
+      }
+      .main-tab-bar {
+        position: static; transform: none;
+        order: 3; width: 100%;
+        justify-content: center;
+        margin-bottom: 4px;
+      }
+      .navbar-brand { flex: 1; }
+      .navbar-right { flex-shrink: 0; }
+    }
     @media (max-width: 1024px) {
       .stat-grid, .stat-grid-3 { grid-template-columns: repeat(2,1fr); }
       .chart-grid, .overview-grid { grid-template-columns: 1fr; }
       .page-body { padding-left: 16px; padding-right: 16px; }
-      .main-tab-btn { padding: 8px 14px; font-size: 12px; }
     }
     @media (max-width: 768px) {
       .navbar { padding: 0 16px; height: auto; padding-top: 10px; padding-bottom: 10px; flex-wrap: wrap; gap: 8px; }

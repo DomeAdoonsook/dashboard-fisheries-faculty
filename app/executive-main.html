@@ -12,7 +12,6 @@
     :root {
       --primary: #1e3a5f;
       --primary-light: #2563eb;
-      --accent: #3b82f6;
       --text: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
@@ -20,27 +19,20 @@
       --warning: #f59e0b;
       --danger: #ef4444;
     }
-    body {
-      font-family: 'Inter', 'Sarabun', sans-serif;
-      background: #f0f4f8;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+    body { font-family: 'Inter','Sarabun',sans-serif; background: #f0f4f8; min-height: 100vh; display: flex; flex-direction: column; }
 
-    /* ===== Navbar ===== */
+    /* Navbar */
     .navbar {
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 40px; height: 80px;
-      background: rgba(255,255,255,0.10);
-      backdrop-filter: blur(32px) saturate(220%);
+      background: rgba(255,255,255,0.10); backdrop-filter: blur(32px) saturate(220%);
       -webkit-backdrop-filter: blur(32px) saturate(220%);
       border-bottom: 1px solid rgba(255,255,255,0.35);
       position: sticky; top: 0; z-index: 50;
       box-shadow: 0 2px 16px rgba(30,58,95,0.04);
     }
     .navbar-brand { display: flex; align-items: center; gap: 14px; }
-    .navbar-brand img { height: 70px; width: auto; }
+    .navbar-brand img { height: 70px; }
     .navbar-brand-text .title { font-size: 20px; font-weight: 700; color: var(--text); }
     .navbar-brand-text .subtitle { font-size: 12px; color: var(--text-muted); }
     .navbar-right { display: flex; align-items: center; gap: 12px; }
@@ -57,39 +49,38 @@
       border: 1px solid rgba(255,255,255,0.30); border-radius: 99px; padding: 6px 16px 6px 8px;
       font-size: 13px; font-weight: 600; color: var(--text);
     }
-    .user-avatar {
-      width: 30px; height: 30px; background: var(--primary); border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; color: white; font-weight: 700;
-    }
+    .user-avatar { width: 30px; height: 30px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; color: white; font-weight: 700; }
     .btn-logout {
       background: rgba(255,255,255,0.08); backdrop-filter: blur(20px);
       border: 1px solid rgba(255,255,255,0.30); border-radius: 8px; padding: 8px 16px;
-      font-size: 13px; font-weight: 600; font-family: inherit; color: var(--text-muted);
-      cursor: pointer; transition: all 0.2s;
+      font-size: 13px; font-weight: 600; font-family: inherit; color: var(--text-muted); cursor: pointer; transition: all 0.2s;
     }
     .btn-logout:hover { background: rgba(239,68,68,0.1); color: #dc2626; border-color: rgba(239,68,68,0.3); }
 
-    /* ===== Tab switcher ===== */
-    .tab-bar {
-      display: flex; align-items: center; gap: 4px;
-      background: rgba(255,255,255,0.08); backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.30); border-radius: 12px; padding: 4px;
+    /* Main tabs (ภาพรวม / ภาระกิจ / เชิงรุก) */
+    .main-tab-bar {
+      display: flex; gap: 0;
+      border-bottom: 2px solid var(--border);
+      padding: 0 40px;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(20px);
     }
-    .tab-btn {
-      padding: 7px 18px; border-radius: 9px; border: none;
-      font-size: 13px; font-weight: 600; font-family: inherit;
-      cursor: pointer; transition: all 0.18s; color: var(--text-muted); background: transparent;
+    .main-tab-btn {
+      padding: 14px 28px; border: none; background: transparent;
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      color: var(--text-muted); cursor: pointer; transition: all 0.18s;
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
     }
-    .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(30,58,95,0.2); }
+    .main-tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .main-tab-btn:hover:not(.active) { color: var(--text); }
 
-    /* ===== Page body ===== */
+    /* Page body */
     .page-body { flex: 1; padding: 28px 40px; display: flex; flex-direction: column; gap: 24px; }
+    .tab-section { display: none; flex-direction: column; gap: 24px; }
+    .tab-section.active { display: flex; }
 
-    /* ===== Quarter selector ===== */
-    .quarter-bar {
-      display: flex; align-items: center; gap: 8px;
-    }
+    /* Quarter selector */
+    .quarter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .quarter-bar span { font-size: 13px; font-weight: 600; color: var(--text-muted); }
     .q-chip {
       padding: 6px 16px; border-radius: 99px; border: 1.5px solid var(--border);
@@ -99,60 +90,38 @@
     .q-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
     .q-chip:hover:not(.active) { border-color: var(--primary-light); color: var(--primary); }
 
-    /* ===== Stat cards ===== */
-    .stat-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-    }
+    /* Stat cards */
+    .stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+    .stat-grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
     .stat-card {
-      background: rgba(255,255,255,0.35);
-      backdrop-filter: blur(24px) saturate(180%);
+      background: rgba(255,255,255,0.35); backdrop-filter: blur(24px) saturate(180%);
       -webkit-backdrop-filter: blur(24px) saturate(180%);
-      border: 1px solid rgba(255,255,255,0.6);
-      border-radius: 18px;
-      padding: 22px 24px;
-      box-shadow: 0 4px 20px rgba(30,58,95,0.06);
-      display: flex; flex-direction: column; gap: 10px;
+      border: 1px solid rgba(255,255,255,0.6); border-radius: 18px; padding: 22px 24px;
+      box-shadow: 0 4px 20px rgba(30,58,95,0.06); display: flex; flex-direction: column; gap: 10px;
     }
     .stat-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
     .stat-card-left { display: flex; flex-direction: column; gap: 6px; }
     .stat-icon { font-size: 26px; }
     .stat-card-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
     .stat-card-value { font-size: 64px; font-weight: 800; line-height: 1; }
-    .stat-card-sub { font-size: 12px; color: var(--text-muted); }
     .stat-card.green .stat-card-value { color: var(--success); }
     .stat-card.orange .stat-card-value { color: var(--warning); }
     .stat-card.red .stat-card-value { color: var(--danger); }
     .stat-card.blue .stat-card-value { color: var(--primary-light); }
 
-    /* ===== Chart grid ===== */
-    .chart-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    .chart-grid-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 20px;
-    }
+    /* Chart grid */
+    .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .chart-card {
-      background: rgba(255,255,255,0.35);
-      backdrop-filter: blur(24px) saturate(180%);
+      background: rgba(255,255,255,0.35); backdrop-filter: blur(24px) saturate(180%);
       -webkit-backdrop-filter: blur(24px) saturate(180%);
-      border: 1px solid rgba(255,255,255,0.6);
-      border-radius: 18px;
-      padding: 24px;
+      border: 1px solid rgba(255,255,255,0.6); border-radius: 18px; padding: 24px;
       box-shadow: 0 4px 20px rgba(30,58,95,0.06);
     }
-    .chart-card.full { grid-column: 1 / -1; }
     .chart-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
     .chart-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
     .chart-wrap { position: relative; height: 260px; }
-    .chart-wrap-sm { position: relative; height: 220px; }
 
-    /* ===== Progress bars ===== */
+    /* Progress bars */
     .progress-list { display: flex; flex-direction: column; gap: 18px; margin-top: 4px; }
     .progress-item { display: flex; flex-direction: column; gap: 7px; }
     .progress-header { display: flex; justify-content: space-between; align-items: center; }
@@ -161,21 +130,26 @@
     .progress-bar-bg { background: rgba(0,0,0,0.07); border-radius: 99px; height: 16px; overflow: hidden; }
     .progress-bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
 
-    /* ===== Traffic light table ===== */
+    /* KPI Table */
     .kpi-table-wrap { overflow-x: auto; margin-top: 4px; }
     .kpi-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    .kpi-table th {
-      background: rgba(30,58,95,0.8); color: white; padding: 8px 12px;
-      text-align: left; font-weight: 600; white-space: nowrap;
-    }
+    .kpi-table th { background: rgba(30,58,95,0.8); color: white; padding: 10px 12px; text-align: left; font-weight: 600; white-space: nowrap; }
     .kpi-table th:first-child { border-radius: 10px 0 0 0; }
     .kpi-table th:last-child { border-radius: 0 10px 0 0; }
-    .kpi-table td { padding: 7px 12px; border-bottom: 1px solid rgba(0,0,0,0.05); vertical-align: middle; }
+    .kpi-table td { padding: 8px 12px; border-bottom: 1px solid rgba(0,0,0,0.05); vertical-align: middle; }
     .kpi-table tr:hover td { background: rgba(37,99,235,0.04); }
-    .kpi-table .strat-row td { background: rgba(30,58,95,0.06); font-weight: 700; font-size: 11px; color: var(--primary); padding: 6px 12px; }
-    .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; }
+    .kpi-table .strat-row td { background: rgba(30,58,95,0.06); font-weight: 700; font-size: 11px; color: var(--primary); padding: 8px 12px; }
+    .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
 
-    /* ===== Footer ===== */
+    /* Overview combined stat */
+    .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .overview-section-title {
+      font-size: 13px; font-weight: 700; color: var(--primary); text-transform: uppercase;
+      letter-spacing: 0.06em; padding: 10px 0 6px; border-bottom: 2px solid var(--primary);
+      margin-bottom: 14px;
+    }
+
+    /* Footer */
     .footer {
       padding: 14px 40px; border-top: 1px solid rgba(255,255,255,0.35);
       background: rgba(255,255,255,0.10); backdrop-filter: blur(32px);
@@ -183,21 +157,20 @@
     }
 
     @media (max-width: 1024px) {
-      .stat-grid { grid-template-columns: repeat(2,1fr); }
-      .chart-grid { grid-template-columns: 1fr; }
-      .chart-grid-3 { grid-template-columns: 1fr; }
-      .page-body { padding: 16px; }
+      .stat-grid, .stat-grid-3 { grid-template-columns: repeat(2,1fr); }
+      .chart-grid, .overview-grid { grid-template-columns: 1fr; }
+      .page-body, .main-tab-bar { padding-left: 16px; padding-right: 16px; }
+      .main-tab-btn { padding: 12px 16px; font-size: 13px; }
     }
   </style>
 </head>
 <body>
 
-<!-- Navbar -->
 <nav class="navbar">
   <div class="navbar-brand">
     <img src="assets/images/Logo.PNG" alt="Logo" onerror="this.style.display='none'">
     <div class="navbar-brand-text">
-      <div class="title">Dashboard ภาพรวมองค์กร</div>
+      <div class="title">Dashboard ผู้บริหาร</div>
       <div class="subtitle">คณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ มหาวิทยาลัยแม่โจ้</div>
     </div>
   </div>
@@ -210,10 +183,6 @@
         <option value="2571">2571</option>
       </select>
     </div>
-    <div class="tab-bar">
-      <button class="tab-btn active" id="tab-mission" onclick="switchSystem('mission')">ภาระกิจประจำ</button>
-      <button class="tab-btn" id="tab-proactive" onclick="switchSystem('proactive')">เชิงรุก</button>
-    </div>
     <div class="user-badge">
       <div class="user-avatar" id="userAvatar">E</div>
       <span id="userName">ผู้บริหาร</span>
@@ -222,64 +191,156 @@
   </div>
 </nav>
 
+<!-- Main tabs -->
+<div class="main-tab-bar">
+  <button class="main-tab-btn active" id="mtab-overview" onclick="switchTab('overview')">🏠 ภาพรวม</button>
+  <button class="main-tab-btn" id="mtab-mission" onclick="switchTab('mission')">📋 ภาระกิจประจำ</button>
+  <button class="main-tab-btn" id="mtab-proactive" onclick="switchTab('proactive')">🎯 เชิงรุก</button>
+</div>
+
 <div class="page-body">
-  <!-- Quarter selector -->
-  <div class="quarter-bar">
-    <span>ไตรมาส:</span>
-    <button class="q-chip active" id="qc-1" onclick="setQuarter(1)">Q1 (ต.ค.–ธ.ค.)</button>
-    <button class="q-chip" id="qc-2" onclick="setQuarter(2)">Q2 (ต.ค.–มี.ค.)</button>
-    <button class="q-chip" id="qc-3" onclick="setQuarter(3)">Q3 (ต.ค.–มิ.ย.)</button>
-    <button class="q-chip" id="qc-4" onclick="setQuarter(4)">Q4 (ต.ค.–ก.ย.)</button>
-  </div>
 
-  <!-- Stat cards -->
-  <div class="stat-grid" id="statGrid"></div>
+  <!-- ===== TAB: ภาพรวม ===== -->
+  <div class="tab-section active" id="section-overview">
+    <div class="quarter-bar">
+      <span>ไตรมาส:</span>
+      <button class="q-chip active" id="ov-qc-1" onclick="setOvQuarter(1)">Q1 (ต.ค.–ธ.ค.)</button>
+      <button class="q-chip" id="ov-qc-2" onclick="setOvQuarter(2)">Q2 (ต.ค.–มี.ค.)</button>
+      <button class="q-chip" id="ov-qc-3" onclick="setOvQuarter(3)">Q3 (ต.ค.–มิ.ย.)</button>
+      <button class="q-chip" id="ov-qc-4" onclick="setOvQuarter(4)">Q4 (ต.ค.–ก.ย.)</button>
+    </div>
 
-  <!-- Charts row 1: Donut + Bar -->
-  <div class="chart-grid">
-    <div class="chart-card">
-      <div class="chart-title">สัดส่วนสถานะตัวชี้วัด</div>
-      <div class="chart-sub">ภาพรวมทุกตัวชี้วัดในไตรมาสที่เลือก</div>
-      <div class="chart-wrap"><canvas id="donutChart"></canvas></div>
+    <div class="overview-grid">
+      <!-- ภาระกิจ overview -->
+      <div class="chart-card">
+        <div class="overview-section-title">📋 ภาระกิจประจำ (46 ตัวชี้วัด)</div>
+        <div id="ov-mission-stats"></div>
+        <div style="margin-top:16px;position:relative;height:200px;"><canvas id="ov-donut-mission"></canvas></div>
+      </div>
+      <!-- เชิงรุก overview -->
+      <div class="chart-card">
+        <div class="overview-section-title">🎯 เชิงรุก (10 ตัวชี้วัด)</div>
+        <div id="ov-proactive-stats"></div>
+        <div style="margin-top:16px;position:relative;height:200px;"><canvas id="ov-donut-proactive"></canvas></div>
+      </div>
     </div>
-    <div class="chart-card">
-      <div class="chart-title">ร้อยละความสำเร็จรายยุทธศาสตร์</div>
-      <div class="chart-sub">เฉลี่ยร้อยละของตัวชี้วัดในแต่ละยุทธศาสตร์</div>
-      <div class="chart-wrap"><canvas id="barChart"></canvas></div>
-    </div>
-  </div>
 
-  <!-- Charts row 2: Radar + Progress -->
-  <div class="chart-grid">
+    <!-- Combined bar comparison -->
     <div class="chart-card">
-      <div class="chart-title">กราฟใยแมงมุมรายยุทธศาสตร์</div>
-      <div class="chart-sub">เปรียบเทียบความสำเร็จทั้ง 5 ยุทธศาสตร์</div>
-      <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">ความคืบหน้ารายไตรมาส</div>
-      <div class="chart-sub">เปรียบเทียบร้อยละเฉลี่ย Q1–Q4</div>
-      <div style="margin-top:8px;" id="progressList"></div>
+      <div class="chart-title">เปรียบเทียบร้อยละรายยุทธศาสตร์ — ภาระกิจประจำ vs เชิงรุก</div>
+      <div class="chart-sub">เฉลี่ยร้อยละของทุกตัวชี้วัดในแต่ละยุทธศาสตร์</div>
+      <div class="chart-wrap"><canvas id="ov-bar-compare"></canvas></div>
     </div>
   </div>
 
-  <!-- Traffic light table -->
-  <div class="chart-card">
-    <div class="chart-title">สถานะรายตัวชี้วัด</div>
-    <div class="chart-sub">Traffic light แสดงสถานะทุกตัวชี้วัดในไตรมาสที่เลือก</div>
-    <div class="kpi-table-wrap">
-      <table class="kpi-table" id="kpiTable">
-        <thead><tr>
-          <th>รหัส</th>
-          <th>ตัวชี้วัด</th>
-          <th style="text-align:center">ผลงาน</th>
-          <th style="text-align:center">ร้อยละ</th>
-          <th style="text-align:center">สถานะ</th>
-        </tr></thead>
-        <tbody id="kpiTableBody"></tbody>
-      </table>
+  <!-- ===== TAB: ภาระกิจประจำ ===== -->
+  <div class="tab-section" id="section-mission">
+    <div class="quarter-bar">
+      <span>ไตรมาส:</span>
+      <button class="q-chip active" id="ms-qc-1" onclick="setMsQuarter(1)">Q1 (ต.ค.–ธ.ค.)</button>
+      <button class="q-chip" id="ms-qc-2" onclick="setMsQuarter(2)">Q2 (ต.ค.–มี.ค.)</button>
+      <button class="q-chip" id="ms-qc-3" onclick="setMsQuarter(3)">Q3 (ต.ค.–มิ.ย.)</button>
+      <button class="q-chip" id="ms-qc-4" onclick="setMsQuarter(4)">Q4 (ต.ค.–ก.ย.)</button>
+    </div>
+
+    <div class="stat-grid" id="ms-statGrid"></div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">สัดส่วนสถานะตัวชี้วัด</div>
+        <div class="chart-sub">ภาพรวมทุกตัวชี้วัดในไตรมาสที่เลือก</div>
+        <div class="chart-wrap"><canvas id="ms-donut"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">ร้อยละรายยุทธศาสตร์</div>
+        <div class="chart-sub">เฉลี่ยร้อยละของตัวชี้วัดในแต่ละยุทธศาสตร์</div>
+        <div class="chart-wrap"><canvas id="ms-bar"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">กราฟใยแมงมุมรายยุทธศาสตร์</div>
+        <div class="chart-sub">เปรียบเทียบความสำเร็จทั้ง 5 ยุทธศาสตร์</div>
+        <div class="chart-wrap"><canvas id="ms-radar"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">ความคืบหน้ารายไตรมาส</div>
+        <div class="chart-sub">เปรียบเทียบร้อยละเฉลี่ย Q1–Q4</div>
+        <div id="ms-progress" style="margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">สถานะรายตัวชี้วัด — ภาระกิจประจำ</div>
+      <div class="chart-sub">เป้าหมาย ผลงาน ร้อยละ รายละเอียด และสถานะทุกตัวชี้วัด</div>
+      <div class="kpi-table-wrap">
+        <table class="kpi-table">
+          <thead><tr>
+            <th>รหัส</th><th>ตัวชี้วัด</th><th>หน่วย</th><th style="text-align:center">เป้าหมาย</th>
+            <th style="text-align:center">ผลงาน</th><th style="text-align:center">ร้อยละ</th>
+            <th>รายละเอียด</th><th style="text-align:center">สถานะ</th>
+          </tr></thead>
+          <tbody id="ms-tableBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
+
+  <!-- ===== TAB: เชิงรุก ===== -->
+  <div class="tab-section" id="section-proactive">
+    <div class="quarter-bar">
+      <span>ไตรมาส:</span>
+      <button class="q-chip active" id="pr-qc-1" onclick="setPrQuarter(1)">Q1 (ต.ค.–ธ.ค.)</button>
+      <button class="q-chip" id="pr-qc-2" onclick="setPrQuarter(2)">Q2 (ต.ค.–มี.ค.)</button>
+      <button class="q-chip" id="pr-qc-3" onclick="setPrQuarter(3)">Q3 (ต.ค.–มิ.ย.)</button>
+      <button class="q-chip" id="pr-qc-4" onclick="setPrQuarter(4)">Q4 (ต.ค.–ก.ย.)</button>
+    </div>
+
+    <div class="stat-grid" id="pr-statGrid"></div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">สัดส่วนสถานะตัวชี้วัด</div>
+        <div class="chart-sub">ภาพรวมทุกตัวชี้วัดในไตรมาสที่เลือก</div>
+        <div class="chart-wrap"><canvas id="pr-donut"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">ร้อยละรายยุทธศาสตร์</div>
+        <div class="chart-sub">เฉลี่ยร้อยละของตัวชี้วัดในแต่ละยุทธศาสตร์</div>
+        <div class="chart-wrap"><canvas id="pr-bar"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">กราฟใยแมงมุมรายยุทธศาสตร์</div>
+        <div class="chart-sub">เปรียบเทียบความสำเร็จทั้ง 5 ยุทธศาสตร์</div>
+        <div class="chart-wrap"><canvas id="pr-radar"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">ความคืบหน้ารายไตรมาส</div>
+        <div class="chart-sub">เปรียบเทียบร้อยละเฉลี่ย Q1–Q4</div>
+        <div id="pr-progress" style="margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">สถานะรายตัวชี้วัด — เชิงรุก</div>
+      <div class="chart-sub">คะแนน ร้อยละ ผู้รับผิดชอบ และสถานะทุกตัวชี้วัด</div>
+      <div class="kpi-table-wrap">
+        <table class="kpi-table">
+          <thead><tr>
+            <th>รหัส</th><th>ตัวชี้วัด</th><th style="text-align:center">คะแนน</th>
+            <th style="text-align:center">ร้อยละ</th><th>ผู้รับผิดชอบ</th>
+            <th>รายละเอียด</th><th style="text-align:center">สถานะ</th>
+          </tr></thead>
+          <tbody id="pr-tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <footer class="footer">
@@ -288,12 +349,10 @@
 </footer>
 
 <script>
-// ===== State =====
-let currentSystem = 'mission'; // 'mission' | 'proactive'
-let currentQuarter = 1;
-let charts = {};
-
 const Q_LABELS = {1:'Q1 (ต.ค.–ธ.ค.)',2:'Q2 (ต.ค.–มี.ค.)',3:'Q3 (ต.ค.–มิ.ย.)',4:'Q4 (ต.ค.–ก.ย.)'};
+let charts = {};
+let ovQ = 1, msQ = 1, prQ = 1;
+let currentTab = 'overview';
 
 // ===== Auth =====
 window.onload = function() {
@@ -301,32 +360,33 @@ window.onload = function() {
   if (!auth) { location.href = 'index.html'; return; }
   if (auth.role !== 'executive') { location.href = 'dashboard-main.html'; return; }
   document.getElementById('userName').textContent = auth.name || 'ผู้บริหาร';
-  const roleInitials = {'admin':'A','executive':'E'};
-  document.getElementById('userAvatar').textContent = roleInitials[auth.role] || 'E';
+  document.getElementById('userAvatar').textContent = {'admin':'A','executive':'E'}[auth.role] || 'E';
   const savedYear = sessionStorage.getItem('current_year');
   if (savedYear) document.getElementById('yearSelect').value = savedYear;
-  render();
+  document.getElementById('lastUpdate').textContent = `ข้อมูล ณ ${new Date().toLocaleDateString('th-TH')}`;
+  renderAll();
 };
 
 function logout() { sessionStorage.clear(); location.href = 'index.html'; }
-function onYearChange() { sessionStorage.setItem('current_year', getCurrentYear()); render(); }
+function onYearChange() { sessionStorage.setItem('current_year', getCurrentYear()); renderAll(); }
 function getCurrentYear() { return parseInt(document.getElementById('yearSelect').value); }
 
-// ===== System / Quarter =====
-function switchSystem(sys) {
-  currentSystem = sys;
-  document.getElementById('tab-mission').classList.toggle('active', sys === 'mission');
-  document.getElementById('tab-proactive').classList.toggle('active', sys === 'proactive');
-  render();
+// ===== Tab switching =====
+function switchTab(tab) {
+  currentTab = tab;
+  ['overview','mission','proactive'].forEach(t => {
+    document.getElementById(`mtab-${t}`).classList.toggle('active', t === tab);
+    document.getElementById(`section-${t}`).classList.toggle('active', t === tab);
+  });
+  renderAll();
 }
 
-function setQuarter(q) {
-  currentQuarter = q;
-  [1,2,3,4].forEach(i => document.getElementById(`qc-${i}`).classList.toggle('active', i===q));
-  render();
-}
+// ===== Quarter setters =====
+function setOvQuarter(q) { ovQ = q; [1,2,3,4].forEach(i => document.getElementById(`ov-qc-${i}`).classList.toggle('active',i===q)); renderOverview(); }
+function setMsQuarter(q) { msQ = q; [1,2,3,4].forEach(i => document.getElementById(`ms-qc-${i}`).classList.toggle('active',i===q)); renderMission(); }
+function setPrQuarter(q) { prQ = q; [1,2,3,4].forEach(i => document.getElementById(`pr-qc-${i}`).classList.toggle('active',i===q)); renderProactive(); }
 
-// ===== Load data =====
+// ===== Data loaders =====
 function getMissionData() {
   const raw = localStorage.getItem(`mission_${getCurrentYear()}`);
   return raw ? JSON.parse(raw) : { kpis: [] };
@@ -335,14 +395,9 @@ function getProactiveData() {
   const raw = localStorage.getItem(`proactive_${getCurrentYear()}`);
   return raw ? JSON.parse(raw) : { kpis: [] };
 }
-function getData() {
-  return currentSystem === 'mission' ? getMissionData() : getProactiveData();
-}
-function getStrategies() {
-  const key = currentSystem === 'mission'
-    ? `strategies_${getCurrentYear()}`
-    : `pro_strategies_${getCurrentYear()}`;
-  const defaults = currentSystem === 'mission'
+function getStrategies(sys) {
+  const key = sys === 'mission' ? `strategies_${getCurrentYear()}` : `pro_strategies_${getCurrentYear()}`;
+  const defaults = sys === 'mission'
     ? [{id:1,name:'Proactive Strategy toward Inter IWA'},{id:2,name:'Driving Mission-Driven Performance'},
        {id:3,name:'Fostering Internationalization'},{id:4,name:'Technology Development and Innovation University'},
        {id:5,name:'Financial Stability and Sustainable Growth'}]
@@ -352,74 +407,50 @@ function getStrategies() {
   return JSON.parse(localStorage.getItem(key) || JSON.stringify(defaults));
 }
 
-// ===== Compute stats =====
-function computeStats(kpis, q) {
+// ===== Stats computation =====
+function computeStats(kpis, q, sys) {
   const Q = `Q${q}`;
-  let pass = 0, progress = 0, urgent = 0, nodata = 0;
+  let pass = 0, progress = 0, urgent = 0;
   kpis.forEach(kpi => {
     const qd = kpi.quarters?.[Q] || {};
-    const pct = parseFloat(currentSystem === 'mission' ? qd.percent : qd.percent);
-    const hasVal = currentSystem === 'mission'
+    const pct = parseFloat(qd.percent);
+    const hasVal = sys === 'mission'
       ? (qd.result !== undefined && qd.result !== '' && qd.result !== '0')
       : (qd.score !== undefined && qd.score !== '');
     if (!hasVal || isNaN(pct)) { urgent++; return; }
-    const threshold = currentSystem === 'mission' ? 100 : 80;
-    if (pct >= threshold) pass++;
+    const thr = sys === 'mission' ? 100 : 80;
+    if (pct >= thr) pass++;
     else if (pct >= 50) progress++;
     else urgent++;
   });
-  return { pass, progress, urgent, nodata: 0, total: kpis.length };
+  return { pass, progress, urgent, total: kpis.length };
 }
 
-function getPct(kpi, q) {
-  const Q = `Q${q}`;
-  const qd = kpi.quarters?.[Q] || {};
-  return parseFloat(qd.percent) || 0;
-}
-
-function getDotColor(kpi, q) {
+function getDotColor(kpi, q, sys) {
   const Q = `Q${q}`;
   const qd = kpi.quarters?.[Q] || {};
   const pct = parseFloat(qd.percent);
-  const hasVal = currentSystem === 'mission'
+  const hasVal = sys === 'mission'
     ? (qd.result !== undefined && qd.result !== '' && qd.result !== '0')
     : (qd.score !== undefined && qd.score !== '');
-  if (!hasVal || isNaN(pct)) return '#cbd5e1';
-  const threshold = currentSystem === 'mission' ? 100 : 80;
-  return pct >= threshold ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
+  if (!hasVal || isNaN(pct)) return '#ef4444';
+  const thr = sys === 'mission' ? 100 : 80;
+  return pct >= thr ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
 }
 
-// ===== Render all =====
-function render() {
-  const data = getData();
-  const kpis = data.kpis || [];
-  const strategies = getStrategies();
-  const stats = computeStats(kpis, currentQuarter);
-  renderStats(stats, kpis.length);
-  renderDonut(stats);
-  renderBar(kpis, strategies);
-  renderRadar(kpis, strategies);
-  renderProgress(kpis);
-  renderTable(kpis, strategies);
-  document.getElementById('lastUpdate').textContent = `ข้อมูล ณ ${new Date().toLocaleDateString('th-TH')}`;
-}
-
-// ===== Stat cards =====
-function renderStats(s, total) {
-  const isMission = currentSystem === 'mission';
-  const threshold = isMission ? '≥100%' : '≥80%';
-  const pctPass     = total ? Math.round(s.pass/total*100) : 0;
-  const pctProgress = total ? Math.round(s.progress/total*100) : 0;
-  const pctUrgent   = total ? Math.round(s.urgent/total*100) : 0;
-  const hasData = total - s.nodata;
-  const mkCard = (cls, icon, label, value, color, barPct, barColor, sub) => `
+// ===== Shared renderers =====
+function mkStatCards(s, sys, containerId) {
+  const isMission = sys === 'mission';
+  const thr = isMission ? '≥100%' : '≥80%';
+  const total = s.total;
+  const pctPass = total ? Math.round(s.pass/total*100) : 0;
+  const pctProg = total ? Math.round(s.progress/total*100) : 0;
+  const pctUrg  = total ? Math.round(s.urgent/total*100) : 0;
+  const mk = (cls,icon,label,val,barPct,barColor,sub) => `
     <div class="stat-card ${cls}">
       <div class="stat-card-top">
-        <div class="stat-card-left">
-          <div class="stat-icon">${icon}</div>
-          <div class="stat-card-label">${label}</div>
-        </div>
-        <div class="stat-card-value">${value}</div>
+        <div class="stat-card-left"><div class="stat-icon">${icon}</div><div class="stat-card-label">${label}</div></div>
+        <div class="stat-card-value">${val}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;">
         <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);">
@@ -431,182 +462,250 @@ function renderStats(s, total) {
         <div style="font-size:11px;color:var(--text-muted);">${sub}</div>
       </div>
     </div>`;
-
-  document.getElementById('statGrid').innerHTML =
-    mkCard('blue','📋','ตัวชี้วัดทั้งหมด', total, '#2563eb',
-      pctPass, '#2563eb',
-      `ผ่านแล้ว ${s.pass} · ดำเนินการ ${s.progress} · ต้องเร่ง ${s.urgent}`) +
-    mkCard('green','✅',`ผ่านแล้ว (${threshold})`, s.pass, '#10b981',
-      pctPass, '#10b981', `จาก ${total} ตัวชี้วัดทั้งหมด`) +
-    mkCard('orange','🔄','กำลังดำเนินการ', s.progress, '#f59e0b',
-      pctProgress, '#f59e0b', `ช่วง 50–${isMission?'99':'79'}%`) +
-    mkCard('red','⚠️','ต้องเร่งดำเนินการ', s.urgent, '#ef4444',
-      pctUrgent, '#ef4444', 'ต่ำกว่า 50% ต้องติดตาม');
+  document.getElementById(containerId).innerHTML =
+    mk('blue','📋','ตัวชี้วัดทั้งหมด',total, pctPass,'#2563eb',`ผ่าน ${s.pass} · ดำเนินการ ${s.progress} · เร่ง ${s.urgent}`) +
+    mk('green','✅',`ผ่านแล้ว (${thr})`,s.pass, pctPass,'#10b981',`จาก ${total} ตัวชี้วัด`) +
+    mk('orange','🔄','กำลังดำเนินการ',s.progress, pctProg,'#f59e0b',`ช่วง 50–${isMission?'99':'79'}%`) +
+    mk('red','⚠️','ต้องเร่งดำเนินการ',s.urgent, pctUrg,'#ef4444','ต่ำกว่า 50% ต้องติดตาม');
 }
 
-// ===== Donut chart =====
-function renderDonut(s) {
-  if (charts.donut) charts.donut.destroy();
-  const ctx = document.getElementById('donutChart').getContext('2d');
-  charts.donut = new Chart(ctx, {
+function mkDonut(s, canvasId, key) {
+  if (charts[key]) charts[key].destroy();
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  charts[key] = new Chart(ctx, {
     type: 'doughnut',
     data: {
       labels: ['ผ่านแล้ว','กำลังดำเนินการ','ต้องเร่ง'],
-      datasets: [{
-        data: [s.pass, s.progress, s.urgent],
-        backgroundColor: ['#10b981','#f59e0b','#ef4444'],
-        borderWidth: 2, borderColor: '#fff',
-      }]
+      datasets: [{ data: [s.pass,s.progress,s.urgent], backgroundColor: ['#10b981','#f59e0b','#ef4444'], borderWidth: 2, borderColor: '#fff' }]
     },
     options: {
-      responsive: true, maintainAspectRatio: false,
-      cutout: '65%',
+      responsive: true, maintainAspectRatio: false, cutout: '65%',
       plugins: {
-        legend: { position: 'bottom', labels: { font: { family: 'Sarabun', size: 12 }, padding: 16 } },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} ตัว` } }
+        legend: { position: 'bottom', labels: { font: { family: 'Sarabun', size: 12 }, padding: 14 } },
+        tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw} ตัว` } }
       }
     }
   });
 }
 
-// ===== Bar chart =====
-function renderBar(kpis, strategies) {
-  if (charts.bar) charts.bar.destroy();
-  const Q = `Q${currentQuarter}`;
+function mkBar(kpis, strategies, q, canvasId, key, sys) {
+  if (charts[key]) charts[key].destroy();
+  const Q = `Q${q}`;
   const labels = strategies.map(s => `ยุทธ ${s.id}`);
   const values = strategies.map(s => {
-    const group = kpis.filter(k => k.strategy === s.id);
-    if (!group.length) return 0;
-    const sum = group.reduce((acc, k) => acc + (parseFloat(k.quarters?.[Q]?.percent) || 0), 0);
-    return Math.round(sum / group.length * 10) / 10;
+    const g = kpis.filter(k => k.strategy === s.id);
+    if (!g.length) return 0;
+    return Math.round(g.reduce((a,k) => a+(parseFloat(k.quarters?.[Q]?.percent)||0),0)/g.length*10)/10;
   });
-  const threshold = currentSystem === 'mission' ? 100 : 80;
-  const colors = values.map(v => v >= threshold ? '#10b981' : v >= 50 ? '#f59e0b' : '#ef4444');
-
-  const ctx = document.getElementById('barChart').getContext('2d');
-  charts.bar = new Chart(ctx, {
+  const thr = sys === 'mission' ? 100 : 80;
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  charts[key] = new Chart(ctx, {
     type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'ร้อยละเฉลี่ย',
-        data: values,
-        backgroundColor: colors,
-        borderRadius: 8,
-        borderSkipped: false,
-      }]
-    },
+    data: { labels, datasets: [{ label:'ร้อยละเฉลี่ย', data: values, backgroundColor: values.map(v=>v>=thr?'#10b981':v>=50?'#f59e0b':'#ef4444'), borderRadius: 8, borderSkipped: false }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: {
-        y: { min: 0, max: 100, ticks: { callback: v => v+'%' }, grid: { color: 'rgba(0,0,0,0.05)' } },
-        x: { grid: { display: false } }
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.raw}%` } }
-      }
+      scales: { y: { min:0, max:100, ticks: { callback: v=>v+'%' }, grid: { color:'rgba(0,0,0,0.05)' } }, x: { grid: { display:false } } },
+      plugins: { legend: { display:false }, tooltip: { callbacks: { label: c=>` ${c.raw}%` } } }
     }
   });
 }
 
-// ===== Radar chart =====
-function renderRadar(kpis, strategies) {
-  if (charts.radar) charts.radar.destroy();
-  const Q = `Q${currentQuarter}`;
-  const labels = strategies.map(s => s.name.length > 20 ? s.name.slice(0,20)+'…' : s.name);
+function mkRadar(kpis, strategies, q, canvasId, key) {
+  if (charts[key]) charts[key].destroy();
+  const Q = `Q${q}`;
+  const labels = strategies.map(s => s.name.length>20 ? s.name.slice(0,20)+'…' : s.name);
   const values = strategies.map(s => {
-    const group = kpis.filter(k => k.strategy === s.id);
-    if (!group.length) return 0;
-    const sum = group.reduce((acc, k) => acc + (parseFloat(k.quarters?.[Q]?.percent) || 0), 0);
-    return Math.round(sum / group.length * 10) / 10;
+    const g = kpis.filter(k => k.strategy === s.id);
+    if (!g.length) return 0;
+    return Math.round(g.reduce((a,k) => a+(parseFloat(k.quarters?.[Q]?.percent)||0),0)/g.length*10)/10;
   });
-
-  const ctx = document.getElementById('radarChart').getContext('2d');
-  charts.radar = new Chart(ctx, {
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  charts[key] = new Chart(ctx, {
     type: 'radar',
-    data: {
-      labels,
-      datasets: [{
-        label: Q_LABELS[currentQuarter],
-        data: values,
-        backgroundColor: 'rgba(37,99,235,0.12)',
-        borderColor: '#2563eb',
-        borderWidth: 2,
-        pointBackgroundColor: '#2563eb',
-        pointRadius: 4,
-      }]
-    },
+    data: { labels, datasets: [{ label: Q_LABELS[q], data: values, backgroundColor:'rgba(37,99,235,0.12)', borderColor:'#2563eb', borderWidth:2, pointBackgroundColor:'#2563eb', pointRadius:4 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: {
-        r: {
-          min: 0, max: 100,
-          ticks: { stepSize: 25, callback: v => v+'%', font: { size: 10 } },
-          pointLabels: { font: { family: 'Sarabun', size: 11 } },
-          grid: { color: 'rgba(0,0,0,0.08)' },
-          angleLines: { color: 'rgba(0,0,0,0.08)' },
-        }
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.raw}%` } }
-      }
+      scales: { r: { min:0, max:100, ticks: { stepSize:25, callback: v=>v+'%', font:{size:10} }, pointLabels: { font:{family:'Sarabun',size:11} }, grid: { color:'rgba(0,0,0,0.08)' }, angleLines: { color:'rgba(0,0,0,0.08)' } } },
+      plugins: { legend: { display:false }, tooltip: { callbacks: { label: c=>` ${c.raw}%` } } }
     }
   });
 }
 
-// ===== Progress bars =====
-function renderProgress(kpis) {
-  const html = [1,2,3,4].map(q => {
-    const Q = `Q${q}`;
-    const vals = kpis.map(k => parseFloat(k.quarters?.[Q]?.percent) || 0);
+function mkProgress(kpis, q, containerId, sys) {
+  const html = [1,2,3,4].map(qi => {
+    const Q = `Q${qi}`;
+    const vals = kpis.map(k => parseFloat(k.quarters?.[Q]?.percent)||0);
     const avg = vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*10)/10 : 0;
-    const color = avg >= (currentSystem==='mission'?100:80) ? '#10b981' : avg >= 50 ? '#f59e0b' : '#ef4444';
-    const isCurrent = q === currentQuarter;
+    const thr = sys === 'mission' ? 100 : 80;
+    const color = avg >= thr ? '#10b981' : avg >= 50 ? '#f59e0b' : '#ef4444';
+    const isCur = qi === q;
     return `<div class="progress-item">
       <div class="progress-header">
-        <span class="progress-label" style="${isCurrent?'color:var(--primary-light);font-weight:700;':''}">${Q_LABELS[q]}</span>
+        <span class="progress-label" style="${isCur?'color:var(--primary-light);font-weight:800;':''}">${Q_LABELS[qi]}</span>
         <span class="progress-pct" style="color:${color}">${avg}%</span>
       </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" style="width:${Math.min(avg,100)}%;background:${color};"></div>
-      </div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${Math.min(avg,100)}%;background:${color};"></div></div>
     </div>`;
   }).join('');
-  document.getElementById('progressList').innerHTML = `<div class="progress-list">${html}</div>`;
+  document.getElementById(containerId).innerHTML = `<div class="progress-list">${html}</div>`;
 }
 
-// ===== Traffic light table =====
-function renderTable(kpis, strategies) {
-  const Q = `Q${currentQuarter}`;
-  const isMission = currentSystem === 'mission';
+// ===== Overview mini stats =====
+function mkMiniStats(s, sys, containerId) {
+  const thr = sys === 'mission' ? '≥100%' : '≥80%';
+  document.getElementById(containerId).innerHTML = `
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:80px;text-align:center;padding:10px;background:rgba(16,185,129,0.08);border-radius:12px;">
+        <div style="font-size:28px;font-weight:800;color:#10b981;">${s.pass}</div>
+        <div style="font-size:11px;color:var(--text-muted);">ผ่าน (${thr})</div>
+      </div>
+      <div style="flex:1;min-width:80px;text-align:center;padding:10px;background:rgba(245,158,11,0.08);border-radius:12px;">
+        <div style="font-size:28px;font-weight:800;color:#f59e0b;">${s.progress}</div>
+        <div style="font-size:11px;color:var(--text-muted);">ดำเนินการ</div>
+      </div>
+      <div style="flex:1;min-width:80px;text-align:center;padding:10px;background:rgba(239,68,68,0.08);border-radius:12px;">
+        <div style="font-size:28px;font-weight:800;color:#ef4444;">${s.urgent}</div>
+        <div style="font-size:11px;color:var(--text-muted);">ต้องเร่ง</div>
+      </div>
+    </div>`;
+}
+
+// ===== Mission table =====
+function mkMissionTable(kpis, strategies, q) {
+  const Q = `Q${q}`;
   let html = '';
   strategies.forEach(s => {
-    const group = kpis.filter(k => k.strategy === s.id);
-    if (!group.length) return;
-    html += `<tr class="strat-row"><td colspan="5">ยุทธศาสตร์ที่ ${s.id}: ${s.name}</td></tr>`;
-    group.forEach(kpi => {
+    const g = kpis.filter(k => k.strategy === s.id);
+    if (!g.length) return;
+    html += `<tr class="strat-row"><td colspan="8">ยุทธศาสตร์ที่ ${s.id}: ${s.name}</td></tr>`;
+    g.forEach(kpi => {
       const qd = kpi.quarters?.[Q] || {};
-      const result = isMission ? (qd.result ?? '-') : (qd.score !== '' ? `${qd.score}/5` : '-');
       const pct = parseFloat(qd.percent);
-      const pctDisplay = isNaN(pct) ? '-' : pct.toFixed(1) + '%';
-      const color = getDotColor(kpi, currentQuarter);
-      const statusText = color === '#10b981' ? 'ผ่าน' : color === '#f59e0b' ? 'กำลังดำเนินการ' : color === '#ef4444' ? 'ต้องเร่ง' : 'ยังไม่มีข้อมูล';
-      const name = (kpi.name || '').replace(/^\d+\.\d+\.\d+\S*\s*/,'');
+      const color = getDotColor(kpi, q, 'mission');
+      const status = color==='#10b981'?'ผ่าน':color==='#f59e0b'?'ดำเนินการ':'ต้องเร่ง';
+      const name = (kpi.name||'').replace(/^\d+\.\d+\.\d+\S*\s*/,'');
       html += `<tr>
         <td style="font-weight:700;color:var(--primary);white-space:nowrap;">${kpi.code}</td>
-        <td style="max-width:320px;">${name}</td>
-        <td style="text-align:center;">${result}</td>
-        <td style="text-align:center;font-weight:600;">${pctDisplay}</td>
-        <td style="text-align:center;">
-          <span class="dot" style="background:${color};" title="${statusText}"></span>
-          <span style="margin-left:6px;font-size:11px;color:${color};">${statusText}</span>
+        <td style="max-width:260px;">${name}</td>
+        <td style="white-space:nowrap;">${kpi.unit||'-'}</td>
+        <td style="text-align:center;">${kpi.target||'-'}</td>
+        <td style="text-align:center;font-weight:600;">${qd.result??'-'}</td>
+        <td style="text-align:center;font-weight:600;">${isNaN(pct)?'-':pct.toFixed(1)+'%'}</td>
+        <td style="max-width:200px;font-size:11px;color:var(--text-muted);">${(qd.detail||'').slice(0,80)}${(qd.detail||'').length>80?'…':''}</td>
+        <td style="text-align:center;white-space:nowrap;">
+          <span class="dot" style="background:${color};vertical-align:middle;"></span>
+          <span style="margin-left:5px;font-size:11px;color:${color};">${status}</span>
         </td>
       </tr>`;
     });
   });
-  document.getElementById('kpiTableBody').innerHTML = html;
+  document.getElementById('ms-tableBody').innerHTML = html;
+}
+
+// ===== Proactive table =====
+function mkProactiveTable(kpis, strategies, q) {
+  const Q = `Q${q}`;
+  let html = '';
+  strategies.forEach(s => {
+    const g = kpis.filter(k => k.strategy === s.id);
+    if (!g.length) return;
+    html += `<tr class="strat-row"><td colspan="7">ยุทธศาสตร์ที่ ${s.id}: ${s.name}</td></tr>`;
+    g.forEach(kpi => {
+      const qd = kpi.quarters?.[Q] || {};
+      const pct = parseFloat(qd.percent);
+      const color = getDotColor(kpi, q, 'proactive');
+      const status = color==='#10b981'?'ผ่าน':color==='#f59e0b'?'ดำเนินการ':'ต้องเร่ง';
+      const name = (kpi.name||'').replace(/^\d+\.\d+\.\d+\S*\s*/,'');
+      html += `<tr>
+        <td style="font-weight:700;color:var(--primary);white-space:nowrap;">${kpi.code}</td>
+        <td style="max-width:240px;">${name}</td>
+        <td style="text-align:center;font-weight:600;">${qd.score!==undefined&&qd.score!==''?`${qd.score}/5`:'-'}</td>
+        <td style="text-align:center;font-weight:600;">${isNaN(pct)?'-':pct.toFixed(1)+'%'}</td>
+        <td style="font-size:11px;">${qd.owner||kpi.owner||'-'}</td>
+        <td style="max-width:200px;font-size:11px;color:var(--text-muted);">${(qd.detail||'').slice(0,80)}${(qd.detail||'').length>80?'…':''}</td>
+        <td style="text-align:center;white-space:nowrap;">
+          <span class="dot" style="background:${color};vertical-align:middle;"></span>
+          <span style="margin-left:5px;font-size:11px;color:${color};">${status}</span>
+        </td>
+      </tr>`;
+    });
+  });
+  document.getElementById('pr-tableBody').innerHTML = html;
+}
+
+// ===== Overview compare bar =====
+function mkCompareBar(msKpis, prKpis, msStrats, prStrats, q) {
+  if (charts['ov-bar']) charts['ov-bar'].destroy();
+  const Q = `Q${q}`;
+  const labels = ['ยุทธ 1','ยุทธ 2','ยุทธ 3','ยุทธ 4','ยุทธ 5'];
+  const msVals = msStrats.map(s => {
+    const g = msKpis.filter(k => k.strategy === s.id);
+    return g.length ? Math.round(g.reduce((a,k)=>a+(parseFloat(k.quarters?.[Q]?.percent)||0),0)/g.length*10)/10 : 0;
+  });
+  const prVals = prStrats.map(s => {
+    const g = prKpis.filter(k => k.strategy === s.id);
+    return g.length ? Math.round(g.reduce((a,k)=>a+(parseFloat(k.quarters?.[Q]?.percent)||0),0)/g.length*10)/10 : 0;
+  });
+  const ctx = document.getElementById('ov-bar-compare').getContext('2d');
+  charts['ov-bar'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label:'ภาระกิจประจำ', data: msVals, backgroundColor:'rgba(37,99,235,0.7)', borderRadius:6 },
+        { label:'เชิงรุก', data: prVals, backgroundColor:'rgba(16,185,129,0.7)', borderRadius:6 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { min:0, max:100, ticks:{callback:v=>v+'%'}, grid:{color:'rgba(0,0,0,0.05)'} }, x:{grid:{display:false}} },
+      plugins: { legend: { position:'bottom', labels:{font:{family:'Sarabun',size:12},padding:16} }, tooltip: { callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}%`} } }
+    }
+  });
+}
+
+// ===== Main render functions =====
+function renderOverview() {
+  const msData = getMissionData(); const msKpis = msData.kpis||[];
+  const prData = getProactiveData(); const prKpis = prData.kpis||[];
+  const msStrats = getStrategies('mission'); const prStrats = getStrategies('proactive');
+  const msStats = computeStats(msKpis, ovQ, 'mission');
+  const prStats = computeStats(prKpis, ovQ, 'proactive');
+  mkMiniStats(msStats, 'mission', 'ov-mission-stats');
+  mkMiniStats(prStats, 'proactive', 'ov-proactive-stats');
+  mkDonut(msStats, 'ov-donut-mission', 'ov-donut-ms');
+  mkDonut(prStats, 'ov-donut-proactive', 'ov-donut-pr');
+  mkCompareBar(msKpis, prKpis, msStrats, prStrats, ovQ);
+}
+
+function renderMission() {
+  const data = getMissionData(); const kpis = data.kpis||[];
+  const strats = getStrategies('mission');
+  const stats = computeStats(kpis, msQ, 'mission');
+  mkStatCards(stats, 'mission', 'ms-statGrid');
+  mkDonut(stats, 'ms-donut', 'ms-donut-c');
+  mkBar(kpis, strats, msQ, 'ms-bar', 'ms-bar-c', 'mission');
+  mkRadar(kpis, strats, msQ, 'ms-radar', 'ms-radar-c');
+  mkProgress(kpis, msQ, 'ms-progress', 'mission');
+  mkMissionTable(kpis, strats, msQ);
+}
+
+function renderProactive() {
+  const data = getProactiveData(); const kpis = data.kpis||[];
+  const strats = getStrategies('proactive');
+  const stats = computeStats(kpis, prQ, 'proactive');
+  mkStatCards(stats, 'proactive', 'pr-statGrid');
+  mkDonut(stats, 'pr-donut', 'pr-donut-c');
+  mkBar(kpis, strats, prQ, 'pr-bar', 'pr-bar-c', 'proactive');
+  mkRadar(kpis, strats, prQ, 'pr-radar', 'pr-radar-c');
+  mkProgress(kpis, prQ, 'pr-progress', 'proactive');
+  mkProactiveTable(kpis, strats, prQ);
+}
+
+function renderAll() {
+  if (currentTab === 'overview') renderOverview();
+  else if (currentTab === 'mission') renderMission();
+  else renderProactive();
 }
 </script>
 </body>

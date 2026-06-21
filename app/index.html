@@ -521,7 +521,7 @@
 
     function saveAndGo(username, role, name) {
       sessionStorage.setItem('auth', JSON.stringify({ username, role, name }));
-      window.location.href = 'dashboard-main.html';
+      window.location.href = role === 'executive' ? 'executive-main.html' : 'dashboard-main.html';
     }
 
     // ===== Admin Login =====

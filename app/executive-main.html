@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard ผู้บริหาร — คณะประมง แม่โจ้</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #1e3a5f;
+      --primary-light: #2563eb;
+      --accent: #3b82f6;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    body {
+      font-family: 'Inter', 'Sarabun', sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== Navbar ===== */
+    .navbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 80px;
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(32px) saturate(220%);
+      -webkit-backdrop-filter: blur(32px) saturate(220%);
+      border-bottom: 1px solid rgba(255,255,255,0.35);
+      position: sticky; top: 0; z-index: 50;
+      box-shadow: 0 2px 16px rgba(30,58,95,0.04);
+    }
+    .navbar-brand { display: flex; align-items: center; gap: 14px; }
+    .navbar-brand img { height: 70px; width: auto; }
+    .navbar-brand-text .title { font-size: 20px; font-weight: 700; color: var(--text); }
+    .navbar-brand-text .subtitle { font-size: 12px; color: var(--text-muted); }
+    .navbar-right { display: flex; align-items: center; gap: 12px; }
+    .year-selector {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.08); backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.30); border-radius: 10px; padding: 6px 12px;
+    }
+    .year-selector label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+    .year-select { background: transparent; border: none; font-size: 14px; font-weight: 700; font-family: inherit; color: var(--primary); cursor: pointer; outline: none; }
+    .user-badge {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.08); backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.30); border-radius: 99px; padding: 6px 16px 6px 8px;
+      font-size: 13px; font-weight: 600; color: var(--text);
+    }
+    .user-avatar {
+      width: 30px; height: 30px; background: var(--primary); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: white; font-weight: 700;
+    }
+    .btn-logout {
+      background: rgba(255,255,255,0.08); backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.30); border-radius: 8px; padding: 8px 16px;
+      font-size: 13px; font-weight: 600; font-family: inherit; color: var(--text-muted);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-logout:hover { background: rgba(239,68,68,0.1); color: #dc2626; border-color: rgba(239,68,68,0.3); }
+
+    /* ===== Tab switcher ===== */
+    .tab-bar {
+      display: flex; align-items: center; gap: 4px;
+      background: rgba(255,255,255,0.08); backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.30); border-radius: 12px; padding: 4px;
+    }
+    .tab-btn {
+      padding: 7px 18px; border-radius: 9px; border: none;
+      font-size: 13px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: all 0.18s; color: var(--text-muted); background: transparent;
+    }
+    .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(30,58,95,0.2); }
+
+    /* ===== Page body ===== */
+    .page-body { flex: 1; padding: 28px 40px; display: flex; flex-direction: column; gap: 24px; }
+
+    /* ===== Quarter selector ===== */
+    .quarter-bar {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .quarter-bar span { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+    .q-chip {
+      padding: 6px 16px; border-radius: 99px; border: 1.5px solid var(--border);
+      font-size: 12px; font-weight: 700; font-family: inherit; cursor: pointer;
+      background: rgba(255,255,255,0.5); color: var(--text-muted); transition: all 0.15s;
+    }
+    .q-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .q-chip:hover:not(.active) { border-color: var(--primary-light); color: var(--primary); }
+
+    /* ===== Stat cards ===== */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.35);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 18px;
+      padding: 22px 24px;
+      box-shadow: 0 4px 20px rgba(30,58,95,0.06);
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .stat-card-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-card-value { font-size: 36px; font-weight: 800; line-height: 1; }
+    .stat-card-sub { font-size: 12px; color: var(--text-muted); }
+    .stat-card.green .stat-card-value { color: var(--success); }
+    .stat-card.orange .stat-card-value { color: var(--warning); }
+    .stat-card.red .stat-card-value { color: var(--danger); }
+    .stat-card.blue .stat-card-value { color: var(--primary-light); }
+    .stat-icon { font-size: 28px; margin-bottom: 4px; }
+
+    /* ===== Chart grid ===== */
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .chart-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+    }
+    .chart-card {
+      background: rgba(255,255,255,0.35);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(30,58,95,0.06);
+    }
+    .chart-card.full { grid-column: 1 / -1; }
+    .chart-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .chart-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
+    .chart-wrap { position: relative; height: 260px; }
+    .chart-wrap-sm { position: relative; height: 220px; }
+
+    /* ===== Progress bars ===== */
+    .progress-list { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
+    .progress-item { display: flex; flex-direction: column; gap: 5px; }
+    .progress-header { display: flex; justify-content: space-between; align-items: center; }
+    .progress-label { font-size: 12px; font-weight: 600; color: var(--text); }
+    .progress-pct { font-size: 12px; font-weight: 700; color: var(--primary-light); }
+    .progress-bar-bg { background: rgba(0,0,0,0.07); border-radius: 99px; height: 8px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
+
+    /* ===== Traffic light table ===== */
+    .kpi-table-wrap { overflow-x: auto; margin-top: 4px; }
+    .kpi-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .kpi-table th {
+      background: rgba(30,58,95,0.8); color: white; padding: 8px 12px;
+      text-align: left; font-weight: 600; white-space: nowrap;
+    }
+    .kpi-table th:first-child { border-radius: 10px 0 0 0; }
+    .kpi-table th:last-child { border-radius: 0 10px 0 0; }
+    .kpi-table td { padding: 7px 12px; border-bottom: 1px solid rgba(0,0,0,0.05); vertical-align: middle; }
+    .kpi-table tr:hover td { background: rgba(37,99,235,0.04); }
+    .kpi-table .strat-row td { background: rgba(30,58,95,0.06); font-weight: 700; font-size: 11px; color: var(--primary); padding: 6px 12px; }
+    .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; }
+
+    /* ===== Footer ===== */
+    .footer {
+      padding: 14px 40px; border-top: 1px solid rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.10); backdrop-filter: blur(32px);
+      font-size: 12px; color: #94a3b8; display: flex; justify-content: space-between;
+    }
+
+    @media (max-width: 1024px) {
+      .stat-grid { grid-template-columns: repeat(2,1fr); }
+      .chart-grid { grid-template-columns: 1fr; }
+      .chart-grid-3 { grid-template-columns: 1fr; }
+      .page-body { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <img src="assets/images/Logo.PNG" alt="Logo" onerror="this.style.display='none'">
+    <div class="navbar-brand-text">
+      <div class="title">Dashboard ภาพรวมองค์กร</div>
+      <div class="subtitle">คณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ มหาวิทยาลัยแม่โจ้</div>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <div class="year-selector">
+      <label>ปีงบประมาณ</label>
+      <select class="year-select" id="yearSelect" onchange="onYearChange()">
+        <option value="2569">2569</option>
+        <option value="2570">2570</option>
+        <option value="2571">2571</option>
+      </select>
+    </div>
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-mission" onclick="switchSystem('mission')">ภาระกิจประจำ</button>
+      <button class="tab-btn" id="tab-proactive" onclick="switchSystem('proactive')">เชิงรุก</button>
+    </div>
+    <div class="user-badge">
+      <div class="user-avatar" id="userAvatar">E</div>
+      <span id="userName">ผู้บริหาร</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
+  </div>
+</nav>
+
+<div class="page-body">
+  <!-- Quarter selector -->
+  <div class="quarter-bar">
+    <span>ไตรมาส:</span>
+    <button class="q-chip active" id="qc-1" onclick="setQuarter(1)">Q1 (ต.ค.–ธ.ค.)</button>
+    <button class="q-chip" id="qc-2" onclick="setQuarter(2)">Q2 (ต.ค.–มี.ค.)</button>
+    <button class="q-chip" id="qc-3" onclick="setQuarter(3)">Q3 (ต.ค.–มิ.ย.)</button>
+    <button class="q-chip" id="qc-4" onclick="setQuarter(4)">Q4 (ต.ค.–ก.ย.)</button>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid" id="statGrid"></div>
+
+  <!-- Charts row 1: Donut + Bar -->
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">สัดส่วนสถานะตัวชี้วัด</div>
+      <div class="chart-sub">ภาพรวมทุกตัวชี้วัดในไตรมาสที่เลือก</div>
+      <div class="chart-wrap"><canvas id="donutChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">ร้อยละความสำเร็จรายยุทธศาสตร์</div>
+      <div class="chart-sub">เฉลี่ยร้อยละของตัวชี้วัดในแต่ละยุทธศาสตร์</div>
+      <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Charts row 2: Radar + Progress -->
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">กราฟใยแมงมุมรายยุทธศาสตร์</div>
+      <div class="chart-sub">เปรียบเทียบความสำเร็จทั้ง 5 ยุทธศาสตร์</div>
+      <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">ความคืบหน้ารายไตรมาส</div>
+      <div class="chart-sub">เปรียบเทียบร้อยละเฉลี่ย Q1–Q4</div>
+      <div style="margin-top:8px;" id="progressList"></div>
+    </div>
+  </div>
+
+  <!-- Traffic light table -->
+  <div class="chart-card">
+    <div class="chart-title">สถานะรายตัวชี้วัด</div>
+    <div class="chart-sub">Traffic light แสดงสถานะทุกตัวชี้วัดในไตรมาสที่เลือก</div>
+    <div class="kpi-table-wrap">
+      <table class="kpi-table" id="kpiTable">
+        <thead><tr>
+          <th>รหัส</th>
+          <th>ตัวชี้วัด</th>
+          <th style="text-align:center">ผลงาน</th>
+          <th style="text-align:center">ร้อยละ</th>
+          <th style="text-align:center">สถานะ</th>
+        </tr></thead>
+        <tbody id="kpiTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <span>© 2569 คณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ มหาวิทยาลัยแม่โจ้</span>
+  <span id="lastUpdate"></span>
+</footer>
+
+<script>
+// ===== State =====
+let currentSystem = 'mission'; // 'mission' | 'proactive'
+let currentQuarter = 1;
+let charts = {};
+
+const Q_LABELS = {1:'Q1 (ต.ค.–ธ.ค.)',2:'Q2 (ต.ค.–มี.ค.)',3:'Q3 (ต.ค.–มิ.ย.)',4:'Q4 (ต.ค.–ก.ย.)'};
+
+// ===== Auth =====
+window.onload = function() {
+  const auth = JSON.parse(sessionStorage.getItem('auth') || 'null');
+  if (!auth) { location.href = 'index.html'; return; }
+  if (auth.role !== 'executive') { location.href = 'dashboard-main.html'; return; }
+  document.getElementById('userName').textContent = auth.name || 'ผู้บริหาร';
+  const roleInitials = {'admin':'A','executive':'E'};
+  document.getElementById('userAvatar').textContent = roleInitials[auth.role] || 'E';
+  const savedYear = sessionStorage.getItem('current_year');
+  if (savedYear) document.getElementById('yearSelect').value = savedYear;
+  render();
+};
+
+function logout() { sessionStorage.clear(); location.href = 'index.html'; }
+function onYearChange() { sessionStorage.setItem('current_year', getCurrentYear()); render(); }
+function getCurrentYear() { return parseInt(document.getElementById('yearSelect').value); }
+
+// ===== System / Quarter =====
+function switchSystem(sys) {
+  currentSystem = sys;
+  document.getElementById('tab-mission').classList.toggle('active', sys === 'mission');
+  document.getElementById('tab-proactive').classList.toggle('active', sys === 'proactive');
+  render();
+}
+
+function setQuarter(q) {
+  currentQuarter = q;
+  [1,2,3,4].forEach(i => document.getElementById(`qc-${i}`).classList.toggle('active', i===q));
+  render();
+}
+
+// ===== Load data =====
+function getMissionData() {
+  const raw = localStorage.getItem(`mission_${getCurrentYear()}`);
+  return raw ? JSON.parse(raw) : { kpis: [] };
+}
+function getProactiveData() {
+  const raw = localStorage.getItem(`proactive_${getCurrentYear()}`);
+  return raw ? JSON.parse(raw) : { kpis: [] };
+}
+function getData() {
+  return currentSystem === 'mission' ? getMissionData() : getProactiveData();
+}
+function getStrategies() {
+  const key = currentSystem === 'mission'
+    ? `strategies_${getCurrentYear()}`
+    : `pro_strategies_${getCurrentYear()}`;
+  const defaults = currentSystem === 'mission'
+    ? [{id:1,name:'Proactive Strategy toward Inter IWA'},{id:2,name:'Driving Mission-Driven Performance'},
+       {id:3,name:'Fostering Internationalization'},{id:4,name:'Technology Development and Innovation University'},
+       {id:5,name:'Financial Stability and Sustainable Growth'}]
+    : [{id:1,name:'Professional Immersive Learning'},{id:2,name:'Digital Intelligence'},
+       {id:3,name:'Green & Smart Faculty (FTAR-IWA)'},{id:4,name:'Global Partnership'},
+       {id:5,name:'Knowledge and Innovation Revenue Generation'}];
+  return JSON.parse(localStorage.getItem(key) || JSON.stringify(defaults));
+}
+
+// ===== Compute stats =====
+function computeStats(kpis, q) {
+  const Q = `Q${q}`;
+  let pass = 0, progress = 0, urgent = 0, nodata = 0;
+  kpis.forEach(kpi => {
+    const qd = kpi.quarters?.[Q] || {};
+    const pct = parseFloat(currentSystem === 'mission' ? qd.percent : qd.percent);
+    const hasVal = currentSystem === 'mission'
+      ? (qd.result !== undefined && qd.result !== '' && qd.result !== '0')
+      : (qd.score !== undefined && qd.score !== '');
+    if (!hasVal || isNaN(pct)) { nodata++; return; }
+    const threshold = currentSystem === 'mission' ? 100 : 80;
+    if (pct >= threshold) pass++;
+    else if (pct >= 50) progress++;
+    else urgent++;
+  });
+  return { pass, progress, urgent, nodata, total: kpis.length };
+}
+
+function getPct(kpi, q) {
+  const Q = `Q${q}`;
+  const qd = kpi.quarters?.[Q] || {};
+  return parseFloat(qd.percent) || 0;
+}
+
+function getDotColor(kpi, q) {
+  const Q = `Q${q}`;
+  const qd = kpi.quarters?.[Q] || {};
+  const pct = parseFloat(qd.percent);
+  const hasVal = currentSystem === 'mission'
+    ? (qd.result !== undefined && qd.result !== '' && qd.result !== '0')
+    : (qd.score !== undefined && qd.score !== '');
+  if (!hasVal || isNaN(pct)) return '#cbd5e1';
+  const threshold = currentSystem === 'mission' ? 100 : 80;
+  return pct >= threshold ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
+}
+
+// ===== Render all =====
+function render() {
+  const data = getData();
+  const kpis = data.kpis || [];
+  const strategies = getStrategies();
+  const stats = computeStats(kpis, currentQuarter);
+  renderStats(stats, kpis.length);
+  renderDonut(stats);
+  renderBar(kpis, strategies);
+  renderRadar(kpis, strategies);
+  renderProgress(kpis);
+  renderTable(kpis, strategies);
+  document.getElementById('lastUpdate').textContent = `ข้อมูล ณ ${new Date().toLocaleDateString('th-TH')}`;
+}
+
+// ===== Stat cards =====
+function renderStats(s, total) {
+  const isMission = currentSystem === 'mission';
+  const threshold = isMission ? '≥100%' : '≥80%';
+  document.getElementById('statGrid').innerHTML = `
+    <div class="stat-card blue">
+      <div class="stat-icon">📋</div>
+      <div class="stat-card-label">ตัวชี้วัดทั้งหมด</div>
+      <div class="stat-card-value">${total}</div>
+      <div class="stat-card-sub">${isMission ? '5 ยุทธศาสตร์' : '5 ยุทธศาสตร์'}</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon">✅</div>
+      <div class="stat-card-label">ผ่านแล้ว (${threshold})</div>
+      <div class="stat-card-value">${s.pass}</div>
+      <div class="stat-card-sub">คิดเป็น ${total ? Math.round(s.pass/total*100) : 0}%</div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-icon">🔄</div>
+      <div class="stat-card-label">กำลังดำเนินการ</div>
+      <div class="stat-card-value">${s.progress}</div>
+      <div class="stat-card-sub">50–${isMission?'99':'79'}%</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-icon">⚠️</div>
+      <div class="stat-card-label">ต้องเร่งดำเนินการ</div>
+      <div class="stat-card-value">${s.urgent}</div>
+      <div class="stat-card-sub">ต่ำกว่า 50%</div>
+    </div>
+  `;
+}
+
+// ===== Donut chart =====
+function renderDonut(s) {
+  if (charts.donut) charts.donut.destroy();
+  const ctx = document.getElementById('donutChart').getContext('2d');
+  charts.donut = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['ผ่านแล้ว','กำลังดำเนินการ','ต้องเร่ง','ยังไม่มีข้อมูล'],
+      datasets: [{
+        data: [s.pass, s.progress, s.urgent, s.nodata],
+        backgroundColor: ['#10b981','#f59e0b','#ef4444','#cbd5e1'],
+        borderWidth: 2, borderColor: '#fff',
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '65%',
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { family: 'Sarabun', size: 12 }, padding: 16 } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} ตัว` } }
+      }
+    }
+  });
+}
+
+// ===== Bar chart =====
+function renderBar(kpis, strategies) {
+  if (charts.bar) charts.bar.destroy();
+  const Q = `Q${currentQuarter}`;
+  const labels = strategies.map(s => `ยุทธ ${s.id}`);
+  const values = strategies.map(s => {
+    const group = kpis.filter(k => k.strategy === s.id);
+    if (!group.length) return 0;
+    const sum = group.reduce((acc, k) => acc + (parseFloat(k.quarters?.[Q]?.percent) || 0), 0);
+    return Math.round(sum / group.length * 10) / 10;
+  });
+  const threshold = currentSystem === 'mission' ? 100 : 80;
+  const colors = values.map(v => v >= threshold ? '#10b981' : v >= 50 ? '#f59e0b' : '#ef4444');
+
+  const ctx = document.getElementById('barChart').getContext('2d');
+  charts.bar = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'ร้อยละเฉลี่ย',
+        data: values,
+        backgroundColor: colors,
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        y: { min: 0, max: 110, ticks: { callback: v => v+'%' }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        x: { grid: { display: false } }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.raw}%` } }
+      }
+    }
+  });
+}
+
+// ===== Radar chart =====
+function renderRadar(kpis, strategies) {
+  if (charts.radar) charts.radar.destroy();
+  const Q = `Q${currentQuarter}`;
+  const labels = strategies.map(s => s.name.length > 20 ? s.name.slice(0,20)+'…' : s.name);
+  const values = strategies.map(s => {
+    const group = kpis.filter(k => k.strategy === s.id);
+    if (!group.length) return 0;
+    const sum = group.reduce((acc, k) => acc + (parseFloat(k.quarters?.[Q]?.percent) || 0), 0);
+    return Math.round(sum / group.length * 10) / 10;
+  });
+
+  const ctx = document.getElementById('radarChart').getContext('2d');
+  charts.radar = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels,
+      datasets: [{
+        label: Q_LABELS[currentQuarter],
+        data: values,
+        backgroundColor: 'rgba(37,99,235,0.12)',
+        borderColor: '#2563eb',
+        borderWidth: 2,
+        pointBackgroundColor: '#2563eb',
+        pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        r: {
+          min: 0, max: 110,
+          ticks: { stepSize: 25, callback: v => v+'%', font: { size: 10 } },
+          pointLabels: { font: { family: 'Sarabun', size: 11 } },
+          grid: { color: 'rgba(0,0,0,0.08)' },
+          angleLines: { color: 'rgba(0,0,0,0.08)' },
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.raw}%` } }
+      }
+    }
+  });
+}
+
+// ===== Progress bars =====
+function renderProgress(kpis) {
+  const html = [1,2,3,4].map(q => {
+    const Q = `Q${q}`;
+    const vals = kpis.map(k => parseFloat(k.quarters?.[Q]?.percent) || 0);
+    const avg = vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*10)/10 : 0;
+    const color = avg >= (currentSystem==='mission'?100:80) ? '#10b981' : avg >= 50 ? '#f59e0b' : '#ef4444';
+    const isCurrent = q === currentQuarter;
+    return `<div class="progress-item">
+      <div class="progress-header">
+        <span class="progress-label" style="${isCurrent?'color:var(--primary-light);font-weight:700;':''}">${Q_LABELS[q]}</span>
+        <span class="progress-pct" style="color:${color}">${avg}%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" style="width:${Math.min(avg,100)}%;background:${color};"></div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('progressList').innerHTML = `<div class="progress-list">${html}</div>`;
+}
+
+// ===== Traffic light table =====
+function renderTable(kpis, strategies) {
+  const Q = `Q${currentQuarter}`;
+  const isMission = currentSystem === 'mission';
+  let html = '';
+  strategies.forEach(s => {
+    const group = kpis.filter(k => k.strategy === s.id);
+    if (!group.length) return;
+    html += `<tr class="strat-row"><td colspan="5">ยุทธศาสตร์ที่ ${s.id}: ${s.name}</td></tr>`;
+    group.forEach(kpi => {
+      const qd = kpi.quarters?.[Q] || {};
+      const result = isMission ? (qd.result ?? '-') : (qd.score !== '' ? `${qd.score}/5` : '-');
+      const pct = parseFloat(qd.percent);
+      const pctDisplay = isNaN(pct) ? '-' : pct.toFixed(1) + '%';
+      const color = getDotColor(kpi, currentQuarter);
+      const statusText = color === '#10b981' ? 'ผ่าน' : color === '#f59e0b' ? 'กำลังดำเนินการ' : color === '#ef4444' ? 'ต้องเร่ง' : 'ยังไม่มีข้อมูล';
+      const name = (kpi.name || '').replace(/^\d+\.\d+\.\d+\S*\s*/,'');
+      html += `<tr>
+        <td style="font-weight:700;color:var(--primary);white-space:nowrap;">${kpi.code}</td>
+        <td style="max-width:320px;">${name}</td>
+        <td style="text-align:center;">${result}</td>
+        <td style="text-align:center;font-weight:600;">${pctDisplay}</td>
+        <td style="text-align:center;">
+          <span class="dot" style="background:${color};" title="${statusText}"></span>
+          <span style="margin-left:6px;font-size:11px;color:${color};">${statusText}</span>
+        </td>
+      </tr>`;
+    });
+  });
+  document.getElementById('kpiTableBody').innerHTML = html;
+}
+</script>
+</body>
+</html>

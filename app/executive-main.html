@@ -25,54 +25,48 @@
     .navbar {
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 40px; height: 80px;
-      background: rgba(255,255,255,0.10); backdrop-filter: blur(32px) saturate(220%);
+      background: rgba(30,58,95,0.92); backdrop-filter: blur(32px) saturate(220%);
       -webkit-backdrop-filter: blur(32px) saturate(220%);
-      border-bottom: 1px solid rgba(255,255,255,0.35);
+      border-bottom: 1px solid rgba(255,255,255,0.12);
       position: sticky; top: 0; z-index: 50;
-      box-shadow: 0 2px 16px rgba(30,58,95,0.04);
+      box-shadow: 0 2px 16px rgba(30,58,95,0.15);
     }
     .navbar-brand { display: flex; align-items: center; gap: 14px; }
     .navbar-brand img { height: 70px; }
-    .navbar-brand-text .title { font-size: 20px; font-weight: 700; color: var(--text); }
-    .navbar-brand-text .subtitle { font-size: 12px; color: var(--text-muted); }
+    .navbar-brand-text .title { font-size: 20px; font-weight: 700; color: white; }
+    .navbar-brand-text .subtitle { font-size: 12px; color: rgba(255,255,255,0.65); }
     .navbar-right { display: flex; align-items: center; gap: 12px; }
     .year-selector {
       display: flex; align-items: center; gap: 8px;
       background: rgba(255,255,255,0.08); backdrop-filter: blur(20px);
       border: 1px solid rgba(255,255,255,0.30); border-radius: 10px; padding: 6px 12px;
     }
-    .year-selector label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
-    .year-select { background: transparent; border: none; font-size: 14px; font-weight: 700; font-family: inherit; color: var(--primary); cursor: pointer; outline: none; }
+    .year-selector label { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.65); }
+    .year-select { background: transparent; border: none; font-size: 14px; font-weight: 700; font-family: inherit; color: white; cursor: pointer; outline: none; }
     .user-badge {
       display: flex; align-items: center; gap: 8px;
-      background: rgba(255,255,255,0.08); backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.30); border-radius: 99px; padding: 6px 16px 6px 8px;
-      font-size: 13px; font-weight: 600; color: var(--text);
+      background: rgba(255,255,255,0.10); backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.20); border-radius: 99px; padding: 6px 16px 6px 8px;
+      font-size: 13px; font-weight: 600; color: white;
     }
     .user-avatar { width: 30px; height: 30px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; color: white; font-weight: 700; }
     .btn-logout {
       background: rgba(255,255,255,0.08); backdrop-filter: blur(20px);
       border: 1px solid rgba(255,255,255,0.30); border-radius: 8px; padding: 8px 16px;
-      font-size: 13px; font-weight: 600; font-family: inherit; color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+      font-size: 13px; font-weight: 600; font-family: inherit; color: rgba(255,255,255,0.7); cursor: pointer; transition: all 0.2s;
     }
-    .btn-logout:hover { background: rgba(239,68,68,0.1); color: #dc2626; border-color: rgba(239,68,68,0.3); }
+    .btn-logout:hover { background: rgba(239,68,68,0.2); color: #fca5a5; border-color: rgba(239,68,68,0.4); }
 
-    /* Main tabs (ภาพรวม / ภาระกิจ / เชิงรุก) */
-    .main-tab-bar {
-      display: flex; gap: 0;
-      border-bottom: 2px solid var(--border);
-      padding: 0 40px;
-      background: rgba(255,255,255,0.6);
-      backdrop-filter: blur(20px);
-    }
+    /* Main tabs in navbar */
+    .main-tab-bar { display: flex; gap: 2px; background: transparent; padding: 0; border: none; }
     .main-tab-btn {
-      padding: 14px 28px; border: none; background: transparent;
-      font-size: 14px; font-weight: 600; font-family: inherit;
-      color: var(--text-muted); cursor: pointer; transition: all 0.18s;
-      border-bottom: 3px solid transparent; margin-bottom: -2px;
+      padding: 8px 18px; border: none; background: transparent;
+      font-size: 13px; font-weight: 600; font-family: inherit;
+      color: rgba(255,255,255,0.55); cursor: pointer; transition: all 0.18s;
+      border-radius: 8px;
     }
-    .main-tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-    .main-tab-btn:hover:not(.active) { color: var(--text); }
+    .main-tab-btn.active { background: rgba(255,255,255,0.18); color: white; }
+    .main-tab-btn:hover:not(.active) { background: rgba(255,255,255,0.10); color: rgba(255,255,255,0.85); }
 
     /* Page body */
     .page-body { flex: 1; padding: 28px 40px; display: flex; flex-direction: column; gap: 24px; }
@@ -187,16 +181,14 @@
       <div class="user-avatar" id="userAvatar">E</div>
       <span id="userName">ผู้บริหาร</span>
     </div>
+    <div class="main-tab-bar" style="margin:0;">
+      <button class="main-tab-btn active" id="mtab-overview" onclick="switchTab('overview')">🏠 ภาพรวม</button>
+      <button class="main-tab-btn" id="mtab-mission" onclick="switchTab('mission')">📋 ภาระกิจประจำ</button>
+      <button class="main-tab-btn" id="mtab-proactive" onclick="switchTab('proactive')">🎯 เชิงรุก</button>
+    </div>
     <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
   </div>
 </nav>
-
-<!-- Main tabs -->
-<div class="main-tab-bar">
-  <button class="main-tab-btn active" id="mtab-overview" onclick="switchTab('overview')">🏠 ภาพรวม</button>
-  <button class="main-tab-btn" id="mtab-mission" onclick="switchTab('mission')">📋 ภาระกิจประจำ</button>
-  <button class="main-tab-btn" id="mtab-proactive" onclick="switchTab('proactive')">🎯 เชิงรุก</button>
-</div>
 
 <div class="page-body">
 

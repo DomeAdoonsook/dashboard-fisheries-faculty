@@ -178,8 +178,27 @@
     @media (max-width: 1024px) {
       .stat-grid, .stat-grid-3 { grid-template-columns: repeat(2,1fr); }
       .chart-grid, .overview-grid { grid-template-columns: 1fr; }
-      .page-body, .main-tab-bar { padding-left: 16px; padding-right: 16px; }
-      .main-tab-btn { padding: 12px 16px; font-size: 13px; }
+      .page-body { padding-left: 16px; padding-right: 16px; }
+      .main-tab-btn { padding: 8px 14px; font-size: 12px; }
+    }
+    @media (max-width: 768px) {
+      .navbar { padding: 0 16px; height: auto; padding-top: 10px; padding-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+      .navbar-brand img { height: 60px; }
+      .navbar-brand-text .subtitle { display: none; }
+      .navbar-right { flex-wrap: wrap; justify-content: flex-end; gap: 8px; width: 100%; }
+      .main-tab-bar { position: static; transform: none; order: -1; width: 100%; justify-content: center; }
+      .stat-grid, .stat-grid-3 { grid-template-columns: repeat(2,1fr); }
+      .chart-grid, .overview-grid { grid-template-columns: 1fr; }
+      .page-body { padding: 16px; gap: 16px; }
+      .quarter-bar { flex-wrap: wrap; }
+      .kpi-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .footer { padding: 12px 16px; flex-direction: column; gap: 6px; text-align: center; }
+    }
+    @media (max-width: 480px) {
+      .stat-grid, .stat-grid-3 { grid-template-columns: 1fr; }
+      .stat-card-value { font-size: 48px; }
+      .navbar-brand-text .title { font-size: 15px; }
+      .main-tab-btn { padding: 6px 10px; font-size: 11px; }
     }
   </style>
 </head>

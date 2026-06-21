@@ -395,11 +395,51 @@
 
     /* ===== Responsive ===== */
     @media (max-width: 680px) {
-      .login-card { grid-template-columns: 1fr; }
+      .login-cards { flex-direction: column; gap: 24px; }
       .login-left { border-right: none; border-bottom: 1px solid rgba(30,58,95,0.08); padding: 36px 28px; }
       .login-right { padding: 36px 28px; }
       .navbar { padding: 0 20px; }
       .footer { padding: 16px 20px; flex-direction: column; gap: 10px; text-align: center; }
+    }
+
+    @media (max-width: 480px) {
+      /* Navbar */
+      .navbar {
+        padding: 0 16px;
+        height: auto;
+        min-height: 64px;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+      }
+      .navbar-brand img { height: 60px; }
+      .navbar-brand { font-size: 16px; gap: 10px; }
+      .navbar-brand > div > div:last-child { display: none; } /* hide subtitle */
+
+      /* Login cards */
+      .login-cards { margin: 16px; gap: 16px; width: auto; }
+      .main { padding: 24px 0; }
+
+      /* Card padding */
+      .login-left { padding: 28px 20px; }
+      .login-right { padding: 28px 20px; }
+
+      /* Typography */
+      .access-title { font-size: 20px; margin-bottom: 24px; }
+      .exec-card-title { font-size: 17px; }
+      .exec-note { font-size: 12px; }
+
+      /* Form elements */
+      .field { margin-bottom: 20px; }
+      .field input { font-size: 14px; }
+      .btn-submit { font-size: 14px; padding: 12px; }
+
+      /* Footer */
+      .footer { padding: 12px 16px; flex-direction: column; gap: 8px; text-align: center; }
+      .footer-copy { font-size: 11px; }
+      .footer-links { gap: 16px; }
+      .footer-links a { font-size: 11px; }
     }
   </style>
 </head>

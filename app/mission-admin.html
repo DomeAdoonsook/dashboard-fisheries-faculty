@@ -27,7 +27,7 @@
 
     body {
       font-family: 'Inter', 'Sarabun', sans-serif;
-      background: var(--bg);
+      background: #f0f4f8;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -38,7 +38,7 @@
       content: '';
       position: fixed;
       inset: 0;
-      background: url('assets/images/Logo3D_2.PNG') center center / 52% auto no-repeat;
+      background: url('assets/images/white-unsplash.jpg') center center / cover no-repeat;
       opacity: 1;
       z-index: 0;
       pointer-events: none;
@@ -51,13 +51,14 @@
       justify-content: space-between;
       padding: 0 40px;
       height: 96px;
-      background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(10px) saturate(120%);
-      -webkit-backdrop-filter: blur(10px) saturate(120%);
-      border-bottom: 1px solid rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid #e2e8f0;
       position: sticky;
       top: 0;
       z-index: 50;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
 
     .navbar-brand {
@@ -677,10 +678,8 @@
       align-items: center;
       justify-content: space-between;
       padding: 14px 40px;
-      border-top: 1px solid rgba(255,255,255,0.4);
-      background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(10px) saturate(120%);
-      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border-top: 1px solid #e2e8f0;
+      background: rgba(255,255,255,0.95);
       position: sticky;
       bottom: 0;
       z-index: 50;
@@ -749,16 +748,18 @@
 
       <div class="sidebar-divider"></div>
 
+      <div class="sidebar-divider"></div>
+
       <div class="quarter-group">
         <div class="quarter-label">ไตรมาส</div>
         <div class="quarter-btns">
-          <button class="q-btn" onclick="setQuarter(1)" id="q1">Q1</button>
+          <button class="q-btn active" onclick="setQuarter(1)" id="q1">Q1</button>
           <button class="q-btn" onclick="setQuarter(2)" id="q2">Q2</button>
-          <button class="q-btn active" onclick="setQuarter(3)" id="q3">Q3</button>
+          <button class="q-btn" onclick="setQuarter(3)" id="q3">Q3</button>
           <button class="q-btn" onclick="setQuarter(4)" id="q4">Q4</button>
         </div>
         <div style="margin-top:8px;font-size:11px;color:var(--text-muted);text-align:center" id="quarter-label-text">
-          ต.ค. 68 – มิ.ย. 69
+          ต.ค. – ธ.ค. 68
         </div>
       </div>
     </aside>
@@ -838,10 +839,27 @@
             <option value="4">ยุทธศาสตร์ที่ 4</option>
             <option value="5">ยุทธศาสตร์ที่ 5</option>
           </select>
-          <button class="btn-success" onclick="saveEditData()" style="margin-left:auto">
+          <button class="btn-outline" onclick="openAddStrategyModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            เพิ่มยุทธศาสตร์
+          </button>
+          <button class="btn-outline" onclick="openAddKpiModal()" style="margin-left:auto">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            เพิ่มตัวชี้วัด
+          </button>
+          <button class="btn-success" onclick="saveEditData()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
             บันทึกทั้งหมด
           </button>
+        </div>
+
+        <div id="strategy-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:8px 12px;background:rgba(0,0,0,0.03);border-radius:10px;font-size:12px;color:var(--text-muted)">
+          <span style="font-weight:600">สถานะ:</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:50%;background:#10b981;display:inline-block"></span>ผ่าน (≥100%)</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:50%;background:#f59e0b;display:inline-block"></span>กำลังดำเนินการ (50–99%)</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:50%;background:#ef4444;display:inline-block"></span>ต้องเร่ง (&lt;50%)</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:50%;background:#cbd5e1;display:inline-block"></span>ยังไม่มีข้อมูล</span>
         </div>
 
         <div class="table-wrap">
@@ -882,6 +900,69 @@
   <footer class="footer">
     <div class="footer-copy">© 2569 คณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ มหาวิทยาลัยแม่โจ้</div>
   </footer>
+
+  <!-- Modal: เพิ่มยุทธศาสตร์ -->
+  <div class="modal-overlay" id="add-strategy-modal">
+    <div class="modal" style="max-width:420px">
+      <div class="modal-title">เพิ่มยุทธศาสตร์</div>
+      <div class="modal-sub">กรอกชื่อยุทธศาสตร์ที่ต้องการเพิ่ม</div>
+      <div class="form-group">
+        <label class="form-label">ชื่อยุทธศาสตร์ <span style="color:#ef4444">*</span></label>
+        <input type="text" class="form-control" id="add-strategy-name" placeholder="เช่น Proactive Strategy toward Inter IWA">
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeAddStrategyModal()">ยกเลิก</button>
+        <button class="btn-confirm" onclick="confirmAddStrategy()">เพิ่ม</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: เพิ่มตัวชี้วัดใหม่ -->
+  <div class="modal-overlay" id="add-kpi-modal">
+    <div class="modal">
+      <div class="modal-title">เพิ่มตัวชี้วัดใหม่</div>
+      <div class="modal-sub">กรอกข้อมูลตัวชี้วัดที่ต้องการเพิ่ม</div>
+
+      <div class="form-group">
+        <label class="form-label">รหัสตัวชี้วัด <span style="color:#ef4444">*</span></label>
+        <input type="text" class="form-control" id="add-code" placeholder="เช่น 1.1.1">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ชื่อตัวชี้วัด <span style="color:#ef4444">*</span></label>
+        <textarea class="form-control" id="add-name" rows="2" placeholder="ชื่อตัวชี้วัด"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="form-group">
+          <label class="form-label">หน่วยนับ</label>
+          <input type="text" class="form-control" id="add-unit" placeholder="เช่น ร้อยละ, คน, บาท">
+        </div>
+        <div class="form-group">
+          <label class="form-label">เป้าหมาย</label>
+          <input type="text" class="form-control" id="add-target" placeholder="เป้าหมาย">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ยุทธศาสตร์ <span style="color:#ef4444">*</span></label>
+        <select class="form-control" id="add-strategy" style="border:none;border-bottom:1.5px solid #cbd5e1;border-radius:0;padding-left:0">
+          <option value="">-- เลือกยุทธศาสตร์ --</option>
+          <option value="1">ยุทธศาสตร์ที่ 1</option>
+          <option value="2">ยุทธศาสตร์ที่ 2</option>
+          <option value="3">ยุทธศาสตร์ที่ 3</option>
+          <option value="4">ยุทธศาสตร์ที่ 4</option>
+          <option value="5">ยุทธศาสตร์ที่ 5</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">เกณฑ์การประเมิน</label>
+        <textarea class="form-control" id="add-criteria" rows="2" placeholder="เกณฑ์การประเมิน (ถ้ามี)"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeAddKpiModal()">ยกเลิก</button>
+        <button class="btn-confirm" onclick="confirmAddKpi()">เพิ่มตัวชี้วัด</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal: แก้ไขรายตัว -->
   <div class="modal-overlay" id="edit-modal">
@@ -936,7 +1017,7 @@
     }
 
     // ===== Quarter =====
-    let currentQuarter = 3;
+    let currentQuarter = 1;
     const quarterLabels = {1:'ต.ค. – ธ.ค.', 2:'ต.ค. – มี.ค.', 3:'ต.ค. – มิ.ย.', 4:'ต.ค. – ก.ย.'};
 
     function setQuarter(q) {
@@ -950,11 +1031,106 @@
       renderPdfList();
     }
 
+    // ===== Template ปี 2569 (46 ตัวชี้วัด) =====
+    // ลิงก์หลักฐานจาก Excel (hyperlink ใน col F)
+    const LINKS = {
+      "2.1.7": {"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzg2&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzg2&method=inline"},
+      "2.1.8": {"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgwMjUz&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzk1NDE2&method=inline"},
+      "2.1.9": {"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzg1&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzg1&method=inline"},
+      "2.2.1": {"Q2":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTI4&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTI4&method=inline"},
+      "2.2.2": {"Q2":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTMw&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTMw&method=inline"},
+      "2.2.3": {"Q2":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTMy&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTMy&method=inline"},
+      "2.2.4": {"Q2":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTM0&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTM0&method=inline"},
+      "2.2.5": {"Q2":"https://dashboard.mju.ac.th/scopusList?dataType=2&year=2568&dep=20900-20900-2090","Q3":"https://dashboard.mju.ac.th/scopusList?dataType=2&year=2568&dep=20900-20900-2090"},
+      "2.2.6": {"Q2":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTM1&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTM1&method=inline"},
+      "2.2.7": {"Q2":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTM3&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTM3&method=inline"},
+      "2.2.8": {"Q2":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTM5&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTM5&method=inline"},
+      "2.3.1": {"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzg3&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzg3&method=inline"},
+      "2.3.3": {"Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzk1MDcw&method=inline"},
+      "3.1.2": {"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgwMjE2&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=NzgwMjE2&method=inline"},
+      "3.1.3": {"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgwMzcw&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=NzgwMzcw&method=inline"},
+      "3.1.4": {"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgwMzkx&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=NzgwMzkx&method=inline"},
+      "4.1.3": {"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzgx&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzgx&method=inline"},
+      "5.1.2": {"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzg0&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzg0&method=inline"},
+    };
+
+    // ข้อมูล Q2/Q3 จาก Excel รายงานตัวชี้วัดภาระกิจประจำ.xlsx
+    const Q_DATA = {"1.1.1":{"Q2":{"result":"1501","percent":"100","detail":"อ้างอิงข้อมูลจากส่วนกลาง"},"Q3":{"result":"1501","percent":"100","detail":"อ้างอิงข้อมูลจากส่วนกลาง"}},"1.1.2":{"Q2":{"result":"13","percent":"76.92","detail":"อ้างอิงข้อมูลจากส่วนกลาง"},"Q3":{"result":"13","percent":"76.92","detail":"อ้างอิงข้อมูลจากส่วนกลาง"}},"1.1.3":{"Q2":{"result":"401","percent":"100","detail":"อ้างอิงข้อมูลจากส่วนกลาง"},"Q3":{"result":"401","percent":"100","detail":"อ้างอิงข้อมูลจากส่วนกลาง"}},"1.1.4":{"Q2":{"result":"0","percent":"0","detail":"ยังไม่มีผลการดำเนินงาน"},"Q3":{"result":"0","percent":"0","detail":"ยังไม่มีผลการดำเนินงาน"}},"1.1.5":{"Q2":{"result":"0","percent":"0","detail":"ยังไม่มีผลการดำเนินงาน"},"Q3":{"result":"0","percent":"0","detail":"ยังไม่มีผลการดำเนินงาน"}},"1.2.1":{"Q2":{"result":"22.22","percent":"24.69","detail":"อ้างอิงข้อมูลจากส่วนกลาง"},"Q3":{"result":"62.5","percent":"69.44","detail":"อ้างอิงข้อมูลจากส่วนกลาง"}},"1.2.2":{"Q2":{"result":"16.67","percent":"18.52","detail":"อ้างอิงข้อมูลจากส่วนกลาง"},"Q3":{"result":"75","percent":"83.33","detail":"อ้างอิงข้อมูลจากส่วนกลาง"}},"2.1.1":{"Q2":{"result":"N/A","percent":"N/A","detail":"รอข้อมูลนักศึกษาใหม่ระดับปริญญาตรี ปีการศึกษา 2569"},"Q3":{"result":"133","percent":"100","detail":"ข้อมูลนักศึกษาใหม่ระดับปริญญาตรี ปีการศึกษา 2569"}},"2.1.2":{"Q2":{"result":"0","percent":"0","detail":"ยังไม่มีผลการดำเนินงาน"},"Q3":{"result":"0","percent":"0","detail":"ยังไม่มีผลการดำเนินงาน"}},"2.1.3a":{"Q2":{"result":"74.29","percent":"92.86","detail":"มีบัณฑิตตอบแบบสอบถาม จำนวน 91 คน มีงานทำ จำนวน 76 คน"},"Q3":{"result":"74.29","percent":"92.86","detail":"มีบัณฑิตตอบแบบสอบถาม จำนวน 91 คน มีงานทำ จำนวน 76 คน"}},"2.1.3b":{"Q2":{"result":"74.29","percent":"92.86","detail":"มีบัณฑิตตอบแบบสอบถาม จำนวน 91 คน มีงานทำ จำนวน 76 คน"},"Q3":{"result":"74.29","percent":"92.86","detail":"มีบัณฑิตตอบแบบสอบถาม จำนวน 91 คน มีงานทำ จำนวน 76 คน"}},"2.1.4":{"Q2":{"result":"N/A","percent":"N/A","detail":"รอข้อมูลจากส่วนกลาง"},"Q3":{"result":"N/A","percent":"N/A","detail":"รอข้อมูลจากส่วนกลาง"}},"2.1.5":{"Q2":{"result":"15840","percent":"100","detail":"อ้างอิงข้อมูลจากส่วนกลาง"},"Q3":{"result":"15840","percent":"100","detail":"อ้างอิงข้อมูลจากส่วนกลาง"}},"2.1.6":{"Q2":{"result":"N/A","percent":"N/A","detail":"รอผลการประเมินของหลักสูตร"},"Q3":{"result":"N/A","percent":"N/A","detail":"รอผลการประเมินของหลักสูตร"}},"2.1.7":{"Q2":{"result":"2","percent":"100","detail":"1. นวัตกรรมปลาน้ำจืดสำหรับผู้ประกอบการ\n2. หลักสูตรนวัตกรรมการเพิ่มมูลค่าผลผลิตทางการเกษตรเพื่อขับเคลื่อนเศรษฐกิจ BCG (โครงการบัณฑิตพันธุ์ใหม่ฯ)"},"Q3":{"result":"2","percent":"100","detail":"1. นวัตกรรมปลาน้ำจืดสำหรับผู้ประกอบการ\n2. หลักสูตรนวัตกรรมการเพิ่มมูลค่าผลผลิตทางการเกษตรเพื่อขับเคลื่อนเศรษฐกิจ BCG (โครงการบัณฑิตพันธุ์ใหม่ฯ)"}},"2.1.8":{"Q2":{"result":"12","percent":"100","detail":"คณะมีจำนวนรางวัล 12 รางวัล ได้แก่ รางวัล Best Poster Presentation Award, รางวัลนำเสนอระดับดีมาก 4 รางวัล, รางวัลนำเสนอระดับดี 1 รางวัล, รางวัลนำเสนอระดับดีเยี่ยม 2 รางวัล, รางวัลคนดีศรีเกษตร, เหรียญทอง 3 รางวัล"},"Q3":{"result":"19","percent":"100","detail":"คณะมีจำนวนรางวัล 19 รางวัล (เพิ่มเติมจาก Q2: รางวัลนำเสนอระดับนานาชาติ BEST ORAL PRESENTATION AWARD และรางวัลอื่นๆ)"}},"2.1.9":{"Q2":{"result":"100","percent":"100","detail":"ร้อยละของนักศึกษาชั้นปีสุดท้ายที่ผ่านกระบวนการพัฒนาให้เป็นพลเมืองโลก ร้อยละ 100"},"Q3":{"result":"100","percent":"100","detail":"ร้อยละของนักศึกษาชั้นปีสุดท้ายที่ผ่านกระบวนการพัฒนาให้เป็นพลเมืองโลก ร้อยละ 100"}},"2.2.1":{"Q2":{"result":"9088219","percent":"100","detail":"คณะฯ มีเงินสนับสนุนงานวิจัย 9,088,219 บาท (ภายใน 2,034,440 บาท + ภายนอก 7,053,779 บาท) คิดเป็น 605,881.27 บาท/คน"},"Q3":{"result":"9088219","percent":"100","detail":"คณะฯ มีเงินสนับสนุนงานวิจัย 9,088,219 บาท (ภายใน 2,034,440 บาท + ภายนอก 7,053,779 บาท) คิดเป็น 605,881.27 บาท/คน"}},"2.2.2":{"Q2":{"result":"60","percent":"85.71","detail":"อาจารย์ประจำที่มีงานวิจัย 9 คน / อาจารย์ประจำ 15 คน = ร้อยละ 60"},"Q3":{"result":"60","percent":"85.71","detail":"อาจารย์ประจำที่มีงานวิจัย 9 คน / อาจารย์ประจำ 15 คน = ร้อยละ 60"}},"2.2.3":{"Q2":{"result":"8","percent":"100","detail":"นำผลงานวิจัยไปใช้ประโยชน์ 8 ครั้ง"},"Q3":{"result":"8","percent":"100","detail":"นำผลงานวิจัยไปใช้ประโยชน์ 8 ครั้ง"}},"2.2.4":{"Q2":{"result":"106.25","percent":"100","detail":"งานวิจัยที่ตีพิมพ์ 17 เรื่อง (TCI กลุ่ม 2: 1, TCI กลุ่ม 1: 3, นานาชาติ: 13) / อาจารย์ 16 คน = ร้อยละ 106.25"},"Q3":{"result":"106.25","percent":"100","detail":"งานวิจัยที่ตีพิมพ์ 17 เรื่อง (TCI กลุ่ม 2: 1, TCI กลุ่ม 1: 3, นานาชาติ: 13) / อาจารย์ 16 คน = ร้อยละ 106.25"}},"2.2.5":{"Q2":{"result":"1112.5","percent":"100","detail":"บทความที่ได้รับการอ้างอิง 178 เรื่อง / อาจารย์ 16 คน = ร้อยละ 1,112.50"},"Q3":{"result":"1112.5","percent":"100","detail":"บทความที่ได้รับการอ้างอิง 178 เรื่อง / อาจารย์ 16 คน = ร้อยละ 1,112.50"}},"2.2.6":{"Q2":{"result":"1","percent":"50","detail":"ยื่นขอจดทะเบียนอนุสิทธิบัตร สูตรขนมเลียผสมซินไบโอติกสำหรับแมว โดย รศ.ดร.ดวงพร อมรเลิศพิศาล"},"Q3":{"result":"1","percent":"50","detail":"ยื่นขอจดทะเบียนอนุสิทธิบัตร สูตรขนมเลียผสมซินไบโอติกสำหรับแมว โดย รศ.ดร.ดวงพร อมรเลิศพิศาล"}},"2.2.7":{"Q2":{"result":"18.75","percent":"31.25","detail":"ผลงานวิชาการที่ขอจดลิขสิทธิ์ 3 เรื่อง / อาจารย์ 16 คน = ร้อยละ 18.75"},"Q3":{"result":"18.75","percent":"31.25","detail":"ผลงานวิชาการที่ขอจดลิขสิทธิ์ 3 เรื่อง / อาจารย์ 16 คน = ร้อยละ 18.75"}},"2.2.8":{"Q2":{"result":"15","percent":"100","detail":"มีการนำองค์ความรู้งานวิจัยมาประยุกต์ใช้ในการเรียนการสอน 15 เรื่อง"},"Q3":{"result":"15","percent":"100","detail":"มีการนำองค์ความรู้งานวิจัยมาประยุกต์ใช้ในการเรียนการสอน 15 เรื่อง"}},"2.3.1":{"Q2":{"result":"745000","percent":"100","detail":"มีจำนวน 10 โครงการ"},"Q3":{"result":"745000","percent":"100","detail":"มีจำนวน 10 โครงการ"}},"2.3.2":{"Q2":{"result":"N/A","percent":"N/A","detail":"รอผลประเมินเมื่อสิ้นสุดการจัดทำโครงการ"},"Q3":{"result":"N/A","percent":"N/A","detail":"รอผลประเมินเมื่อสิ้นสุดการจัดทำโครงการ"}},"2.3.3":{"Q2":{"result":"N/A","percent":"N/A","detail":"รอผลการดำเนินงานเมื่อสิ้นสุดการจัดทำโครงการ"},"Q3":{"result":"1.67","percent":"33.4","detail":"โครงการบริการวิชาการ 10 โครงการ มีการบูรณาการ 1 โครงการ = ร้อยละ 10 เทียบบัญญัติไตรยางศ์ (30%=5คะแนน) = 1.67 คะแนน"}},"2.4.1":{"Q2":{"result":"N/A","percent":"N/A","detail":"ยังไม่มีผลการดำเนินงาน"},"Q3":{"result":"N/A","percent":"N/A","detail":"ยังไม่มีผลการดำเนินงาน"}},"2.4.2":{"Q2":{"result":"0","percent":"0","detail":"อยู่ระหว่างดำเนินการ"},"Q3":{"result":"0","percent":"0","detail":"อยู่ระหว่างดำเนินการ"}},"3.1.1":{"Q2":{"result":"1","percent":"50","detail":"Mr. Noylamphanh Phongsavath"},"Q3":{"result":"1","percent":"50","detail":"Mr. Noylamphanh Phongsavath"}},"3.1.2":{"Q2":{"result":"2","percent":"50","detail":"รศ.ดร.อภินันท์ สุวรรณรักษ์ เข้าร่วมประชุมวิชาการ 2025 Southeast Asia Biodiversity Workshop ณ สาธารณรัฐประชาชนจีน และได้รับเชิญเป็นวิทยากร"},"Q3":{"result":"2","percent":"50","detail":"รศ.ดร.อภินันท์ สุวรรณรักษ์ เข้าร่วมประชุมวิชาการ 2025 Southeast Asia Biodiversity Workshop ณ สาธารณรัฐประชาชนจีน และได้รับเชิญเป็นวิทยากร"}},"3.1.3":{"Q2":{"result":"18","percent":"60","detail":"นายสุชน สมคิด เข้าร่วมฝึกอบรม Agricultural Productivity and Sustainability ณ Central Luzon State University, Philippines"},"Q3":{"result":"46","percent":"100","detail":"นายสุชน สมคิด เข้าร่วมฝึกอบรม Agricultural Productivity and Sustainability ณ Central Luzon State University, Philippines"}},"3.1.4":{"Q2":{"result":"2","percent":"50","detail":"รศ.ดร.อภินันท์ สุวรรณรักษ์ บรรยายพิเศษ Freshwater Fish of Thailand ณ Kunming Institute of Zoology, จีน"},"Q3":{"result":"3","percent":"75","detail":"รศ.ดร.อภินันท์ สุวรรณรักษ์ บรรยายพิเศษ Freshwater Fish of Thailand ณ Kunming Institute of Zoology, จีน"}},"3.1.5":{"Q2":{"result":"N/A","percent":"N/A","detail":"ยังไม่มีผลการดำเนินงาน"},"Q3":{"result":"N/A","percent":"N/A","detail":"ยังไม่มีผลการดำเนินงาน"}},"4.1.1":{"Q2":{"result":"0","percent":"0","detail":"ยังไม่มีผลการดำเนินงาน"},"Q3":{"result":"0","percent":"0","detail":"ยังไม่มีผลการดำเนินงาน"}},"4.1.2":{"Q2":{"result":"2","percent":"100","detail":"บุคลากร 13 คน เข้าร่วมฝึกอบรม AI และการพัฒนาเว็บไซต์ ณ ฟาร์มแม่ริม บริษัท อีพาวเวอร์ เซอร์วิส จำกัด วันที่ 17-18 ม.ค. 2569"},"Q3":{"result":"2","percent":"100","detail":"บุคลากร 13 คน เข้าร่วมฝึกอบรม AI และการพัฒนาเว็บไซต์ ณ ฟาร์มแม่ริม บริษัท อีพาวเวอร์ เซอร์วิส จำกัด วันที่ 17-18 ม.ค. 2569"}},"4.1.3":{"Q2":{"result":"4","percent":"80","detail":"ดำเนินการครบ 4 ใน 5 ขั้นตอน (A-D): มีนโยบาย, เครือข่าย, โครงการ/กิจกรรม, รายวิชาเฉพาะ"},"Q3":{"result":"4","percent":"80","detail":"ดำเนินการครบ 4 ใน 5 ขั้นตอน (A-D): มีนโยบาย, เครือข่าย, โครงการ/กิจกรรม, รายวิชาเฉพาะ"}},"5.1.1":{"Q2":{"result":"N/A","percent":"N/A","detail":"รอผลการดำเนินงานสิ้นเดือนกรกฎาคม 2569"},"Q3":{"result":"N/A","percent":"N/A","detail":"รอผลการดำเนินงานสิ้นเดือนกรกฎาคม 2569"}},"5.1.2":{"Q2":{"result":"80","percent":"100","detail":"อาจารย์ที่มีตำแหน่งทางวิชาการ 11 คน + ยื่นขอ 1 คน = 12 คน / อาจารย์ทั้งหมด 16 คน"},"Q3":{"result":"80","percent":"100","detail":"อาจารย์ที่มีตำแหน่งทางวิชาการ 11 คน + ยื่นขอ 1 คน = 12 คน / อาจารย์ทั้งหมด 16 คน"}},"5.1.3":{"Q2":{"result":"N/A","percent":"N/A","detail":"รอข้อมูลจากส่วนกลาง"},"Q3":{"result":"N/A","percent":"N/A","detail":"รอข้อมูลจากส่วนกลาง"}},"5.2.1":{"Q2":{"result":"25.85","percent":"27.21","detail":"รายรับจริง 1,704,153.52 บาท / ประมาณการ 6,590,740 บาท (ข้อมูล 31 มี.ค. 2569)"},"Q3":{"result":"36.72","percent":"38.65","detail":"รายรับจริง 2,419,885.81 บาท / ประมาณการ 6,590,740 บาท (ข้อมูล 31 พ.ค. 2569)"}},"5.2.2":{"Q2":{"result":"101154.52","percent":"20.23","detail":"ค่าสมัครสอบ 1,350 + ค่าเช่าพื้นที่ 9,000 + ค่าเช่าห้องประชุม 5,940 + เครื่องมือวิทย์ 1,125 + ฟาร์ม 24,651 + ทุนภายนอก 59,088.52 บาท"},"Q3":{"result":"101154.52","percent":"20.23","detail":"ค่าสมัครสอบ 1,350 + ค่าเช่าพื้นที่ 9,000 + ค่าเช่าห้องประชุม 5,940 + เครื่องมือวิทย์ 1,125 + ฟาร์ม 24,651 + ทุนภายนอก 59,088.52 บาท"}},"5.2.3":{"Q2":{"result":"25453398.21","percent":"100","detail":"ข้อมูลในระบบ E-Fin วันที่ 31 มีนาคม 2569"},"Q3":{"result":"25453398.21","percent":"100","detail":"ข้อมูลในระบบ E-Fin วันที่ 31 มีนาคม 2569"}},"5.2.4":{"Q2":{"result":"N/A","percent":"N/A","detail":"รอข้อมูลจากส่วนกลาง"},"Q3":{"result":"N/A","percent":"N/A","detail":"รอข้อมูลจากส่วนกลาง"}},"5.2.5":{"Q2":{"result":"5","percent":"100","detail":"ลงระบบ e-GP ครบถ้วนทุกรายการ"},"Q3":{"result":"5","percent":"100","detail":"ลงระบบ e-GP ครบถ้วนทุกรายการ"}}};
+
+    const TEMPLATE_2569 = [
+      {code:'1.1.1',name:'1.1.1 ผลการจัดอันดับ World University Ranking (WUR)',unit:'อันดับ',target:'อันดับที่ 1,201-1,500 ของโลก',strategy:1,criteria:'พิจารณาจากรายงานผลการดำเนินงานที่สนับสนุนเป้าหมายของมหาวิทยาลัย เพื่อเข้าสู่การจัดอันดับ World University Ranking (WUR)'},
+      {code:'1.1.2',name:'1.1.2 ผลการจัดอันดับ SCIMAGO',unit:'อันดับ',target:'10',strategy:1,criteria:'พิจารณาจากรายงานผลการดำเนินงานที่สนับสนุนเป้าหมายของมหาวิทยาลัย เพื่อเข้าสู่การจัดอันดับ SCIMAGO ตามเป้าหมายที่กำหนด'},
+      {code:'1.1.3',name:'1.1.3 ผลการจัดอันดับ QS ด้านเกษตรและป่าไม้',unit:'อันดับ',target:'อันดับที่ 401-450 ของโลก',strategy:1,criteria:'พิจารณาจากรายงานผลการดำเนินงานที่สนับสนุนเป้าหมายของมหาวิทยาลัย เพื่อเข้าสู่การจัดอันดับ QS ด้านเกษตรและป่าไม้ ตามเป้าหมายที่กำหนด'},
+      {code:'1.1.4',name:'1.1.4 ความสำเร็จในการร่วมสนับสนุนและขับเคลื่อนการดำเนินงานเพื่อเข้ารับการจัดอันดับ SDGs',unit:'ระดับ',target:'5',strategy:1,criteria:'พิจารณาจากการประเมินความสำเร็จตามกระบวนการ'},
+      {code:'1.1.5',name:'1.1.5 ความสำเร็จในการสนับสนุนมหาวิทยาลัยในการขับเคลื่อนนโยบาย Green U และ Green Office',unit:'ระดับ',target:'3',strategy:1,criteria:'พิจารณาจากเกณฑ์การประเมินผลการดำเนินงานตามมติที่ประชุมคณะกรรมการขับเคลื่อนยุทธศาสตร์การเป็นมหาวิทยาลัยสีเขียว'},
+      {code:'1.2.1',name:'1.2.1 ความสำเร็จของยุทธศาสตร์เกษตรอินทรีย์ (Organic University)',unit:'ร้อยละ',target:'90',strategy:1,criteria:'พิจารณาจากผลการดำเนินงานการร่วมขับเคลื่อนกิจกรรมสำคัญ'},
+      {code:'1.2.2',name:'1.2.2 ความสำเร็จของการดำเนินงานด้านเกษตรอัจฉริยะ (Intelligent Agriculture)',unit:'ร้อยละ',target:'90',strategy:1,criteria:'พิจารณาจากผลการดำเนินงานกิจกรรมสำคัญที่จะขับเคลื่อนการดำเนินงาน'},
+      {code:'2.1.1',name:'2.1.1 จำนวนนักศึกษาใหม่ระดับปริญญาตรี',unit:'คน',target:'130',strategy:2,criteria:'พิจารณาจากการนับจำนวนนักศึกษารับเข้าระดับปริญญาตรี'},
+      {code:'2.1.2',name:'2.1.2 ร้อยละของผู้สำเร็จการศึกษาภายในระยะเวลาของหลักสูตร',unit:'ร้อยละ',target:'80',strategy:2,criteria:'พิจารณาจากจำนวนนักศึกษาชั้นปีสุดท้ายระดับปริญญาตรีที่สำเร็จการศึกษา'},
+      {code:'2.1.3a',name:'2.1.3 ความสำเร็จในการพัฒนานักศึกษาสู่การเป็นผู้มีสุขภาวะที่ดี',unit:'ร้อยละ',target:'90',strategy:2,criteria:'พิจารณาจากความสำเร็จของการบรรลุเป้าหมายตามตัวชี้วัดและกิจกรรมโครงการ'},
+      {code:'2.1.3b',name:'2.1.3 ร้อยละของบัณฑิตที่มีงานทำหรือประกอบอาชีพอิสระภายใน 1 ปี',unit:'ร้อยละ',target:'80',strategy:2,criteria:'พิจารณาจากจำนวนบัณฑิตระดับปริญญาตรีที่สำเร็จในปีการศึกษา 2567 ที่ได้งานทำ'},
+      {code:'2.1.4',name:'2.1.4 ความพึงพอใจผู้ใช้บัณฑิต',unit:'ค่าเฉลี่ย',target:'4.4',strategy:2,criteria:'พิจารณาจากค่าเฉลี่ยผลการสำรวจความพึงพอใจของผู้ใช้บัณฑิต ประจำปีการศึกษา 2567'},
+      {code:'2.1.5',name:'2.1.5 รายได้เริ่มต้นเฉลี่ยต่อเดือนของบัณฑิตระดับปริญญาตรี',unit:'บาท',target:'15000',strategy:2,criteria:'พิจารณาจากจำนวนรายได้เฉลี่ยต่อเดือนเริ่มต้นของบัณฑิตปริญญาตรีที่สำเร็จการศึกษา'},
+      {code:'2.1.6',name:'2.1.6 ค่าฐานนิยม (Mode) ผลการประเมินระดับหลักสูตร',unit:'ค่าเฉลี่ย',target:'3',strategy:2,criteria:'พิจารณาจากค่าฐานนิยม (Mode) จากผลการประเมินคุณภาพการศึกษาระดับหลักสูตร'},
+      {code:'2.1.7',name:'2.1.7 จำนวนรายวิชาเรียนรู้ตลอดชีวิต',unit:'รายวิชา',target:'2',strategy:2,criteria:'พิจารณาจากการนับจำนวนรายวิชาเรียนรู้ตลอดชีวิตที่คณะกรรมการวิชาการรับทราบ'},
+      {code:'2.1.8',name:'2.1.8 จำนวนรางวัลที่นักศึกษา บุคลากร ศิษย์เก่าหรือส่วนงาน ได้รับในระดับชาติ หรือนานาชาติ',unit:'รางวัล',target:'5',strategy:2,criteria:'พิจารณาจากการนับจำนวนรางวัลที่นักศึกษา บุคลากร ศิษย์เก่า หรือส่วนงานได้รับ'},
+      {code:'2.1.9',name:'2.1.9 ร้อยละของนักศึกษาชั้นปีสุดท้ายที่ผ่านกระบวนการพัฒนาให้เป็นพลเมืองโลก',unit:'ร้อยละ',target:'90',strategy:2,criteria:'พิจารณาจากจำนวนนักศึกษาชั้นปีสุดท้ายที่ได้รับการพัฒนาตามกระบวนการทักษะศตวรรษที่ 21'},
+      {code:'2.2.1',name:'2.2.1 จำนวนเงินวิจัยด้านวิทยาศาสตร์และเทคโนโลยี',unit:'บาท',target:'5167959',strategy:2,criteria:'พิจารณาจากจำนวนเงินสนับสนุนโครงการวิจัยจากทุกแหล่งงบประมาณ'},
+      {code:'2.2.2',name:'2.2.2 ร้อยละของอาจารย์และนักวิจัยประจำที่มีผลงานวิจัย',unit:'ร้อยละ',target:'70',strategy:2,criteria:'พิจารณาจากจำนวนอาจารย์และนักวิจัยประจำที่มีผลงานวิจัย'},
+      {code:'2.2.3',name:'2.2.3 จำนวนครั้งในการผลงานวิจัยหรืองานสร้างสรรค์ที่นำไปใช้ประโยชน์',unit:'ครั้ง',target:'3',strategy:2,criteria:'พิจารณาจากจำนวนครั้งในการนำผลงานวิจัยหรืองานสร้างสรรค์มาใช้ประโยชน์'},
+      {code:'2.2.4',name:'2.2.4 ร้อยละของผลงานวิจัยที่ได้รับการตีพิมพ์เผยแพร่ตามเกณฑ์ กพอ.',unit:'ร้อยละ',target:'50',strategy:2,criteria:'พิจารณาจากจำนวนผลงานวิจัยที่ได้รับการตีพิมพ์ระดับชาติหรือนานาชาติ'},
+      {code:'2.2.5',name:'2.2.5 ร้อยละของบทความวิจัยที่ได้รับการอ้างอิง (Citation)',unit:'ร้อยละ',target:'110',strategy:2,criteria:'พิจารณาจากบทความวิจัยที่ได้รับการอ้างอิง (Citation) ในฐานข้อมูลนานาชาติ'},
+      {code:'2.2.6',name:'2.2.6 จำนวนผลงานวิจัยที่ยื่นขอจดสิทธิบัตร/อนุสิทธิบัตร/บัญชีนวัตกรรม',unit:'ผลงาน',target:'2',strategy:2,criteria:'พิจารณาจากการนับจำนวนผลงานวิจัยที่ได้ยื่นขอจดสิทธิบัตร'},
+      {code:'2.2.7',name:'2.2.7 ร้อยละของผลงานวิชาการที่เสนอขอรับการจดลิขสิทธิ์',unit:'ร้อยละ',target:'60',strategy:2,criteria:'พิจารณาจากจำนวนผลงานวิชาการที่เสนอขอรับการจดลิขสิทธิ์'},
+      {code:'2.2.8',name:'2.2.8 จำนวนองค์ความรู้งานวิจัยเพื่อพัฒนาผู้เรียน',unit:'เรื่อง',target:'10',strategy:2,criteria:'พิจารณาจากจำนวนองค์ความรู้งานวิจัยที่นำมาสู่การพัฒนาผู้เรียน'},
+      {code:'2.3.1',name:'2.3.1 จำนวนงบประมาณบริการวิชาการ',unit:'บาท',target:'745000',strategy:2,criteria:'พิจารณาจากการนับจำนวนงบประมาณบริการวิชาการจากทุกแหล่งทุน'},
+      {code:'2.3.2',name:'2.3.2 ผลกระทบด้านเศรษฐกิจ สังคม และคุณภาพชีวิตของชุมชนจากการบริการวิชาการ',unit:'ค่าเฉลี่ย',target:'4',strategy:2,criteria:'พิจารณาจากค่าเฉลี่ยผลการสำรวจผลกระทบด้านเศรษฐกิจ สังคม และคุณภาพชีวิต'},
+      {code:'2.3.3',name:'2.3.3 ระดับความสำเร็จของการบูรณาการผลงานบริการวิชาการสู่พันธกิจอื่น',unit:'ระดับ',target:'5',strategy:2,criteria:'พิจารณาจากจำนวนผลการนำความรู้และประสบการณ์จากการให้บริการวิชาการมาใช้'},
+      {code:'2.4.1',name:'2.4.1 ความสำเร็จของแผนทำนุบำรุงศิลปวัฒนธรรม',unit:'ร้อยละ',target:'80',strategy:2,criteria:'พิจารณาจากผลการดำเนินงานตามตัวชี้วัดในแผนทำนุบำรุงศิลปวัฒนธรรม'},
+      {code:'2.4.2',name:'2.4.2 องค์ความรู้ด้านทำนุบำรุงศิลปะวัฒนธรรมไทยและการอนุรักษ์ทรัพยากรธรรมชาติ',unit:'เรื่อง',target:'5',strategy:2,criteria:'พิจารณาจากจำนวนองค์ความรู้ด้านทำนุบำรุงศิลปะวัฒนธรรมไทย'},
+      {code:'3.1.1',name:'3.1.1 จำนวนนักศึกษาต่างชาติทุกระดับ / ทุกหลักสูตร',unit:'คน',target:'2',strategy:3,criteria:'พิจารณาจากจำนวนนักศึกษาชาวต่างชาติทุกระดับ และทุกหลักสูตร'},
+      {code:'3.1.2',name:'3.1.2 จำนวนอาจารย์/นักวิจัยแลกเปลี่ยน หรือบุคลากรชาวต่างชาติ (Inbound/Outbound)',unit:'คน',target:'4',strategy:3,criteria:'พิจารณาจากการนับจำนวนอาจารย์/นักวิจัย/บุคลากรชาวต่างชาติที่แลกเปลี่ยน'},
+      {code:'3.1.3',name:'3.1.3 จำนวนนักศึกษาแลกเปลี่ยนทุกระดับ ทุกหลักสูตร หรือผู้เข้ารับการฝึกอบรมชาวต่างชาติ',unit:'คน',target:'30',strategy:3,criteria:'พิจารณาจากการนับจำนวนนักศึกษาที่เข้ามาหรือไปเพื่อแลกเปลี่ยนด้วยเหตุผลทางวิชาการ'},
+      {code:'3.1.4',name:'3.1.4 จำนวนองค์ความรู้ด้านการเกษตรที่ได้รับการยอมรับในระดับนานาชาติ',unit:'เรื่อง',target:'4',strategy:3,criteria:'พิจารณาจากการนับจำนวนองค์ความรู้เกษตรที่ได้รับการยอมรับในระดับนานาชาติ'},
+      {code:'3.1.5',name:'3.1.5 ร้อยละของนักศึกษาที่มีผลสอบมาตรฐานภาษาอังกฤษ (CEFR) ตั้งแต่ B1 ขึ้นไป',unit:'ร้อยละ',target:'55',strategy:3,criteria:'พิจารณาจากนักศึกษาระดับปริญญาตรีชั้นปีสุดท้ายที่สอบผ่านมาตรฐาน CEFR ระดับ B1'},
+      {code:'4.1.1',name:'4.1.1 บุคลากรสถาบันอุดมศึกษาและนักศึกษาที่แลกเปลี่ยนความรู้สู่ภาคธุรกิจ/อุตสาหกรรม',unit:'คน',target:'4',strategy:4,criteria:'พิจารณาจากการนับจำนวนบุคลากรที่ไปถ่ายทอด/แลกเปลี่ยนความรู้แก่สถานประกอบการ'},
+      {code:'4.1.2',name:'4.1.2 ความร่วมมือเพื่อพัฒนาผู้ประกอบการและส่งเสริมการสร้างนวัตกรรมกับภาคธุรกิจ/อุตสาหกรรม',unit:'ความร่วมมือ',target:'2',strategy:4,criteria:'พิจารณาจากการนับจำนวนความร่วมมือเพื่อพัฒนาผู้ประกอบการและส่งเสริมนวัตกรรม'},
+      {code:'4.1.3',name:'4.1.3 ระบบนิเวศด้านเทคโนโลยีและนวัตกรรมเพื่อเร่งพัฒนาผู้ประกอบการ',unit:'ระดับ',target:'5',strategy:4,criteria:'พิจารณาจากการดำเนินงานตามขั้นตอนทั้ง 5 ขั้นตอน (A-E)'},
+      {code:'5.1.1',name:'5.1.1 ความสำเร็จในการเตรียมความพร้อมเพื่อเข้ารับการประเมินองค์กรสู่ความเป็นเลิศ (EdPEx)',unit:'ระดับ',target:'5',strategy:5,criteria:'พิจารณาจากการดำเนินการตามแนวทางการนำเกณฑ์ EdPEx ไปใช้ในการพัฒนาองค์กร'},
+      {code:'5.1.2',name:'5.1.2 ร้อยละของบุคลากรที่มีตำแหน่งทางวิชาการ',unit:'ร้อยละ',target:'68.75',strategy:5,criteria:'พิจารณาจากการนับจำนวนคณาจารย์ที่มีตำแหน่งทางวิชาการ'},
+      {code:'5.1.3',name:'5.1.3 ร้อยละของบุคลากรที่มีผลการประเมินสมรรถนะเป็นไปตามมาตรฐาน',unit:'ร้อยละ',target:'80',strategy:5,criteria:'พิจารณาจากผลประเมินสมรรถนะในระบบ PMS'},
+      {code:'5.2.1',name:'5.2.1 ร้อยละของงบประมาณเงินรายได้ที่ได้รับจริงต่อประมาณการเงินรายได้',unit:'ร้อยละ',target:'95',strategy:5,criteria:'พิจารณาจากจำนวนงบประมาณเงินรายได้ที่ได้รับจริงของส่วนงาน'},
+      {code:'5.2.2',name:'5.2.2 จำนวนเงินรายได้จากการให้บริการ',unit:'บาท',target:'500000',strategy:5,criteria:'พิจารณาจากการนับจำนวนงบประมาณเงินรายได้ที่เกิดในระบบ E-Fin'},
+      {code:'5.2.3',name:'5.2.3 จำนวนเงินในกองทุนเงินสะสมเพื่อความมั่นคง',unit:'บาท',target:'25428081',strategy:5,criteria:'พิจารณาจากการนับยอดรวมของจำนวนเงินสะสมรวมในกองทุนสะสมเพื่อความมั่นคง'},
+      {code:'5.2.4',name:'5.2.4 ปริมาณการใช้ไฟฟ้าเปรียบเทียบกับปีที่ผ่านมา',unit:'ร้อยละ',target:'เพิ่มขึ้น 2%',strategy:5,criteria:'พิจารณาผลการดำเนินงานจากปริมาณการใช้ไฟฟ้าต่อหัวบุคลากรและนักศึกษา'},
+      {code:'5.2.5',name:'5.2.5 การใช้จ่ายงบประมาณแผ่นดินงบลงทุนตามมาตรการเร่งรัดการเบิกจ่าย ปีงบประมาณ พ.ศ. 2569',unit:'ระดับ',target:'5',strategy:5,criteria:'พิจารณาจากประเมินผลการใช้จ่ายงบประมาณแผ่นดิน (งบลงทุน) ตามมาตรการเร่งรัดการเบิกจ่าย'},
+    ];
+
     // ===== Data Storage =====
     function storageKey() { return `mission_${getCurrentYear()}`; }
 
     function getData() {
-      return JSON.parse(localStorage.getItem(storageKey()) || '{"kpis":[]}');
+      const raw = localStorage.getItem(storageKey());
+      if (raw) return JSON.parse(raw);
+      // ปี 2569: seed template อัตโนมัติพร้อมข้อมูล Q2/Q3
+      if (getCurrentYear() === 2569) {
+        const normalize = (q, code, qkey) => {
+          const r = q.result === 'N/A' || q.result === '' ? '0' : q.result;
+          const p = q.percent === 'N/A' || q.percent === '' ? '0' : q.percent;
+          const link = LINKS[code]?.[qkey] || '';
+          return { result: r, percent: p, detail: q.detail || '', link };
+        };
+        const data = { kpis: TEMPLATE_2569.map(k => {
+          const qd = Q_DATA[k.code] || {};
+          const q2 = qd.Q2 ? normalize(qd.Q2, k.code, 'Q2') : {result:'0',percent:'0',detail:'',link:''};
+          const q3 = qd.Q3 ? normalize(qd.Q3, k.code, 'Q3') : {result:'0',percent:'0',detail:'',link:''};
+          const q1 = {...q2, link: LINKS[k.code]?.Q2 || ''};
+          return { ...k, quarters: { Q1: q1, Q2: q2, Q3: q3 } };
+        })};
+        saveData(data);
+        return data;
+      }
+      return { kpis: [] };
     }
 
     function saveData(data) {
@@ -1123,25 +1299,35 @@
 
         const q = kpi.quarters?.[`Q${currentQuarter}`] || {};
         const pct = parseFloat(q.percent);
-        const badge = isNaN(pct) ? 'gray' : pct >= 100 ? 'success' : pct >= 50 ? 'warning' : 'danger';
-        const statusText = isNaN(pct) ? '-' : pct >= 100 ? 'ผ่าน' : pct >= 50 ? 'กำลังดำเนินการ' : 'ต้องเร่ง';
+        const dotColor = isNaN(pct) || q.percent === '' ? '#cbd5e1' : pct >= 100 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
+        const statusText = isNaN(pct) || q.percent === '' ? 'ยังไม่มีข้อมูล' : pct >= 100 ? 'ผ่าน' : pct >= 50 ? 'กำลังดำเนินการ' : 'ต้องเร่ง';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><span style="font-size:11px;font-weight:700;color:var(--primary)">${kpi.code}</span></td>
-          <td style="font-size:12px;max-width:200px">${kpi.name}</td>
-          <td style="font-size:12px;text-align:center">${kpi.unit||'-'}</td>
-          <td style="font-size:12px;text-align:center">${kpi.target||'-'}</td>
-          <td><input class="td-input" type="number" value="${q.result||''}" placeholder="-" data-code="${kpi.code}" data-field="result" step="0.01" oninput="onFieldChange(this)"></td>
-          <td><input class="td-input" type="number" value="${q.percent||''}" placeholder="%" data-code="${kpi.code}" data-field="percent" step="0.01" oninput="onFieldChange(this)"></td>
-          <td><span class="badge badge-${badge}">${statusText}</span></td>
+          <td style="font-size:12px;max-width:200px">${kpi.name.replace(/^\d+\.\d+\.\d+\S*\s*/,'')}</td>
+          <td><input class="td-input" type="text" value="${kpi.unit||''}" placeholder="หน่วย" data-code="${kpi.code}" data-field="unit" oninput="onMetaChange(this)" style="text-align:center;min-width:60px"></td>
+          <td><input class="td-input" type="text" value="${kpi.target||''}" placeholder="เป้าหมาย" data-code="${kpi.code}" data-field="target" oninput="onMetaChange(this)" style="text-align:center;min-width:70px"></td>
+          <td><input class="td-input" type="number" value="${q.result ?? ''}" placeholder="-" data-code="${kpi.code}" data-field="result" step="0.01" oninput="onFieldChange(this)"></td>
+          <td><input class="td-input" type="number" value="${q.percent ?? ''}" placeholder="%" data-code="${kpi.code}" data-field="percent" step="0.01" oninput="onFieldChange(this)"></td>
+          <td style="text-align:center"><span title="${statusText}" style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${dotColor}"></span></td>
           <td><textarea class="td-input" placeholder="รายละเอียด..." data-code="${kpi.code}" data-field="detail" oninput="onFieldChange(this)">${q.detail||''}</textarea></td>
-          <td>
+          <td style="white-space:nowrap">
             <button class="btn-edit-sm" onclick="openEditModal('${kpi.code}')">แก้ไข</button>
+            ${q.link ? `<a href="${q.link}" target="_blank" class="btn-view-pdf" style="display:block;margin-top:4px;text-align:center">🔗 หลักฐาน</a>` : ''}
+            <button class="btn-danger-sm" style="margin-top:4px" onclick="deleteKpi('${kpi.code}')">ลบ</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    function onMetaChange(input) {
+      const data = getData();
+      const kpi = data.kpis.find(k => k.code === input.dataset.code);
+      if (!kpi) return;
+      kpi[input.dataset.field] = input.value;
+      saveData(data);
     }
 
     function onFieldChange(input) {
@@ -1157,6 +1343,60 @@
     function saveEditData() {
       showAlert('edit-success', 'บันทึกข้อมูลสำเร็จ!');
     }
+
+    // ===== Modal Add KPI =====
+    function openAddKpiModal() {
+      ['add-code','add-name','add-unit','add-target','add-criteria'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('add-strategy').value = '';
+      document.getElementById('add-kpi-modal').classList.add('active');
+    }
+
+    function closeAddKpiModal() {
+      document.getElementById('add-kpi-modal').classList.remove('active');
+    }
+
+    function confirmAddKpi() {
+      const code = document.getElementById('add-code').value.trim();
+      const name = document.getElementById('add-name').value.trim();
+      const strategy = parseInt(document.getElementById('add-strategy').value);
+      if (!code || !name || !strategy) {
+        alert('กรุณากรอกรหัส ชื่อตัวชี้วัด และยุทธศาสตร์');
+        return;
+      }
+      const data = getData();
+      if (data.kpis.find(k => k.code === code)) {
+        alert(`รหัส ${code} มีอยู่แล้วในระบบ`);
+        return;
+      }
+      data.kpis.push({
+        code,
+        name: name.startsWith(code) ? name : `${code} ${name}`,
+        unit: document.getElementById('add-unit').value.trim(),
+        target: document.getElementById('add-target').value.trim(),
+        strategy,
+        criteria: document.getElementById('add-criteria').value.trim(),
+        quarters: {}
+      });
+      // sort ตาม strategy แล้ว code
+      data.kpis.sort((a,b) => a.strategy - b.strategy || a.code.localeCompare(b.code, undefined, {numeric:true}));
+      saveData(data);
+      closeAddKpiModal();
+      renderEditTable();
+      showAlert('edit-success', `เพิ่มตัวชี้วัด ${code} สำเร็จ!`);
+    }
+
+    function deleteKpi(code) {
+      if (!confirm(`ต้องการลบตัวชี้วัด ${code} ใช่หรือไม่?`)) return;
+      const data = getData();
+      data.kpis = data.kpis.filter(k => k.code !== code);
+      saveData(data);
+      renderEditTable();
+      renderPdfList();
+    }
+
+    document.getElementById('add-kpi-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeAddKpiModal();
+    });
 
     // ===== Modal Edit =====
     let editingCode = '';
@@ -1215,6 +1455,7 @@
       data.kpis.forEach(kpi => {
         const pdfKey = `pdf_mission_${getCurrentYear()}_${kpi.code}_Q${currentQuarter}`;
         const hasPdf = !!localStorage.getItem(pdfKey);
+        const q = kpi.quarters?.[`Q${currentQuarter}`] || {};
         const div = document.createElement('div');
         div.className = 'pdf-item';
         div.innerHTML = `
@@ -1223,6 +1464,7 @@
             <div class="pdf-name">${kpi.name}</div>
           </div>
           <div class="pdf-actions">
+            ${q.link ? `<a class="btn-view-pdf" href="${q.link}" target="_blank">🔗 ลิงก์ ERP</a>` : ''}
             ${hasPdf
               ? `<span class="pdf-status-ok">✓ แนบแล้ว</span>
                  <a class="btn-view-pdf" href="${localStorage.getItem(pdfKey)}" target="_blank">ดู PDF</a>
@@ -1286,8 +1528,84 @@
       renderPdfList();
     }
 
+    // ===== Strategy Management =====
+    const DEFAULT_STRATEGIES = [
+      {id:1, name:'Proactive Strategy toward Inter IWA'},
+      {id:2, name:'Driving Mission-Driven Performance'},
+      {id:3, name:'Fostering Internationalization'},
+      {id:4, name:'Technology Development and Innovation University'},
+      {id:5, name:'Financial Stability and Sustainable Growth'},
+    ];
+
+    function getStrategies() {
+      const key = `strategies_${getCurrentYear()}`;
+      return JSON.parse(localStorage.getItem(key) || JSON.stringify(DEFAULT_STRATEGIES));
+    }
+
+    function saveStrategies(list) {
+      localStorage.setItem(`strategies_${getCurrentYear()}`, JSON.stringify(list));
+    }
+
+    function renderStrategyList() {
+      const list = document.getElementById('strategy-list');
+      if (!list) return;
+      const strategies = getStrategies();
+      list.innerHTML = '';
+      strategies.forEach(s => {
+        const div = document.createElement('div');
+        div.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 8px;border-radius:20px;background:rgba(30,58,95,0.08);border:1px solid rgba(30,58,95,0.15);font-size:12px;color:var(--primary)';
+        div.innerHTML = `
+          <span style="font-weight:700;background:var(--primary);color:white;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">${s.id}</span>
+          <span style="font-weight:500">${s.name}</span>
+          <button onclick="deleteStrategy(${s.id})" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-size:13px;line-height:1;padding:0;margin-left:2px" title="ลบ">✕</button>
+        `;
+        list.appendChild(div);
+      });
+      // sync dropdown filter ใน tab กรอก/แก้ไข
+      const sel = document.getElementById('strategy-filter');
+      const cur = sel.value;
+      sel.innerHTML = '<option value="all">ทั้งหมด</option>';
+      strategies.forEach(s => {
+        const o = document.createElement('option');
+        o.value = s.id; o.textContent = `ยุทธศาสตร์ที่ ${s.id} — ${s.name}`;
+        if (String(s.id) === cur) o.selected = true;
+        sel.appendChild(o);
+      });
+    }
+
+    function openAddStrategyModal() {
+      document.getElementById('add-strategy-name').value = '';
+      document.getElementById('add-strategy-modal').classList.add('active');
+    }
+    function closeAddStrategyModal() {
+      document.getElementById('add-strategy-modal').classList.remove('active');
+    }
+    function confirmAddStrategy() {
+      const name = document.getElementById('add-strategy-name').value.trim();
+      if (!name) { alert('กรุณากรอกชื่อยุทธศาสตร์'); return; }
+      const list = getStrategies();
+      const newId = list.length > 0 ? Math.max(...list.map(s => s.id)) + 1 : 1;
+      list.push({ id: newId, name });
+      saveStrategies(list);
+      closeAddStrategyModal();
+      renderStrategyList();
+    }
+    function deleteStrategy(id) {
+      const data = getData();
+      const hasKpi = data.kpis.some(k => k.strategy === id);
+      if (hasKpi && !confirm(`ยุทธศาสตร์ที่ ${id} มีตัวชี้วัดอยู่ ต้องการลบต่อไหม?\n(ตัวชี้วัดที่อยู่ในยุทธศาสตร์นี้จะยังคงอยู่ แต่ไม่มีกลุ่ม)`)) return;
+      const list = getStrategies().filter(s => s.id !== id);
+      saveStrategies(list);
+      renderStrategyList();
+      renderEditTable();
+    }
+    document.getElementById('add-strategy-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeAddStrategyModal();
+    });
+
     // ===== Init =====
     renderYearSelect();
+    renderStrategyList();
     loadData();
   </script>
 

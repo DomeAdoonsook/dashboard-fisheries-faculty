@@ -1310,7 +1310,7 @@
           <td><span style="font-size:11px;font-weight:700;color:var(--primary)">${kpi.code}</span></td>
           <td style="font-size:12px;max-width:200px">${kpi.name.replace(/^\d+\.\d+\.\d+\S*\s*/,'')}</td>
           <td><input class="td-input" type="text" value="${kpi.unit||''}" placeholder="หน่วย" data-code="${kpi.code}" data-field="unit" oninput="onMetaChange(this)" style="text-align:center;min-width:60px"></td>
-          <td><input class="td-input" type="text" value="${kpi.target||''}" placeholder="เป้าหมาย" data-code="${kpi.code}" data-field="target" oninput="onMetaChange(this)" style="text-align:center;min-width:70px"></td>
+          <td style="min-width:90px;max-width:130px;"><textarea class="td-input" data-code="${kpi.code}" data-field="target" oninput="onMetaChange(this)" style="min-height:36px;resize:none;word-break:break-word;">${kpi.target||''}</textarea></td>
           <td><input class="td-input" type="number" value="${q.result ?? ''}" placeholder="-" data-code="${kpi.code}" data-field="result" step="0.01" oninput="onFieldChange(this)"></td>
           <td><input class="td-input" type="number" value="${q.percent ?? ''}" placeholder="%" data-code="${kpi.code}" data-field="percent" step="0.01" oninput="onFieldChange(this)"></td>
           <td style="text-align:center"><span title="${statusText}" style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${dotColor}"></span></td>

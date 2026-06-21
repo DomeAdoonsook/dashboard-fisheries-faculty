@@ -200,16 +200,16 @@
     .preview-info strong { color: var(--text); }
     .preview-actions { display: flex; gap: 10px; }
     .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(0,0,0,0.06); }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
     thead th {
-      background: rgba(30,58,95,0.85); color: white; padding: 10px 14px;
-      text-align: left; font-weight: 600; font-size: 12px; white-space: nowrap;
+      background: rgba(30,58,95,0.85); color: white; padding: 8px 8px;
+      text-align: left; font-weight: 600; font-size: 11px; white-space: nowrap;
     }
     thead th:first-child { border-radius: 12px 0 0 0; }
     thead th:last-child { border-radius: 0 12px 0 0; }
     tbody tr { border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.15s; }
     tbody tr:hover { background: rgba(37,99,235,0.04); }
-    tbody td { padding: 10px 14px; vertical-align: top; }
+    tbody td { padding: 6px 8px; vertical-align: top; }
     .strategy-row td {
       background: rgba(30,58,95,0.06); font-weight: 700; font-size: 12px;
       color: var(--primary); padding: 8px 14px;
@@ -223,6 +223,22 @@
     }
     .td-input:focus { outline: none; border-color: var(--primary-light); background: white; box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
     textarea.td-input { resize: vertical; min-height: 52px; }
+
+    /* Strategy chips */
+    .strategy-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 99px;
+      background: rgba(30,58,95,0.1); border: 1px solid rgba(30,58,95,0.2);
+      font-size: 12px; font-weight: 600; color: var(--primary); cursor: default;
+    }
+    .strategy-chip .chip-num {
+      width: 20px; height: 20px; border-radius: 50%; background: var(--primary);
+      color: white; font-size: 11px; display: flex; align-items: center; justify-content: center; font-weight: 700;
+    }
+    .strategy-chip .chip-x {
+      cursor: pointer; color: var(--text-muted); font-size: 13px; line-height: 1;
+    }
+    .strategy-chip .chip-x:hover { color: #dc2626; }
 
     /* Score input 1-5 */
     .score-select {
@@ -435,6 +451,9 @@
         <button class="btn-outline" style="padding:8px 16px;font-size:13px;" onclick="openAddKpiModal()">+ เพิ่มตัวชี้วัด</button>
         <button class="btn-success" style="padding:8px 16px;font-size:13px;" onclick="saveAll()">✓ บันทึกทั้งหมด</button>
       </div>
+
+      <!-- Strategy chips -->
+      <div id="strategyChips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;"></div>
 
       <!-- สถานะ legend -->
       <div style="display:flex;align-items:center;gap:18px;margin-bottom:16px;font-size:12px;color:var(--text-muted);">
@@ -709,6 +728,26 @@ function updateStrategyFilter() {
   const strategies = getStrategies();
   sel.innerHTML = '<option value="0">ทั้งหมด</option>' +
     strategies.map(s => `<option value="${s.id}">${s.id}. ${s.name}</option>`).join('');
+  renderStrategyChips();
+}
+
+function renderStrategyChips() {
+  const strategies = getStrategies();
+  document.getElementById('strategyChips').innerHTML = strategies.map(s =>
+    `<div class="strategy-chip">
+      <span class="chip-num">${s.id}</span>
+      ${s.name}
+      <span class="chip-x" onclick="deleteStrategy(${s.id})" title="ลบยุทธศาสตร์">✕</span>
+    </div>`
+  ).join('');
+}
+
+function deleteStrategy(id) {
+  if (!confirm('ยืนยันการลบยุทธศาสตร์นี้?')) return;
+  const strategies = getStrategies().filter(s => s.id !== id);
+  saveStrategies(strategies);
+  updateStrategyFilter();
+  renderEditTable();
 }
 
 // ===== Render Edit Table =====
@@ -737,11 +776,9 @@ function renderEditTable() {
 
     html += `<tr>
       <td style="font-weight:700;color:var(--primary);white-space:nowrap;">${kpi.code}</td>
-      <td style="min-width:220px;">
-        <input class="td-input" value="${escHtml(kpi.name)}" onchange="onMetaChange(${idx},'name',this.value)" style="min-width:200px;">
-      </td>
-      <td><input class="td-input" value="${escHtml(kpi.unit||'')}" onchange="onMetaChange(${idx},'unit',this.value)"></td>
-      <td><input class="td-input" value="${escHtml(kpi.target||'')}" onchange="onMetaChange(${idx},'target',this.value)"></td>
+      <td style="max-width:200px;min-width:150px;word-break:break-word;font-size:12px;line-height:1.4;">${escHtml(kpi.name)}</td>
+      <td style="max-width:60px;"><input class="td-input" value="${escHtml(kpi.unit||'')}" onchange="onMetaChange(${idx},'unit',this.value)" style="min-width:50px;"></td>
+      <td style="max-width:60px;"><input class="td-input" value="${escHtml(kpi.target||'')}" onchange="onMetaChange(${idx},'target',this.value)" style="min-width:40px;"></td>
       <td>
         <select class="score-select" onchange="onScoreChange(${idx},this.value)">
           <option value="">-</option>
@@ -752,9 +789,9 @@ function renderEditTable() {
       <td style="text-align:center;">
         <span title="${statusText}" style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${dotColor}"></span>
       </td>
-      <td><input class="td-input" value="${escHtml(q.owner||kpi.owner||'')}" onchange="onFieldChange(${idx},'owner',this.value)" placeholder="ผู้รับผิดชอบ"></td>
-      <td style="min-width:160px;">
-        <textarea class="td-input" onchange="onFieldChange(${idx},'detail',this.value)" placeholder="รายละเอียด...">${escHtml(q.detail||'')}</textarea>
+      <td style="max-width:110px;min-width:90px;word-break:break-word;font-size:12px;">${escHtml(q.owner||kpi.owner||'')}</td>
+      <td style="max-width:140px;">
+        <textarea class="td-input" onchange="onFieldChange(${idx},'detail',this.value)" placeholder="รายละเอียด..." style="min-width:120px;min-height:44px;">${escHtml(q.detail||'')}</textarea>
       </td>
       <td style="white-space:nowrap;">
         ${q.link ? `<a href="${q.link}" target="_blank" style="margin-right:4px;text-decoration:none;font-size:14px;" title="ดูเอกสารอ้างอิง">🔗</a>` : ''}

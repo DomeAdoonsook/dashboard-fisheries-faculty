@@ -12,3 +12,6 @@ _*.txt
 # OS
 Thumbs.db
 desktop.ini
+
+# Large files (too big for GitHub)
+*.pdf

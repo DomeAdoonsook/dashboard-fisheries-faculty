@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ฟาร์มประมง — SAB</title>
+  <title>ฟาร์มประมง — SAO</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
   <style>
@@ -18,8 +18,8 @@
       --primary: #1e3a5f;
       --primary-light: #2563eb;
       --accent: #3b82f6;
-      --farm: #0891b2;
-      --farm-light: #06b6d4;
+      --farm: #7c3aed;
+      --farm-light: #8b5cf6;
       --text: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
@@ -144,7 +144,7 @@
       transition: background 0.15s;
       color: var(--text-muted);
     }
-    .sidebar-item.active .icon { background: rgba(5,150,105,0.15); color: var(--farm); }
+    .sidebar-item.active .icon { background: rgba(124,58,237,0.15); color: var(--farm); }
     .sidebar-bottom {
       margin-top: auto; padding-top: 10px;
       border-top: 1px solid rgba(0,0,0,0.06);
@@ -199,7 +199,7 @@
     .btn-primary { background: var(--primary); color: white; }
     .btn-primary:hover { background: #162d4a; }
     .btn-farm { background: var(--farm); color: white; }
-    .btn-farm:hover { background: #047857; }
+    .btn-farm:hover { background: #6d28d9; }
     .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text-muted); }
     .btn-outline:hover { border-color: var(--primary-light); color: var(--primary-light); }
     .btn-danger { background: transparent; border: 1.5px solid #fecaca; color: var(--danger); }
@@ -259,8 +259,8 @@
       border: 2px solid var(--border); border-radius: 14px; padding: 16px 14px;
       cursor: pointer; transition: all 0.2s; background: var(--white); position: relative;
     }
-    .pond-card:hover { border-color: var(--farm-light); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(5,150,105,0.12); }
-    .pond-card.active-crop { border-color: var(--farm); background: #f0fdf4; }
+    .pond-card:hover { border-color: var(--farm-light); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(124,58,237,0.12); }
+    .pond-card.active-crop { border-color: var(--farm); background: #f5f3ff; }
     .pond-card.empty { border-color: var(--border); background: #fafafa; }
     .pond-card.needs-input { border-color: var(--warning); background: #fffbeb; }
     .pond-id { font-size: 20px; font-weight: 800; color: var(--primary); }
@@ -294,7 +294,7 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.04);
       transition: all 0.3s cubic-bezier(0.4,0,0.2,1); cursor: default;
     }
-    .stat-box:hover { transform: scale(1.02); border-color: rgba(37,99,235,0.2); }
+    .stat-box:hover { transform: scale(1.02); border-color: rgba(124,58,237,0.2); }
     .stat-box .stat-info { display: flex; flex-direction: column; gap: 4px; }
     .stat-box .lbl { font-size: 12px; font-weight: 500; color: var(--text-muted); }
     .stat-box .num-row { display: flex; align-items: baseline; gap: 6px; }
@@ -310,7 +310,7 @@
     .stat-box:hover .stat-icon { transform: scale(1.1); }
     .stat-box .stat-icon .material-symbols-outlined { font-size: 24px; }
     .stat-icon.blue { background: rgba(37,99,235,0.12); color: var(--primary); }
-    .stat-icon.green { background: rgba(5,150,105,0.12); color: var(--farm); }
+    .stat-icon.green { background: rgba(124,58,237,0.12); color: var(--farm); }
     .stat-icon.gray { background: rgba(100,116,139,0.1); color: var(--text-muted); }
     .stat-icon.yellow { background: rgba(245,158,11,0.12); color: var(--warning); }
 
@@ -387,8 +387,8 @@
   </div>
   <div class="navbar-tabs">
     <div class="nav-tab" onclick="switchFarm('dirt')">Earthen Pond</div>
-    <div class="nav-tab active" onclick="switchFarm('sab')">SAB</div>
-    <div class="nav-tab" onclick="switchFarm('ornamental')">SAO</div>
+    <div class="nav-tab" onclick="switchFarm('sab')">SAB</div>
+    <div class="nav-tab active" onclick="switchFarm('ornamental')">SAO</div>
   </div>
   <div class="navbar-right">
     <div class="user-badge">
@@ -462,7 +462,7 @@
     <!-- ===== PAGE: ภาพรวมบ่อ ===== -->
     <div class="page active" id="page-overview">
       <div class="page-header">
-        <h1><span class="material-symbols-outlined" style="font-size:24px;vertical-align:-4px;margin-right:6px;">dashboard</span>ภาพรวม SAB</h1>
+        <h1><span class="material-symbols-outlined" style="font-size:24px;vertical-align:-4px;margin-right:6px;">dashboard</span>ภาพรวม SAO</h1>
         <p id="overview-date"></p>
       </div>
 
@@ -470,7 +470,7 @@
         <div class="stat-box">
           <div class="stat-info">
             <p class="lbl">บ่อทั้งหมด</p>
-            <div class="num-row"><span class="num" id="stat-total">27</span><span class="unit">บ่อ</span></div>
+            <div class="num-row"><span class="num" id="stat-total">24</span><span class="unit">บ่อ</span></div>
           </div>
           <div class="stat-icon blue"><span class="material-symbols-outlined">water</span></div>
         </div>
@@ -580,8 +580,8 @@
             <input type="date" class="form-control" id="daily-date">
           </div>
         </div>
-        <div id="daily-pond-info" style="display:none; margin-top:14px; padding:12px 16px; background:#f0fdf4; border-radius:10px; border:1px solid #bbf7d0;">
-          <span id="daily-info-text" style="font-size:13px; color:#15803d; font-weight:600;"></span>
+        <div id="daily-pond-info" style="display:none; margin-top:14px; padding:12px 16px; background:#f5f3ff; border-radius:10px; border:1px solid #c4b5fd;">
+          <span id="daily-info-text" style="font-size:13px; color:#6d28d9; font-weight:600;"></span>
         </div>
       </div>
 
@@ -706,7 +706,7 @@
           </div>
         </div>
 
-        <div id="harvest-summary-box" style="display:none; margin:16px 0; padding:14px 18px; background:#f0fdf4; border-radius:12px; border:1px solid #bbf7d0; font-size:13px; line-height:2;">
+        <div id="harvest-summary-box" style="display:none; margin:16px 0; padding:14px 18px; background:#f5f3ff; border-radius:12px; border:1px solid #c4b5fd; font-size:13px; line-height:2;">
         </div>
 
         <div class="form-grid" style="margin-top:16px;">
@@ -897,12 +897,12 @@
     <div class="form-grid">
       <div class="form-group">
         <label class="form-label">รหัสบ่อ *</label>
-        <input class="form-control" id="ap-id" placeholder="เช่น SAB28">
+        <input class="form-control" id="ap-id" placeholder="เช่น SAO25">
       </div>
       <div class="form-group">
         <label class="form-label">กลุ่ม *</label>
         <select class="form-control" id="ap-group">
-          <option value="SAB">SAB</option><option value="อื่นๆ">อื่นๆ</option>
+          <option value="SAO">SAO</option><option value="อื่นๆ">อื่นๆ</option>
         </select>
       </div>
       <div class="form-group">
@@ -1048,28 +1048,28 @@ function logout() { sessionStorage.clear(); window.location.href = 'index.html';
 function switchFarm(type) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   event.currentTarget.classList.add('active');
-  if (type === 'sab') return; // อยู่หน้านี้แล้ว
-  const names = { dirt: 'farm-admin.html', ornamental: 'farm-sao.html' };
+  if (type === 'ornamental') return; // อยู่หน้านี้แล้ว
+  const names = { dirt: 'farm-admin.html', sab: 'farm-sab.html' };
   if (names[type]) window.location.href = names[type];
 }
 
 // ===== Storage Keys =====
-const SK_PONDS    = 'farm_ponds_sab';
-const SK_CYCLES   = 'farm_cycles_sab';
+const SK_PONDS    = 'farm_ponds_sao';
+const SK_CYCLES   = 'farm_cycles_sao';
 const SK_FEED_CFG = 'farm_feed_config';
 const SK_MED_CFG  = 'farm_med_config';
 const SK_COST_CFG = 'farm_cost_config';
-const SK_LOGS     = 'farm_daily_logs_sab';
+const SK_LOGS     = 'farm_daily_logs_sao';
 const SK_SPECIES  = 'farm_species';
 
 function load(key, def) { try { return JSON.parse(localStorage.getItem(key)) || def; } catch { return def; } }
 function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
-// ===== Default Ponds (27 บ่อ SAB) =====
-const DEFAULT_PONDS = Array.from({length: 27}, (_, i) => ({
-  id: `SAB${String(i+1).padStart(2,'0')}`,
-  group: 'SAB',
+// ===== Default Ponds (24 บ่อ SAO) =====
+const DEFAULT_PONDS = Array.from({length: 24}, (_, i) => ({
+  id: `SAO${String(i+1).padStart(2,'0')}`,
+  group: 'SAO',
   size: 0,
   note: '',
   active: true

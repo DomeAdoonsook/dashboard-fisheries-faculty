@@ -241,6 +241,15 @@
     .form-hint { font-size: 11px; color: var(--text-muted); }
 
     /* ===== Pond Grid ===== */
+    .pond-grid-wrap {
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.75);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
     .pond-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -254,6 +263,15 @@
     .pond-card.active-crop { border-color: var(--farm); background: #f0fdf4; }
     .pond-card.empty { border-color: var(--border); background: #fafafa; }
     .pond-card.needs-input { border-color: var(--warning); background: #fffbeb; }
+    .pond-card.broodstock { border-color: #d97706 !important; border-width: 2px; background: #fffbeb; box-shadow: 0 0 0 1px rgba(217,119,6,0.15); }
+    .pond-card.broodstock:hover { box-shadow: 0 4px 12px rgba(217,119,6,0.2); }
+    .broodstock-badge {
+      position: absolute; top: 8px; right: 8px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white; font-size: 9px; font-weight: 700;
+      padding: 2px 6px; border-radius: 99px;
+      letter-spacing: 0.03em; display: flex; align-items: center; gap: 3px;
+    }
     .pond-id { font-size: 20px; font-weight: 800; color: var(--primary); }
     .pond-species { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
     .pond-days { font-size: 11px; color: var(--farm); font-weight: 600; margin-top: 2px; }
@@ -275,29 +293,38 @@
     .group-btn:hover, .group-btn.active { background: var(--farm); color: white; border-color: var(--farm); }
 
     /* ===== Stat Row ===== */
-    .stat-row { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+    .stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 24px; }
     .stat-box {
-      flex: 1; min-width: 120px; background: rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.6);
       backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%);
       border: 1px solid rgba(255,255,255,0.75);
-      border-radius: 16px; padding: 16px 20px;
-      display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      border-radius: 16px; padding: 20px 24px;
+      display: flex; align-items: flex-start; justify-content: space-between;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      cursor: default;
     }
-    .stat-box .stat-info { display: flex; flex-direction: column; }
-    .stat-box .num { font-size: 28px; font-weight: 800; color: var(--primary); }
+    .stat-box:hover { transform: scale(1.02); border-color: rgba(37,99,235,0.2); }
+    .stat-box .stat-info { display: flex; flex-direction: column; gap: 4px; }
+    .stat-box .lbl { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+    .stat-box .num-row { display: flex; align-items: baseline; gap: 6px; }
+    .stat-box .num { font-size: 36px; font-weight: 800; color: var(--primary); line-height: 1.1; letter-spacing: -0.02em; }
     .stat-box .num.green { color: var(--farm); }
     .stat-box .num.yellow { color: var(--warning); }
-    .stat-box .lbl { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .stat-box .num.purple { color: #7c3aed; }
+    .stat-box .unit { font-size: 14px; color: var(--text-muted); }
     .stat-box .stat-icon {
-      width: 44px; height: 44px; border-radius: 12px;
+      width: 48px; height: 48px; border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; font-size: 22px;
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
     }
-    .stat-icon.blue { background: rgba(37,99,235,0.1); color: var(--primary); }
-    .stat-icon.green { background: rgba(5,150,105,0.1); color: var(--farm); }
+    .stat-box:hover .stat-icon { transform: scale(1.1); }
+    .stat-box .stat-icon .material-symbols-outlined { font-size: 24px; }
+    .stat-icon.blue { background: rgba(37,99,235,0.12); color: var(--primary); }
+    .stat-icon.green { background: rgba(5,150,105,0.12); color: var(--farm); }
     .stat-icon.gray { background: rgba(100,116,139,0.1); color: var(--text-muted); }
-    .stat-icon.yellow { background: rgba(245,158,11,0.1); color: var(--warning); }
+    .stat-icon.yellow { background: rgba(245,158,11,0.12); color: var(--warning); }
 
     /* ===== Modal ===== */
     .modal-overlay {
@@ -453,20 +480,32 @@
 
       <div class="stat-row" id="overview-stats">
         <div class="stat-box">
-          <div class="stat-info"><div class="num" id="stat-total">53</div><div class="lbl">บ่อทั้งหมด</div></div>
+          <div class="stat-info">
+            <p class="lbl">บ่อทั้งหมด</p>
+            <div class="num-row"><span class="num" id="stat-total">53</span><span class="unit">บ่อ</span></div>
+          </div>
           <div class="stat-icon blue"><span class="material-symbols-outlined">water</span></div>
         </div>
         <div class="stat-box">
-          <div class="stat-info"><div class="num green" id="stat-active">0</div><div class="lbl">กำลังเลี้ยง</div></div>
+          <div class="stat-info">
+            <p class="lbl">กำลังเลี้ยง</p>
+            <div class="num-row"><span class="num green" id="stat-active">0</span><span class="unit">บ่อ</span></div>
+          </div>
           <div class="stat-icon green"><span class="material-symbols-outlined">set_meal</span></div>
         </div>
         <div class="stat-box">
-          <div class="stat-info"><div class="num" id="stat-empty">0</div><div class="lbl">ว่าง</div></div>
-          <div class="stat-icon gray"><span class="material-symbols-outlined">inbox</span></div>
+          <div class="stat-info">
+            <p class="lbl">ว่าง</p>
+            <div class="num-row"><span class="num" id="stat-empty">0</span><span class="unit">บ่อ</span></div>
+          </div>
+          <div class="stat-icon gray"><span class="material-symbols-outlined">layers_clear</span></div>
         </div>
         <div class="stat-box">
-          <div class="stat-info"><div class="num yellow" id="stat-needs">0</div><div class="lbl">ยังไม่กรอกวันนี้</div></div>
-          <div class="stat-icon yellow"><span class="material-symbols-outlined">pending_actions</span></div>
+          <div class="stat-info">
+            <p class="lbl">ยังไม่กรอกวันนี้</p>
+            <div class="num-row"><span class="num yellow" id="stat-needs">0</span><span class="unit">รายการ</span></div>
+          </div>
+          <div class="stat-icon yellow"><span class="material-symbols-outlined">assignment_late</span></div>
         </div>
       </div>
 
@@ -481,7 +520,9 @@
         <button class="group-btn" onclick="filterGroup('ALL',this)">ทั้งหมด</button>
       </div>
 
-      <div class="pond-grid" id="pond-grid"></div>
+      <div class="pond-grid-wrap">
+        <div class="pond-grid" id="pond-grid"></div>
+      </div>
     </div>
 
     <!-- ===== PAGE: เปิดรอบใหม่ ===== -->
@@ -790,7 +831,7 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>รหัสบ่อ</th><th>กลุ่ม</th><th>ขนาด (ไร่)</th><th>หมายเหตุ</th><th>สถานะ</th><th></th></tr></thead>
+            <thead><tr><th>รหัสบ่อ</th><th>กลุ่ม</th><th>ประเภท</th><th>ขนาด (ไร่)</th><th>หมายเหตุ</th><th>สถานะ</th><th></th></tr></thead>
             <tbody id="ponds-tbody"></tbody>
           </table>
         </div>
@@ -907,6 +948,13 @@
       <div class="form-group">
         <label class="form-label">หมายเหตุ</label>
         <input class="form-control" id="ap-note" placeholder="หมายเหตุ">
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">ประเภทบ่อ</label>
+        <select class="form-control" id="ap-type">
+          <option value="growout">เลี้ยงปกติ (Grow-out)</option>
+          <option value="broodstock">พ่อแม่พันธุ์ (Broodstock)</option>
+        </select>
       </div>
     </div>
     <div class="modal-actions">
@@ -1044,7 +1092,7 @@ function switchFarm(type) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   event.currentTarget.classList.add('active');
   if (type === 'dirt') return; // อยู่หน้านี้แล้ว
-  const names = { sab: 'farm-sab.html', ornamental: 'farm-ornamental.html' };
+  const names = { sab: 'farm-sab.html', ornamental: 'farm-sao.html' };
   if (names[type]) window.location.href = names[type];
 }
 
@@ -1177,7 +1225,11 @@ function renderOverview() {
       else { cardClass = 'active-crop'; dotClass = 'dot-green'; }
     }
 
-    return `<div class="pond-card ${cardClass}" onclick="pondCardClick('${pond.id}')">
+    const isBroodstock = pond.type === 'broodstock';
+    const broodstockClass = isBroodstock ? ' broodstock' : '';
+    const broodstockBadge = isBroodstock ? `<div class="broodstock-badge">🐟 พ่อแม่พันธุ์</div>` : '';
+    return `<div class="pond-card ${cardClass}${broodstockClass}" onclick="pondCardClick('${pond.id}')">
+      ${broodstockBadge}
       <div class="pond-status-dot ${dotClass}"></div>
       <div class="pond-id">${pond.id}</div>
       <div class="pond-species">${speciesHtml}</div>
@@ -1218,9 +1270,13 @@ function renderPondsTable(groupFilter) {
 
   document.getElementById('ponds-tbody').innerHTML = filtered.map(pond => {
     const hasActive = cycles.some(c => c.pondId === pond.id && c.status === 'active');
+    const typeBadge = pond.type === 'broodstock'
+      ? '<span style="background:#fef3c7;color:#d97706;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;">🐟 พ่อแม่พันธุ์</span>'
+      : '<span style="background:#f0fdf4;color:#059669;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;">เลี้ยงปกติ</span>';
     return `<tr>
       <td><strong>${pond.id}</strong></td>
       <td>${pond.group}</td>
+      <td>${typeBadge}</td>
       <td>${pond.size || '—'}</td>
       <td>${pond.note || '—'}</td>
       <td>${hasActive ? '<span class="badge badge-green">กำลังเลี้ยง</span>' : '<span class="badge badge-gray">ว่าง</span>'}</td>
@@ -1242,6 +1298,7 @@ function openAddPondModal() {
   document.getElementById('add-pond-title').textContent = 'เพิ่มบ่อใหม่';
   document.getElementById('edit-pond-id').value = '';
   ['ap-id','ap-size','ap-note'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ap-type').value = 'growout';
   document.getElementById('ap-id').removeAttribute('readonly');
   openModal('modal-add-pond');
 }
@@ -1256,6 +1313,7 @@ function editPond(id) {
   document.getElementById('ap-group').value = pond.group;
   document.getElementById('ap-size').value = pond.size || '';
   document.getElementById('ap-note').value = pond.note || '';
+  document.getElementById('ap-type').value = pond.type || 'growout';
   openModal('modal-add-pond');
 }
 
@@ -1265,15 +1323,16 @@ function savePond() {
   const group = document.getElementById('ap-group').value;
   const size = document.getElementById('ap-size').value;
   const note = document.getElementById('ap-note').value.trim();
+  const type = document.getElementById('ap-type').value;
 
   if (!id) return alert('กรุณากรอกรหัสบ่อ');
 
   let ponds = load(SK_PONDS, []);
   if (editId) {
-    ponds = ponds.map(p => p.id === editId ? {...p, group, size, note} : p);
+    ponds = ponds.map(p => p.id === editId ? {...p, group, size, note, type} : p);
   } else {
     if (ponds.find(p => p.id === id)) return alert(`บ่อ ${id} มีอยู่แล้ว`);
-    ponds.push({id, group, size, note, active: true});
+    ponds.push({id, group, size, note, type, active: true});
   }
   save(SK_PONDS, ponds);
   closeModal('modal-add-pond');

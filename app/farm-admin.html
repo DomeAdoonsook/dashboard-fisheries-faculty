@@ -31,7 +31,22 @@
       --sidebar-w: 240px;
     }
 
+    html { overflow-y: scroll; scrollbar-gutter: stable; background: #dbeafe; }
     body { font-family: 'Inter','Sarabun',sans-serif; background: linear-gradient(135deg, #e8f4f0 0%, #dbeafe 50%, #ede9fe 100%); background-attachment: fixed; min-height: 100vh; display: flex; flex-direction: column; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.35);
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.6);
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.4), 0 1px 4px rgba(0,0,0,0.08);
+      transition: all 0.3s;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,0.55);
+      box-shadow: inset 0 1px 3px rgba(255,255,255,0.6), 0 2px 6px rgba(0,0,0,0.12);
+    }
+    * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.35) transparent; }
 
     /* ===== Navbar ===== */
     .navbar-wrap {
@@ -61,7 +76,7 @@
     }
     .nav-tab {
       display: flex; align-items: center; gap: 6px;
-      padding: 6px 32px; border-radius: 999px;
+      padding: 10px 44px; border-radius: 999px;
       font-size: 13px; font-weight: 600; cursor: pointer;
       color: var(--text-muted); transition: all 0.2s;
     }
@@ -78,7 +93,7 @@
       padding: 5px 14px 5px 7px; color: var(--text); font-size: 13px; font-weight: 600;
     }
     .user-avatar {
-      width: 28px; height: 28px; background: var(--farm);
+      width: 28px; height: 28px; background: #2563eb;
       border-radius: 50%; display: flex; align-items: center; justify-content: center;
       font-size: 12px; font-weight: 700; color: white;
     }
@@ -171,7 +186,7 @@
 
     /* ===== Page Header ===== */
     .page-header { margin-bottom: 24px; }
-    .page-header h1 { font-size: 22px; font-weight: 700; color: var(--text); }
+    .page-header h1 { font-size: 22px; font-weight: 700; color: var(--farm); }
     .page-header p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
 
     /* ===== Cards ===== */
@@ -265,6 +280,8 @@
     .pond-card.needs-input { border-color: var(--warning); background: #fffbeb; }
     .pond-card.broodstock { border-color: #d97706 !important; border-width: 2px; background: #fffbeb; box-shadow: 0 0 0 1px rgba(217,119,6,0.15); }
     .pond-card.broodstock:hover { box-shadow: 0 4px 12px rgba(217,119,6,0.2); }
+    .pond-card.nursery { border-color: #0891b2 !important; border-width: 2px; background: #ecfeff; box-shadow: 0 0 0 1px rgba(8,145,178,0.15); }
+    .pond-card.nursery:hover { box-shadow: 0 4px 12px rgba(8,145,178,0.2); }
     .broodstock-badge {
       position: absolute; top: 8px; right: 8px;
       background: linear-gradient(135deg, #f59e0b, #d97706);
@@ -954,6 +971,7 @@
         <select class="form-control" id="ap-type">
           <option value="growout">เลี้ยงปกติ (Grow-out)</option>
           <option value="broodstock">พ่อแม่พันธุ์ (Broodstock)</option>
+          <option value="nursery">อนุบาล (Nursery)</option>
         </select>
       </div>
     </div>
@@ -1226,8 +1244,13 @@ function renderOverview() {
     }
 
     const isBroodstock = pond.type === 'broodstock';
-    const broodstockClass = isBroodstock ? ' broodstock' : '';
-    const broodstockBadge = isBroodstock ? `<div class="broodstock-badge">🐟 พ่อแม่พันธุ์</div>` : '';
+    const isNursery = pond.type === 'nursery';
+    const broodstockClass = isBroodstock ? ' broodstock' : isNursery ? ' nursery' : '';
+    const broodstockBadge = isBroodstock
+      ? `<div class="broodstock-badge">🐟 พ่อแม่พันธุ์</div>`
+      : isNursery
+      ? `<div class="broodstock-badge" style="background:linear-gradient(135deg,#0891b2,#0e7490);">🐣 อนุบาล</div>`
+      : '';
     return `<div class="pond-card ${cardClass}${broodstockClass}" onclick="pondCardClick('${pond.id}')">
       ${broodstockBadge}
       <div class="pond-status-dot ${dotClass}"></div>
@@ -1272,6 +1295,8 @@ function renderPondsTable(groupFilter) {
     const hasActive = cycles.some(c => c.pondId === pond.id && c.status === 'active');
     const typeBadge = pond.type === 'broodstock'
       ? '<span style="background:#fef3c7;color:#d97706;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;">🐟 พ่อแม่พันธุ์</span>'
+      : pond.type === 'nursery'
+      ? '<span style="background:#ecfeff;color:#0891b2;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;">🐣 อนุบาล</span>'
       : '<span style="background:#f0fdf4;color:#059669;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;">เลี้ยงปกติ</span>';
     return `<tr>
       <td><strong>${pond.id}</strong></td>

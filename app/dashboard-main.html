@@ -722,12 +722,17 @@
     }
 
     function updateCardStats(year) {
-      // Mission
+      // Mission — structure: { kpis: [ { quarters: { Q1,Q2,Q3,Q4 }, strategy, ... } ] }
       const mData = JSON.parse(localStorage.getItem(`mission_${year}`) || 'null');
       if (mData && Array.isArray(mData.kpis) && mData.kpis.length > 0) {
         const kpiCount = mData.kpis.length;
         const stratCount = new Set(mData.kpis.map(k => k.strategy).filter(Boolean)).size || 5;
-        const qCount = [1,2,3,4].filter(q => mData.kpis.some(k => k[`q${q}_result`] !== undefined && k[`q${q}_result`] !== '')).length;
+        const qCount = ['Q1','Q2','Q3','Q4'].filter(q =>
+          mData.kpis.some(k => {
+            const r = k.quarters?.[q]?.result;
+            return r !== undefined && r !== '' && r !== '0';
+          })
+        ).length;
         document.getElementById('mission-kpi-count').textContent = kpiCount;
         document.getElementById('mission-strategy-count').textContent = stratCount;
         document.getElementById('mission-quarter-count').textContent = qCount || '—';
@@ -737,12 +742,17 @@
         document.getElementById('mission-quarter-count').textContent = '—';
       }
 
-      // Proactive
+      // Proactive — structure: { kpis: [ { quarters: { Q1,Q2,Q3,Q4 }, strategy, ... } ] }
       const pData = JSON.parse(localStorage.getItem(`proactive_${year}`) || 'null');
       if (pData && Array.isArray(pData.kpis) && pData.kpis.length > 0) {
         const kpiCount = pData.kpis.length;
         const stratCount = new Set(pData.kpis.map(k => k.strategy).filter(Boolean)).size || 5;
-        const qCount = [1,2,3,4].filter(q => pData.kpis.some(k => k[`q${q}_result`] !== undefined && k[`q${q}_result`] !== '')).length;
+        const qCount = ['Q1','Q2','Q3','Q4'].filter(q =>
+          pData.kpis.some(k => {
+            const r = k.quarters?.[q]?.result;
+            return r !== undefined && r !== '' && r !== '0';
+          })
+        ).length;
         document.getElementById('pro-kpi-count').textContent = kpiCount;
         document.getElementById('pro-strategy-count').textContent = stratCount;
         document.getElementById('pro-quarter-count').textContent = qCount || '—';

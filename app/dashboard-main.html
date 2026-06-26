@@ -742,15 +742,16 @@
         document.getElementById('mission-quarter-count').textContent = '—';
       }
 
-      // Proactive — structure: { kpis: [ { quarters: { Q1,Q2,Q3,Q4 }, strategy, ... } ] }
+      // Proactive — structure: { kpis: [ { quarters: { Q1,Q2,Q3,Q4:{score,...} }, strategy, ... } ] }
       const pData = JSON.parse(localStorage.getItem(`proactive_${year}`) || 'null');
       if (pData && Array.isArray(pData.kpis) && pData.kpis.length > 0) {
         const kpiCount = pData.kpis.length;
         const stratCount = new Set(pData.kpis.map(k => k.strategy).filter(Boolean)).size || 5;
         const qCount = ['Q1','Q2','Q3','Q4'].filter(q =>
           pData.kpis.some(k => {
-            const r = k.quarters?.[q]?.result;
-            return r !== undefined && r !== '' && r !== '0';
+            const qd = k.quarters?.[q];
+            const val = qd?.score ?? qd?.result;
+            return val !== undefined && val !== '' && val !== '0';
           })
         ).length;
         document.getElementById('pro-kpi-count').textContent = kpiCount;
@@ -845,8 +846,26 @@
       localStorage.setItem('mission_2569', JSON.stringify(data));
     }
 
+    function seedProactive2569IfNeeded() {
+      if (localStorage.getItem('proactive_2569')) return;
+      const TEMPLATE = [
+        {code:'1.1.1',strategy:1},{code:'1.1.2',strategy:1},{code:'1.1.3',strategy:1},
+        {code:'2.2.1',strategy:2},{code:'2.2.2',strategy:2},{code:'2.2.3',strategy:2},
+        {code:'3.3.1',strategy:3},{code:'3.3.2',strategy:3},
+        {code:'4.4.1',strategy:4},
+        {code:'5.5.1',strategy:5},
+      ];
+      const q = {score:'1',percent:'50',detail:'',owner:'',link:''};
+      const data = { kpis: TEMPLATE.map(k => ({
+        ...k,
+        quarters: { Q1:{...q}, Q2:{...q}, Q3:{...q}, Q4:{score:'',percent:'',detail:'',owner:'',link:''} }
+      }))};
+      localStorage.setItem('proactive_2569', JSON.stringify(data));
+    }
+
     // ===== Init =====
     seedMission2569IfNeeded();
+    seedProactive2569IfNeeded();
     renderYearSelect();
     updateCardStats(getCurrentYear());
   </script>

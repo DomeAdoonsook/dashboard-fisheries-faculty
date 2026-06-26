@@ -570,17 +570,17 @@
         <div class="card-desc">ตัวชี้วัดภาระกิจประจำ 5 ยุทธศาสตร์<br>รายงาน 4 ไตรมาส (ต.ค. – ก.ย.)</div>
         <div class="card-stats">
           <div class="card-stat">
-            <div class="card-stat-num">46</div>
+            <div class="card-stat-num" id="mission-kpi-count">—</div>
             <div class="card-stat-label">ตัวชี้วัด</div>
           </div>
           <div class="card-divider"></div>
           <div class="card-stat">
-            <div class="card-stat-num">5</div>
+            <div class="card-stat-num" id="mission-strategy-count">—</div>
             <div class="card-stat-label">ยุทธศาสตร์</div>
           </div>
           <div class="card-divider"></div>
           <div class="card-stat">
-            <div class="card-stat-num">4</div>
+            <div class="card-stat-num" id="mission-quarter-count">—</div>
             <div class="card-stat-label">ไตรมาส</div>
           </div>
         </div>
@@ -605,17 +605,17 @@
         <div class="card-desc">ตัวชี้วัดเชิงรุก 5 ยุทธศาสตร์<br>รอบรายงาน 4 ไตรมาส</div>
         <div class="card-stats">
           <div class="card-stat">
-            <div class="card-stat-num green">9</div>
+            <div class="card-stat-num green" id="pro-kpi-count">—</div>
             <div class="card-stat-label">ตัวชี้วัด</div>
           </div>
           <div class="card-divider"></div>
           <div class="card-stat">
-            <div class="card-stat-num green">5</div>
+            <div class="card-stat-num green" id="pro-strategy-count">—</div>
             <div class="card-stat-label">ยุทธศาสตร์</div>
           </div>
           <div class="card-divider"></div>
           <div class="card-stat">
-            <div class="card-stat-num green">4</div>
+            <div class="card-stat-num green" id="pro-quarter-count">—</div>
             <div class="card-stat-label">ไตรมาส</div>
           </div>
         </div>
@@ -718,6 +718,39 @@
     function onYearChange(year) {
       setCurrentYear(parseInt(year));
       updatePageLabel(year);
+      updateCardStats(year);
+    }
+
+    function updateCardStats(year) {
+      // Mission
+      const mData = JSON.parse(localStorage.getItem(`mission_${year}`) || 'null');
+      if (mData && Array.isArray(mData.kpis) && mData.kpis.length > 0) {
+        const kpiCount = mData.kpis.length;
+        const stratCount = new Set(mData.kpis.map(k => k.strategy).filter(Boolean)).size || 5;
+        const qCount = [1,2,3,4].filter(q => mData.kpis.some(k => k[`q${q}_result`] !== undefined && k[`q${q}_result`] !== '')).length;
+        document.getElementById('mission-kpi-count').textContent = kpiCount;
+        document.getElementById('mission-strategy-count').textContent = stratCount;
+        document.getElementById('mission-quarter-count').textContent = qCount || '—';
+      } else {
+        document.getElementById('mission-kpi-count').textContent = '—';
+        document.getElementById('mission-strategy-count').textContent = '—';
+        document.getElementById('mission-quarter-count').textContent = '—';
+      }
+
+      // Proactive
+      const pData = JSON.parse(localStorage.getItem(`proactive_${year}`) || 'null');
+      if (pData && Array.isArray(pData.kpis) && pData.kpis.length > 0) {
+        const kpiCount = pData.kpis.length;
+        const stratCount = new Set(pData.kpis.map(k => k.strategy).filter(Boolean)).size || 5;
+        const qCount = [1,2,3,4].filter(q => pData.kpis.some(k => k[`q${q}_result`] !== undefined && k[`q${q}_result`] !== '')).length;
+        document.getElementById('pro-kpi-count').textContent = kpiCount;
+        document.getElementById('pro-strategy-count').textContent = stratCount;
+        document.getElementById('pro-quarter-count').textContent = qCount || '—';
+      } else {
+        document.getElementById('pro-kpi-count').textContent = '—';
+        document.getElementById('pro-strategy-count').textContent = '—';
+        document.getElementById('pro-quarter-count').textContent = '—';
+      }
     }
 
     // ===== Modal =====
@@ -776,6 +809,7 @@
 
     // ===== Init =====
     renderYearSelect();
+    updateCardStats(getCurrentYear());
   </script>
 
 </body>

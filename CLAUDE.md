@@ -98,13 +98,14 @@
 
 ### แผนหน้าทั้งหมด (สร้างทีละหน้า — ติ๊กเมื่อเสร็จ)
 - [x] หน้า 1: `index.html` — Login (admin / executive)
-- [ ] หน้า 2: `dashboard-main.html` — เจ้าหน้าที่เลือกระบบ
-- [ ] หน้า 3: `executive-main.html` — ผู้บริหารเลือก dashboard (ภาพรวมองค์กร)
+- [x] หน้า 2: `dashboard-main.html` — เจ้าหน้าที่เลือกระบบ
+- [x] หน้า 3: `executive-main.html` — ผู้บริหารเลือก dashboard (ภาพรวมองค์กร)
 - [ ] หน้า 4: `mission-dashboard.html` — ผู้บริหารดู ภาระกิจประจำ (กราฟ/สถานะ)
-- [ ] หน้า 5: `mission-admin.html` — เจ้าหน้าที่จัดการ ภาระกิจ (Import/กรอก/แนบ PDF)
+- [x] หน้า 5: `mission-admin.html` — เจ้าหน้าที่จัดการ ภาระกิจ (Import/กรอก/แนบ PDF)
 - [ ] หน้า 6: `proactive-dashboard.html` — ผู้บริหารดู เชิงรุก (กราฟ/สถานะ)
-- [ ] หน้า 7: `proactive-admin.html` — เจ้าหน้าที่จัดการ เชิงรุก (Import/กรอก/แนบ PDF)
+- [x] หน้า 7: `proactive-admin.html` — เจ้าหน้าที่จัดการ เชิงรุก (Import/กรอก/แนบ PDF)
 - [x] หน้า 8: `start.bat` — ไฟล์เปิดระบบ
+- [x] หน้า 9: `farm-admin.html` — เจ้าหน้าที่จัดการฟาร์มประมง บ่อดิน (Sidebar 5 เมนู)
 
 ### กฎสำคัญสำหรับ Claude
 1. ทุก session ให้อ่าน CLAUDE.md ก่อนเสมอ เพื่อรู้ว่าทำถึงหน้าไหนแล้ว

@@ -817,7 +817,36 @@
       window.location.href = 'index.html';
     }
 
+    // ===== Seed ปี 2569 ถ้ายังไม่มีข้อมูล =====
+    function seedMission2569IfNeeded() {
+      if (localStorage.getItem('mission_2569')) return;
+      const TEMPLATE = [
+        {code:'1.1.1',strategy:1},{code:'1.1.2',strategy:1},{code:'1.1.3',strategy:1},
+        {code:'1.1.4',strategy:1},{code:'1.1.5',strategy:1},{code:'1.2.1',strategy:1},
+        {code:'1.2.2',strategy:1},{code:'2.1.1',strategy:2},{code:'2.1.2',strategy:2},
+        {code:'2.1.3a',strategy:2},{code:'2.1.3b',strategy:2},{code:'2.1.4',strategy:2},
+        {code:'2.1.5',strategy:2},{code:'2.1.6',strategy:2},{code:'2.1.7',strategy:2},
+        {code:'2.1.8',strategy:2},{code:'2.1.9',strategy:2},{code:'2.2.1',strategy:2},
+        {code:'2.2.2',strategy:2},{code:'2.2.3',strategy:2},{code:'2.2.4',strategy:2},
+        {code:'2.2.5',strategy:2},{code:'2.2.6',strategy:2},{code:'2.2.7',strategy:2},
+        {code:'2.2.8',strategy:2},{code:'2.3.1',strategy:2},{code:'2.3.2',strategy:2},
+        {code:'2.3.3',strategy:2},{code:'2.4.1',strategy:2},{code:'2.4.2',strategy:2},
+        {code:'3.1.1',strategy:3},{code:'3.1.2',strategy:3},{code:'3.1.3',strategy:3},
+        {code:'3.1.4',strategy:3},{code:'3.1.5',strategy:3},{code:'4.1.1',strategy:4},
+        {code:'4.1.2',strategy:4},{code:'4.1.3',strategy:4},{code:'5.1.1',strategy:5},
+        {code:'5.1.2',strategy:5},{code:'5.1.3',strategy:5},{code:'5.2.1',strategy:5},
+        {code:'5.2.2',strategy:5},{code:'5.2.3',strategy:5},{code:'5.2.4',strategy:5},
+        {code:'5.2.5',strategy:5},
+      ];
+      const data = { kpis: TEMPLATE.map(k => ({
+        ...k,
+        quarters: { Q1:{result:'',percent:'',detail:'',link:''}, Q2:{result:'1',percent:'50',detail:'',link:''}, Q3:{result:'1',percent:'50',detail:'',link:''}, Q4:{result:'',percent:'',detail:'',link:''} }
+      }))};
+      localStorage.setItem('mission_2569', JSON.stringify(data));
+    }
+
     // ===== Init =====
+    seedMission2569IfNeeded();
     renderYearSelect();
     updateCardStats(getCurrentYear());
   </script>

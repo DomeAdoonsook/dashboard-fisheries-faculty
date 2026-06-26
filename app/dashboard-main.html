@@ -711,8 +711,8 @@
     }
 
     function updatePageLabel(year) {
-      document.getElementById('page-label').textContent =
-        `ระบบรายงานตัวชี้วัด ปีงบประมาณ ${year}`;
+      const el = document.getElementById('page-label');
+      if (el) el.textContent = `ระบบรายงานตัวชี้วัด ปีงบประมาณ ${year}`;
     }
 
     function onYearChange(year) {

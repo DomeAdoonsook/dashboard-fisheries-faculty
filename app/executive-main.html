@@ -8,6 +8,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+    const _fbConfig = {
+      apiKey:"AIzaSyDK--LHu280flT2UBqQc85cZAgZ0gSu7m4",
+      authDomain:"dashboard-fisheries.firebaseapp.com",
+      projectId:"dashboard-fisheries",
+      storageBucket:"dashboard-fisheries.firebasestorage.app",
+      messagingSenderId:"1002413057784",
+      appId:"1:1002413057784:web:c6cba7563409e62cbcfd0d"
+    };
+    const _fbApp = initializeApp(_fbConfig);
+    const _db = getFirestore(_fbApp);
+    window._fsGet = async (col, id) => { const s = await getDoc(doc(_db,col,id)); return s.exists()?s.data():null; };
+    window._fsSet = async (col, id, data) => { await setDoc(doc(_db,col,id), data); };
+    window._firebaseReady = true;
+    window.dispatchEvent(new Event('firebase-ready'));
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -530,7 +549,7 @@ let ovQ = 1, msQ = 1, prQ = 1;
 let currentPage = 'overview';
 
 // ===== Auth =====
-window.onload = function() {
+window.onload = async function() {
   const auth = JSON.parse(sessionStorage.getItem('auth') || 'null');
   if (!auth) { location.href = 'index.html'; return; }
   if (auth.role !== 'executive') { location.href = 'dashboard-main.html'; return; }
@@ -539,22 +558,14 @@ window.onload = function() {
   document.getElementById('userAvatar').textContent = initials;
   const savedYear = sessionStorage.getItem('current_year');
   if (savedYear) document.getElementById('yearSelect').value = savedYear;
-  clearFarmDemo();
+  if (!window._firebaseReady) {
+    await new Promise(r => window.addEventListener('firebase-ready', r, {once:true}));
+  }
+  await initData();
   renderAll();
 };
 
-function clearFarmDemo() {
-  ['dirt','sab','sao'].forEach(key => {
-    const cycleKey = `farm_cycles_${key}`;
-    const logKey   = `farm_daily_logs_${key}`;
-    const cycles = JSON.parse(localStorage.getItem(cycleKey)||'[]');
-    const realCycles = cycles.filter(c => !c.note?.includes('demo'));
-    localStorage.setItem(cycleKey, JSON.stringify(realCycles));
-    const logs = JSON.parse(localStorage.getItem(logKey)||'[]');
-    const realLogs = logs.filter(l => !l.id?.startsWith('log_'));
-    localStorage.setItem(logKey, JSON.stringify(realLogs));
-  });
-}
+function clearFarmDemo() { /* no-op: using Firestore now */ }
 
 function logout() { sessionStorage.clear(); location.href = 'index.html'; }
 function onYearChange() { sessionStorage.setItem('current_year', getCurrentYear()); renderAll(); }
@@ -578,25 +589,47 @@ function setOvQuarter(q) { ovQ = q; [1,2,3,4].forEach(i => document.getElementBy
 function setMsQuarter(q) { msQ = q; [1,2,3,4].forEach(i => document.getElementById(`ms-qc-${i}`).classList.toggle('active',i===q)); renderMission(); }
 function setPrQuarter(q) { prQ = q; [1,2,3,4].forEach(i => document.getElementById(`pr-qc-${i}`).classList.toggle('active',i===q)); renderProactive(); }
 
-// ===== Data loaders =====
-function getMissionData() {
-  const raw = localStorage.getItem(`mission_${getCurrentYear()}`);
-  return raw ? JSON.parse(raw) : { kpis: [] };
-}
-function getProactiveData() {
-  const raw = localStorage.getItem(`proactive_${getCurrentYear()}`);
-  return raw ? JSON.parse(raw) : { kpis: [] };
-}
+// ===== Data cache (loaded from Firestore on init) =====
+let _missionCache = { kpis: [] };
+let _proactiveCache = { kpis: [] };
+let _missionStrategiesCache = [{id:1,name:'Proactive Strategy toward Inter IWA'},{id:2,name:'Driving Mission-Driven Performance'},{id:3,name:'Fostering Internationalization'},{id:4,name:'Technology Development and Innovation University'},{id:5,name:'Financial Stability and Sustainable Growth'}];
+let _proactiveStrategiesCache = [{id:1,name:'Professional Immersive Learning'},{id:2,name:'Digital Intelligence'},{id:3,name:'Green & Smart Faculty (FTAR-IWA)'},{id:4,name:'Global Partnership'},{id:5,name:'Knowledge and Innovation Revenue Generation'}];
+
+function getMissionData() { return _missionCache; }
+function getProactiveData() { return _proactiveCache; }
 function getStrategies(sys) {
-  const key = sys === 'mission' ? `strategies_${getCurrentYear()}` : `pro_strategies_${getCurrentYear()}`;
-  const defaults = sys === 'mission'
-    ? [{id:1,name:'Proactive Strategy toward Inter IWA'},{id:2,name:'Driving Mission-Driven Performance'},
-       {id:3,name:'Fostering Internationalization'},{id:4,name:'Technology Development and Innovation University'},
-       {id:5,name:'Financial Stability and Sustainable Growth'}]
-    : [{id:1,name:'Professional Immersive Learning'},{id:2,name:'Digital Intelligence'},
-       {id:3,name:'Green & Smart Faculty (FTAR-IWA)'},{id:4,name:'Global Partnership'},
-       {id:5,name:'Knowledge and Innovation Revenue Generation'}];
-  return JSON.parse(localStorage.getItem(key) || JSON.stringify(defaults));
+  return sys === 'mission' ? _missionStrategiesCache : _proactiveStrategiesCache;
+}
+
+async function initData() {
+  const yr = String(getCurrentYear());
+  const [ms, pr, msStrat, prStrat,
+         dirtPonds, dirtCycles, dirtLogs,
+         sabPonds, sabCycles, sabLogs,
+         saoPonds, saoCycles, saoLogs] = await Promise.all([
+    window._fsGet('mission', yr),
+    window._fsGet('proactive', yr),
+    window._fsGet('mission_meta', `strategies_${yr}`),
+    window._fsGet('proactive_meta', `strategies_${yr}`),
+    window._fsGet('farm', 'dirt_ponds'),
+    window._fsGet('farm', 'dirt_cycles'),
+    window._fsGet('farm', 'dirt_logs'),
+    window._fsGet('farm', 'sab_ponds'),
+    window._fsGet('farm', 'sab_cycles'),
+    window._fsGet('farm', 'sab_logs'),
+    window._fsGet('farm', 'sao_ponds'),
+    window._fsGet('farm', 'sao_cycles'),
+    window._fsGet('farm', 'sao_logs'),
+  ]);
+  if (ms && ms.kpis) _missionCache = ms;
+  if (pr && pr.kpis) _proactiveCache = pr;
+  if (msStrat && msStrat.list) _missionStrategiesCache = msStrat.list;
+  if (prStrat && prStrat.list) _proactiveStrategiesCache = prStrat.list;
+  _farmCache = {
+    dirt: { ponds: dirtPonds?.data||[], cycles: dirtCycles?.data||[], logs: dirtLogs?.data||[] },
+    sab:  { ponds: sabPonds?.data||[],  cycles: sabCycles?.data||[],  logs: sabLogs?.data||[]  },
+    sao:  { ponds: saoPonds?.data||[],  cycles: saoCycles?.data||[],  logs: saoLogs?.data||[]  },
+  };
 }
 
 // ===== Stats computation =====
@@ -931,16 +964,11 @@ function farmCards(totalPonds, activeCount, rev, cost) {
     + farmCard('ต้นทุน', cost.toLocaleString(), 'บ.', 'อาหาร + ค่าใช้จ่ายอื่นๆ', 'package_2', 'rgba(245,158,11,0.12)', '#f59e0b', '#f59e0b')
     + farmCard('กำไร/ขาดทุน', (profit>=0?'+':'')+profit.toLocaleString(), 'บ.', 'รายรับ − ต้นทุน', profit>=0?'trending_up':'trending_down', profitBg, profitColor, profitColor);
 }
-function getFarmPonds(key) {
-  return JSON.parse(localStorage.getItem(`farm_ponds_${key}`) || '[]');
-}
-function getFarmLogs(key) {
-  // farm-admin ใช้ key: farm_daily_logs_dirt / farm_daily_logs_sab / farm_daily_logs_sao
-  return JSON.parse(localStorage.getItem(`farm_daily_logs_${key}`) || '[]');
-}
-function getFarmCycles(key) {
-  return JSON.parse(localStorage.getItem(`farm_cycles_${key}`) || '[]');
-}
+// Farm cache loaded by initData
+let _farmCache = { dirt:{ponds:[],cycles:[],logs:[]}, sab:{ponds:[],cycles:[],logs:[]}, sao:{ponds:[],cycles:[],logs:[]} };
+function getFarmPonds(key) { return _farmCache[key]?.ponds || []; }
+function getFarmLogs(key) { return _farmCache[key]?.logs || []; }
+function getFarmCycles(key) { return _farmCache[key]?.cycles || []; }
 function getFarmCosts(key) {
   const logs = getFarmLogs(key);
   return logs.reduce((sum, l) => {

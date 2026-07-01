@@ -10,6 +10,25 @@
   <style>.material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align: middle; font-size: 18px; }</style>
   <!-- SheetJS สำหรับอ่าน Excel -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+    const _fbConfig = {
+      apiKey:"AIzaSyDK--LHu280flT2UBqQc85cZAgZ0gSu7m4",
+      authDomain:"dashboard-fisheries.firebaseapp.com",
+      projectId:"dashboard-fisheries",
+      storageBucket:"dashboard-fisheries.firebasestorage.app",
+      messagingSenderId:"1002413057784",
+      appId:"1:1002413057784:web:c6cba7563409e62cbcfd0d"
+    };
+    const _fbApp = initializeApp(_fbConfig);
+    const _db = getFirestore(_fbApp);
+    window._fsGet = async (col, id) => { const s = await getDoc(doc(_db,col,id)); return s.exists()?s.data():null; };
+    window._fsSet = async (col, id, data) => { await setDoc(doc(_db,col,id), data); };
+    window._firebaseReady = true;
+    window.dispatchEvent(new Event('firebase-ready'));
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1142,35 +1161,54 @@
       {code:'5.2.5',name:'5.2.5 การใช้จ่ายงบประมาณแผ่นดินงบลงทุนตามมาตรการเร่งรัดการเบิกจ่าย ปีงบประมาณ พ.ศ. 2569',unit:'ระดับ',target:'5',strategy:5,criteria:'พิจารณาจากประเมินผลการใช้จ่ายงบประมาณแผ่นดิน (งบลงทุน) ตามมาตรการเร่งรัดการเบิกจ่าย'},
     ];
 
-    // ===== Data Storage =====
+    // ===== Data Storage (Firestore + in-memory cache) =====
     function storageKey() { return `mission_${getCurrentYear()}`; }
 
-    function getData() {
-      const raw = localStorage.getItem(storageKey());
-      if (raw) return JSON.parse(raw);
-      // ปี 2569: seed template อัตโนมัติพร้อมข้อมูล Q2/Q3
-      if (getCurrentYear() === 2569) {
-        const normalize = (q, code, qkey) => {
-          const r = q.result === 'N/A' || q.result === '' ? '0' : q.result;
-          const p = q.percent === 'N/A' || q.percent === '' ? '0' : q.percent;
-          const link = LINKS[code]?.[qkey] || '';
-          return { result: r, percent: p, detail: q.detail || '', link };
-        };
-        const data = { kpis: TEMPLATE_2569.map(k => {
-          const qd = Q_DATA[k.code] || {};
-          const q2 = qd.Q2 ? normalize(qd.Q2, k.code, 'Q2') : {result:'0',percent:'0',detail:'',link:''};
-          const q3 = qd.Q3 ? normalize(qd.Q3, k.code, 'Q3') : {result:'0',percent:'0',detail:'',link:''};
-          const q1 = {...q2, link: LINKS[k.code]?.Q2 || ''};
-          return { ...k, quarters: { Q1: q1, Q2: q2, Q3: q3 } };
-        })};
-        saveData(data);
-        return data;
-      }
-      return { kpis: [] };
+    function _buildSeedData() {
+      const normalize = (q, code, qkey) => {
+        const r = q.result === 'N/A' || q.result === '' ? '0' : q.result;
+        const p = q.percent === 'N/A' || q.percent === '' ? '0' : q.percent;
+        const link = LINKS[code]?.[qkey] || '';
+        return { result: r, percent: p, detail: q.detail || '', link };
+      };
+      return { kpis: TEMPLATE_2569.map(k => {
+        const qd = Q_DATA[k.code] || {};
+        const q2 = qd.Q2 ? normalize(qd.Q2, k.code, 'Q2') : {result:'0',percent:'0',detail:'',link:''};
+        const q3 = qd.Q3 ? normalize(qd.Q3, k.code, 'Q3') : {result:'0',percent:'0',detail:'',link:''};
+        const q1 = {...q2, link: LINKS[k.code]?.Q2 || ''};
+        return { ...k, quarters: { Q1: q1, Q2: q2, Q3: q3 } };
+      })};
     }
 
+    // In-memory cache — loaded once on init, sync access throughout
+    let _dataCache = { kpis: [] };
+    let _stratCache = [...DEFAULT_STRATEGIES];
+
+    // Synchronous getters (use cache)
+    function getData() { return _dataCache; }
+    function getStrategies() { return _stratCache; }
+
+    // Async savers (write to Firestore in background)
     function saveData(data) {
-      localStorage.setItem(storageKey(), JSON.stringify(data));
+      _dataCache = data;
+      window._fsSet('mission', String(getCurrentYear()), data).catch(console.error);
+    }
+    function saveStrategies(list) {
+      _stratCache = list;
+      window._fsSet('mission_meta', `strategies_${getCurrentYear()}`, { list }).catch(console.error);
+    }
+
+    // Load from Firestore on startup
+    async function initData() {
+      const fs = await window._fsGet('mission', String(getCurrentYear()));
+      if (fs && fs.kpis) {
+        _dataCache = fs;
+      } else if (getCurrentYear() === 2569) {
+        _dataCache = _buildSeedData();
+        window._fsSet('mission', String(getCurrentYear()), _dataCache).catch(console.error);
+      }
+      const fsMeta = await window._fsGet('mission_meta', `strategies_${getCurrentYear()}`);
+      if (fsMeta && fsMeta.list) _stratCache = fsMeta.list;
     }
 
     // ===== Tab Switch =====
@@ -1573,14 +1611,6 @@
       {id:5, name:'Financial Stability and Sustainable Growth'},
     ];
 
-    function getStrategies() {
-      const key = `strategies_${getCurrentYear()}`;
-      return JSON.parse(localStorage.getItem(key) || JSON.stringify(DEFAULT_STRATEGIES));
-    }
-
-    function saveStrategies(list) {
-      localStorage.setItem(`strategies_${getCurrentYear()}`, JSON.stringify(list));
-    }
 
     function renderStrategyList() {
       const list = document.getElementById('strategy-list');
@@ -1641,8 +1671,17 @@
 
     // ===== Init =====
     renderYearSelect();
-    renderStrategyList();
-    loadData();
+
+    async function _init() {
+      // รอ Firebase module โหลดเสร็จก่อน
+      if (!window._firebaseReady) {
+        await new Promise(r => window.addEventListener('firebase-ready', r, {once:true}));
+      }
+      await initData();
+      renderStrategyList();
+      loadData();
+    }
+    _init();
   </script>
 
 </body>

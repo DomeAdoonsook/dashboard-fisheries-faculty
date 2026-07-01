@@ -6,6 +6,24 @@
   <title>ฟาร์มประมง — SAO</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+    const _fbConfig = {
+      apiKey:"AIzaSyDK--LHu280flT2UBqQc85cZAgZ0gSu7m4",
+      authDomain:"dashboard-fisheries.firebaseapp.com",
+      projectId:"dashboard-fisheries",
+      storageBucket:"dashboard-fisheries.firebasestorage.app",
+      messagingSenderId:"1002413057784",
+      appId:"1:1002413057784:web:c6cba7563409e62cbcfd0d"
+    };
+    const _fbApp = initializeApp(_fbConfig);
+    const _db = getFirestore(_fbApp);
+    window._fsGet = async (col, id) => { const s = await getDoc(doc(_db,col,id)); return s.exists()?s.data():null; };
+    window._fsSet = async (col, id, data) => { await setDoc(doc(_db,col,id), data); };
+    window._firebaseReady = true;
+    window.dispatchEvent(new Event('firebase-ready'));
+  </script>
   <style>
     .material-symbols-outlined {
       font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -1096,8 +1114,25 @@ const SK_COST_CFG = 'farm_cost_config';
 const SK_LOGS     = 'farm_daily_logs_sao';
 const SK_SPECIES  = 'farm_species';
 
-function load(key, def) { try { return JSON.parse(localStorage.getItem(key)) || def; } catch { return def; } }
-function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+const _store = {};
+function _fsKey(key) {
+  const map = {
+    'farm_ponds_sao':      ['farm','sao_ponds'],
+    'farm_cycles_sao':     ['farm','sao_cycles'],
+    'farm_daily_logs_sao': ['farm','sao_logs'],
+    'farm_feed_config':    ['farm','sao_feed_cfg'],
+    'farm_med_config':     ['farm','sao_med_cfg'],
+    'farm_cost_config':    ['farm','sao_cost_cfg'],
+    'farm_species':        ['farm','sao_species'],
+  };
+  return map[key] || null;
+}
+function load(key, def) { return key in _store ? _store[key] : def; }
+function save(key, val) {
+  _store[key] = val;
+  const fk = _fsKey(key);
+  if (fk) window._fsSet(fk[0], fk[1], { data: val }).catch(console.error);
+}
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
 // ===== Default Ponds (24 บ่อ SAO) =====
@@ -1114,23 +1149,38 @@ const DEFAULT_SPECIES_OBJ = [
 ].map(n => ({id: n, name: n, note: ''}));
 
 function initDefaults() {
-  if (!localStorage.getItem(SK_PONDS)) save(SK_PONDS, DEFAULT_PONDS);
-  // migrate species: string[] → object[]
-  const rawSpecies = load(SK_SPECIES, null);
+  if (!_store[SK_PONDS]) _store[SK_PONDS] = DEFAULT_PONDS;
+  const rawSpecies = _store[SK_SPECIES];
   if (!rawSpecies) {
-    save(SK_SPECIES, DEFAULT_SPECIES_OBJ);
+    _store[SK_SPECIES] = DEFAULT_SPECIES_OBJ;
   } else if (rawSpecies.length && typeof rawSpecies[0] === 'string') {
-    save(SK_SPECIES, rawSpecies.map(n => ({id: n, name: n, note: ''})));
+    _store[SK_SPECIES] = rawSpecies.map(n => ({id: n, name: n, note: ''}));
   }
-  if (!localStorage.getItem(SK_CYCLES)) save(SK_CYCLES, []);
-  if (!localStorage.getItem(SK_LOGS)) save(SK_LOGS, []);
-  if (!localStorage.getItem(SK_FEED_CFG)) save(SK_FEED_CFG, []);
-  if (!localStorage.getItem(SK_MED_CFG)) save(SK_MED_CFG, []);
-  if (!localStorage.getItem(SK_COST_CFG)) save(SK_COST_CFG, [
+  if (!_store[SK_CYCLES]) _store[SK_CYCLES] = [];
+  if (!_store[SK_LOGS]) _store[SK_LOGS] = [];
+  if (!_store[SK_FEED_CFG]) _store[SK_FEED_CFG] = [];
+  if (!_store[SK_MED_CFG]) _store[SK_MED_CFG] = [];
+  if (!_store[SK_COST_CFG]) _store[SK_COST_CFG] = [
     {id: uid(), name:'ค่าไฟฟ้า', unit:'บาท', note:''},
     {id: uid(), name:'ค่าแรงงาน', unit:'บาท', note:''},
     {id: uid(), name:'ค่าซ่อมแซม', unit:'บาท', note:''},
-  ]);
+  ];
+}
+
+async function loadFromFirestore() {
+  if (!window._firebaseReady) {
+    await new Promise(r => window.addEventListener('firebase-ready', r, {once:true}));
+  }
+  const keys = [
+    [SK_PONDS,'farm','sao_ponds'], [SK_CYCLES,'farm','sao_cycles'],
+    [SK_LOGS,'farm','sao_logs'], [SK_FEED_CFG,'farm','sao_feed_cfg'],
+    [SK_MED_CFG,'farm','sao_med_cfg'], [SK_COST_CFG,'farm','sao_cost_cfg'],
+    [SK_SPECIES,'farm','sao_species'],
+  ];
+  await Promise.all(keys.map(async ([sk, col, id]) => {
+    const d = await window._fsGet(col, id);
+    if (d && d.data) _store[sk] = d.data;
+  }));
 }
 
 // ===== Navigation =====
@@ -1909,10 +1959,13 @@ function deleteSpecies(id) {
 }
 
 // ===== Init =====
-initDefaults();
-document.getElementById('overview-date').textContent =
-  new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
-renderOverview();
+(async () => {
+  await loadFromFirestore();
+  initDefaults();
+  document.getElementById('overview-date').textContent =
+    new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+  renderOverview();
+})();
 </script>
 </body>
 </html>

@@ -9,6 +9,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
   <style>.material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align: middle; font-size: 18px; }</style>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+    const _fbConfig = {
+      apiKey:"AIzaSyDK--LHu280flT2UBqQc85cZAgZ0gSu7m4",
+      authDomain:"dashboard-fisheries.firebaseapp.com",
+      projectId:"dashboard-fisheries",
+      storageBucket:"dashboard-fisheries.firebasestorage.app",
+      messagingSenderId:"1002413057784",
+      appId:"1:1002413057784:web:c6cba7563409e62cbcfd0d"
+    };
+    const _fbApp = initializeApp(_fbConfig);
+    const _db = getFirestore(_fbApp);
+    window._fsGet = async (col, id) => { const s = await getDoc(doc(_db,col,id)); return s.exists()?s.data():null; };
+    window._fsSet = async (col, id, data) => { await setDoc(doc(_db,col,id), data); };
+    window._firebaseReady = true;
+    window.dispatchEvent(new Event('firebase-ready'));
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overflow: hidden; }
@@ -686,7 +705,7 @@ function getCurrentYear() { return parseInt(document.getElementById('yearSelect'
 function storageKey() { return `proactive_${getCurrentYear()}`; }
 function pdfKey(code, q) { return `pdf_proactive_${getCurrentYear()}_${code}_Q${q}`; }
 
-window.onload = function() {
+window.onload = async function() {
   const auth = JSON.parse(sessionStorage.getItem('auth') || 'null');
   if (!auth || auth.role !== 'admin') { location.href = 'index.html'; return; }
   document.getElementById('userName').textContent = auth.name || 'เจ้าหน้าที่';
@@ -694,6 +713,10 @@ window.onload = function() {
   document.getElementById('userInitial').textContent = initials[auth.role] || (auth.name||'').replace(/^เ/,'')[0] || 'A';
   const savedYear = sessionStorage.getItem('current_year');
   if (savedYear) document.getElementById('yearSelect').value = savedYear;
+  if (!window._firebaseReady) {
+    await new Promise(r => window.addEventListener('firebase-ready', r, {once:true}));
+  }
+  await initData();
   setQuarter(1);
   renderEditTable();
   renderPdfList();
@@ -707,36 +730,44 @@ function onYearChange() {
   updateStrategyFilter();
 }
 
-// ===== Data =====
-function getData() {
-  const raw = localStorage.getItem(storageKey());
-  if (raw) {
-    const parsed = JSON.parse(raw);
-    // re-seed ถ้าข้อมูลเก่าไม่มี detail
-    const hasDetail = parsed.kpis?.[0]?.quarters?.Q1?.detail !== undefined;
-    if (hasDetail && parsed.kpis.length > 0) return parsed;
-  }
-  if (getCurrentYear() === 2569) {
-    const data = {
-      kpis: TEMPLATE_2569.map(k => {
-        const qd = Q_DATA_2569[k.code] || {};
-        const link = LINKS[k.code] || '';
-        const q = { score: qd.score ?? '', percent: qd.percent ?? '', detail: qd.detail || '', owner: qd.owner || '', link };
-        return { ...k, quarters: { Q1: {...q}, Q2: {...q}, Q3: {...q}, Q4: { score:'', percent:'', detail:'', owner: qd.owner || '', link:'' } } };
-      })
-    };
-    saveData(data);
-    return data;
-  }
-  return { kpis: [] };
+// ===== Data (Firestore + in-memory cache) =====
+let _dataCache = { kpis: [] };
+let _stratCache = [...DEFAULT_STRATEGIES];
+
+function _buildSeedData() {
+  return {
+    kpis: TEMPLATE_2569.map(k => {
+      const qd = Q_DATA_2569[k.code] || {};
+      const link = LINKS[k.code] || '';
+      const q = { score: qd.score ?? '', percent: qd.percent ?? '', detail: qd.detail || '', owner: qd.owner || '', link };
+      return { ...k, quarters: { Q1: {...q}, Q2: {...q}, Q3: {...q}, Q4: { score:'', percent:'', detail:'', owner: qd.owner || '', link:'' } } };
+    })
+  };
 }
 
-function saveData(data) { localStorage.setItem(storageKey(), JSON.stringify(data)); }
+function getData() { return _dataCache; }
+function getStrategies() { return _stratCache; }
 
-function getStrategies() {
-  return JSON.parse(localStorage.getItem(`pro_strategies_${getCurrentYear()}`) || JSON.stringify(DEFAULT_STRATEGIES));
+function saveData(data) {
+  _dataCache = data;
+  window._fsSet('proactive', String(getCurrentYear()), data).catch(console.error);
 }
-function saveStrategies(s) { localStorage.setItem(`pro_strategies_${getCurrentYear()}`, JSON.stringify(s)); }
+function saveStrategies(s) {
+  _stratCache = s;
+  window._fsSet('proactive_meta', `strategies_${getCurrentYear()}`, { list: s }).catch(console.error);
+}
+
+async function initData() {
+  const fs = await window._fsGet('proactive', String(getCurrentYear()));
+  if (fs && fs.kpis && fs.kpis.length > 0) {
+    _dataCache = fs;
+  } else if (getCurrentYear() === 2569) {
+    _dataCache = _buildSeedData();
+    window._fsSet('proactive', String(getCurrentYear()), _dataCache).catch(console.error);
+  }
+  const fsMeta = await window._fsGet('proactive_meta', `strategies_${getCurrentYear()}`);
+  if (fsMeta && fsMeta.list) _stratCache = fsMeta.list;
+}
 
 // ===== Tab =====
 function switchTab(tab) {

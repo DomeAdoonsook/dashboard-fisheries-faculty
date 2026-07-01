@@ -6,6 +6,25 @@
   <title>เลือกระบบ — Dashboard คณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+    const _fbConfig = {
+      apiKey:"AIzaSyDK--LHu280flT2UBqQc85cZAgZ0gSu7m4",
+      authDomain:"dashboard-fisheries.firebaseapp.com",
+      projectId:"dashboard-fisheries",
+      storageBucket:"dashboard-fisheries.firebasestorage.app",
+      messagingSenderId:"1002413057784",
+      appId:"1:1002413057784:web:c6cba7563409e62cbcfd0d"
+    };
+    const _fbApp = initializeApp(_fbConfig);
+    const _db = getFirestore(_fbApp);
+    window._fsGet = async (col, id) => { const s = await getDoc(doc(_db,col,id)); return s.exists()?s.data():null; };
+    window._fsSet = async (col, id, data) => { await setDoc(doc(_db,col,id), data); };
+    window._firebaseReady = true;
+    window.dispatchEvent(new Event('firebase-ready'));
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -759,13 +778,11 @@
     const DEFAULT_YEAR = 2569;
     const YEARS_KEY = 'kpi_years';
 
-    function getYears() {
-      const stored = localStorage.getItem(YEARS_KEY);
-      return stored ? JSON.parse(stored) : [DEFAULT_YEAR];
-    }
-
+    let _years = [DEFAULT_YEAR];
+    function getYears() { return _years; }
     function saveYears(years) {
-      localStorage.setItem(YEARS_KEY, JSON.stringify(years));
+      _years = years;
+      window._fsSet('app_meta', 'kpi_years', { years }).catch(console.error);
     }
 
     function getCurrentYear() {
@@ -799,20 +816,27 @@
     function onYearChange(year) {
       setCurrentYear(parseInt(year));
       updatePageLabel(year);
+      _dashMission = null; _dashProactive = null;
       updateCardStats(year);
     }
 
-    function updateCardStats(year) {
-      // Mission — structure: { kpis: [ { quarters: { Q1,Q2,Q3,Q4 }, strategy, ... } ] }
-      const mData = JSON.parse(localStorage.getItem(`mission_${year}`) || 'null');
+    let _dashMission = null, _dashProactive = null;
+
+    async function updateCardStats(year) {
+      if (!_dashMission || _dashMission._year !== year) {
+        _dashMission = await window._fsGet('mission', String(year));
+        if (_dashMission) _dashMission._year = year;
+      }
+      if (!_dashProactive || _dashProactive._year !== year) {
+        _dashProactive = await window._fsGet('proactive', String(year));
+        if (_dashProactive) _dashProactive._year = year;
+      }
+      const mData = _dashMission;
       if (mData && Array.isArray(mData.kpis) && mData.kpis.length > 0) {
         const kpiCount = mData.kpis.length;
         const stratCount = new Set(mData.kpis.map(k => k.strategy).filter(Boolean)).size || 5;
         const qCount = ['Q1','Q2','Q3','Q4'].filter(q =>
-          mData.kpis.some(k => {
-            const r = k.quarters?.[q]?.result;
-            return r !== undefined && r !== '' && r !== '0';
-          })
+          mData.kpis.some(k => { const r = k.quarters?.[q]?.result; return r !== undefined && r !== '' && r !== '0'; })
         ).length;
         document.getElementById('mission-kpi-count').textContent = kpiCount;
         document.getElementById('mission-strategy-count').textContent = stratCount;
@@ -822,18 +846,12 @@
         document.getElementById('mission-strategy-count').textContent = '—';
         document.getElementById('mission-quarter-count').textContent = '—';
       }
-
-      // Proactive — structure: { kpis: [ { quarters: { Q1,Q2,Q3,Q4:{score,...} }, strategy, ... } ] }
-      const pData = JSON.parse(localStorage.getItem(`proactive_${year}`) || 'null');
+      const pData = _dashProactive;
       if (pData && Array.isArray(pData.kpis) && pData.kpis.length > 0) {
         const kpiCount = pData.kpis.length;
         const stratCount = new Set(pData.kpis.map(k => k.strategy).filter(Boolean)).size || 5;
         const qCount = ['Q1','Q2','Q3','Q4'].filter(q =>
-          pData.kpis.some(k => {
-            const qd = k.quarters?.[q];
-            const val = qd?.score ?? qd?.result;
-            return val !== undefined && val !== '' && val !== '0';
-          })
+          pData.kpis.some(k => { const qd = k.quarters?.[q]; const val = qd?.score ?? qd?.result; return val !== undefined && val !== '' && val !== '0'; })
         ).length;
         document.getElementById('pro-kpi-count').textContent = kpiCount;
         document.getElementById('pro-strategy-count').textContent = stratCount;
@@ -899,55 +917,14 @@
       window.location.href = 'index.html';
     }
 
-    // ===== Seed ปี 2569 ถ้ายังไม่มีข้อมูล =====
-    function seedMission2569IfNeeded() {
-      if (localStorage.getItem('mission_2569')) return;
-      const TEMPLATE = [
-        {code:'1.1.1',strategy:1},{code:'1.1.2',strategy:1},{code:'1.1.3',strategy:1},
-        {code:'1.1.4',strategy:1},{code:'1.1.5',strategy:1},{code:'1.2.1',strategy:1},
-        {code:'1.2.2',strategy:1},{code:'2.1.1',strategy:2},{code:'2.1.2',strategy:2},
-        {code:'2.1.3a',strategy:2},{code:'2.1.3b',strategy:2},{code:'2.1.4',strategy:2},
-        {code:'2.1.5',strategy:2},{code:'2.1.6',strategy:2},{code:'2.1.7',strategy:2},
-        {code:'2.1.8',strategy:2},{code:'2.1.9',strategy:2},{code:'2.2.1',strategy:2},
-        {code:'2.2.2',strategy:2},{code:'2.2.3',strategy:2},{code:'2.2.4',strategy:2},
-        {code:'2.2.5',strategy:2},{code:'2.2.6',strategy:2},{code:'2.2.7',strategy:2},
-        {code:'2.2.8',strategy:2},{code:'2.3.1',strategy:2},{code:'2.3.2',strategy:2},
-        {code:'2.3.3',strategy:2},{code:'2.4.1',strategy:2},{code:'2.4.2',strategy:2},
-        {code:'3.1.1',strategy:3},{code:'3.1.2',strategy:3},{code:'3.1.3',strategy:3},
-        {code:'3.1.4',strategy:3},{code:'3.1.5',strategy:3},{code:'4.1.1',strategy:4},
-        {code:'4.1.2',strategy:4},{code:'4.1.3',strategy:4},{code:'5.1.1',strategy:5},
-        {code:'5.1.2',strategy:5},{code:'5.1.3',strategy:5},{code:'5.2.1',strategy:5},
-        {code:'5.2.2',strategy:5},{code:'5.2.3',strategy:5},{code:'5.2.4',strategy:5},
-        {code:'5.2.5',strategy:5},
-      ];
-      const data = { kpis: TEMPLATE.map(k => ({
-        ...k,
-        quarters: { Q1:{result:'',percent:'',detail:'',link:''}, Q2:{result:'1',percent:'50',detail:'',link:''}, Q3:{result:'1',percent:'50',detail:'',link:''}, Q4:{result:'',percent:'',detail:'',link:''} }
-      }))};
-      localStorage.setItem('mission_2569', JSON.stringify(data));
-    }
-
-    function seedProactive2569IfNeeded() {
-      if (localStorage.getItem('proactive_2569')) return;
-      const TEMPLATE = [
-        {code:'1.1.1',strategy:1},{code:'1.1.2',strategy:1},{code:'1.1.3',strategy:1},
-        {code:'2.2.1',strategy:2},{code:'2.2.2',strategy:2},{code:'2.2.3',strategy:2},
-        {code:'3.3.1',strategy:3},{code:'3.3.2',strategy:3},
-        {code:'4.4.1',strategy:4},
-        {code:'5.5.1',strategy:5},
-      ];
-      const q = {score:'1',percent:'50',detail:'',owner:'',link:''};
-      const data = { kpis: TEMPLATE.map(k => ({
-        ...k,
-        quarters: { Q1:{...q}, Q2:{...q}, Q3:{...q}, Q4:{score:'',percent:'',detail:'',owner:'',link:''} }
-      }))};
-      localStorage.setItem('proactive_2569', JSON.stringify(data));
-    }
-
-    function updateFarmCardStats() {
+    async function updateFarmCardStats() {
       try {
-        const ponds = JSON.parse(localStorage.getItem('farm_ponds_dirt') || '[]');
-        const cycles = JSON.parse(localStorage.getItem('farm_cycles_dirt') || '[]');
+        const [pondsDoc, cyclesDoc] = await Promise.all([
+          window._fsGet('farm', 'dirt_ponds'),
+          window._fsGet('farm', 'dirt_cycles'),
+        ]);
+        const ponds = pondsDoc?.data || [];
+        const cycles = cyclesDoc?.data || [];
         const activePonds = cycles.filter(c => c.status === 'active').length;
         const totalPonds = ponds.filter(p => p.active).length;
         document.getElementById('farm-pond-count').textContent = totalPonds || 53;
@@ -956,11 +933,16 @@
     }
 
     // ===== Init =====
-    seedMission2569IfNeeded();
-    seedProactive2569IfNeeded();
-    renderYearSelect();
-    updateCardStats(getCurrentYear());
-    updateFarmCardStats();
+    (async () => {
+      if (!window._firebaseReady) {
+        await new Promise(r => window.addEventListener('firebase-ready', r, {once:true}));
+      }
+      const yearsDoc = await window._fsGet('app_meta', 'kpi_years');
+      if (yearsDoc && yearsDoc.years) _years = yearsDoc.years;
+      renderYearSelect();
+      await updateCardStats(getCurrentYear());
+      await updateFarmCardStats();
+    })();
   </script>
 
 </body>

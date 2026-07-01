@@ -674,12 +674,12 @@
           </div>
           <div class="card-divider"></div>
           <div class="card-stat">
-            <div class="card-stat-num teal">27</div>
+            <div class="card-stat-num teal" id="farm-sab-count">—</div>
             <div class="card-stat-label">SAB</div>
           </div>
           <div class="card-divider"></div>
           <div class="card-stat">
-            <div class="card-stat-num teal">—</div>
+            <div class="card-stat-num teal" id="farm-sao-count">—</div>
             <div class="card-stat-label">SAO</div>
           </div>
         </div>
@@ -919,16 +919,17 @@
 
     async function updateFarmCardStats() {
       try {
-        const [pondsDoc, cyclesDoc] = await Promise.all([
+        const [pondsDoc, sabDoc, saoDoc] = await Promise.all([
           window._fsGet('farm', 'dirt_ponds'),
-          window._fsGet('farm', 'dirt_cycles'),
+          window._fsGet('farm', 'sab_ponds'),
+          window._fsGet('farm', 'sao_ponds'),
         ]);
         const ponds = pondsDoc?.data || [];
-        const cycles = cyclesDoc?.data || [];
-        const activePonds = cycles.filter(c => c.status === 'active').length;
-        const totalPonds = ponds.filter(p => p.active).length;
-        document.getElementById('farm-pond-count').textContent = totalPonds || 53;
-        document.getElementById('farm-active-count').textContent = activePonds || '—';
+        const sabPonds = sabDoc?.data || [];
+        const saoPonds = saoDoc?.data || [];
+        document.getElementById('farm-pond-count').textContent = ponds.length || '—';
+        document.getElementById('farm-sab-count').textContent = sabPonds.length || '—';
+        document.getElementById('farm-sao-count').textContent = saoPonds.length || '—';
       } catch(e) {}
     }
 

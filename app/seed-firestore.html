@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Seed Firestore — Dashboard คณะประมง</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+    const cfg = {
+      apiKey:"AIzaSyDK--LHu280flT2UBqQc85cZAgZ0gSu7m4",
+      authDomain:"dashboard-fisheries.firebaseapp.com",
+      projectId:"dashboard-fisheries",
+      storageBucket:"dashboard-fisheries.firebasestorage.app",
+      messagingSenderId:"1002413057784",
+      appId:"1:1002413057784:web:c6cba7563409e62cbcfd0d"
+    };
+    const app = initializeApp(cfg);
+    const db = getFirestore(app);
+
+    // ===== LINKS (หลักฐาน URL จาก Excel) =====
+    const LINKS = {
+      "2.1.7":{"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzg2&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzg2&method=inline"},
+      "2.1.8":{"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgwMjUz&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzk1NDE2&method=inline"},
+      "2.1.9":{"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzg1&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzg1&method=inline"},
+      "2.2.1":{"Q2":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTI4&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTI4&method=inline"},
+      "2.2.2":{"Q2":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTMw&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTMw&method=inline"},
+      "2.2.3":{"Q2":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTMy&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTMy&method=inline"},
+      "2.2.4":{"Q2":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTM0&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTM0&method=inline"},
+      "2.2.5":{"Q2":"https://dashboard.mju.ac.th/scopusList?dataType=2&year=2568&dep=20900-20900-2090","Q3":"https://dashboard.mju.ac.th/scopusList?dataType=2&year=2568&dep=20900-20900-2090"},
+      "2.2.6":{"Q2":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTM1&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTM1&method=inline"},
+      "2.2.7":{"Q2":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTM3&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTM3&method=inline"},
+      "2.2.8":{"Q2":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTM5&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzc3MTM5&method=inline"},
+      "2.3.1":{"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzg3&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzg3&method=inline"},
+      "2.3.3":{"Q3":"https://erp.mju.ac.th/openFile.aspx?id=Nzk1MDcw&method=inline"},
+      "3.1.2":{"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgwMjE2&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=NzgwMjE2&method=inline"},
+      "3.1.3":{"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgwMzcw&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=NzgwMzcw&method=inline"},
+      "3.1.4":{"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgwMzkx&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=NzgwMzkx&method=inline"},
+      "4.1.3":{"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzgx&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzgx&method=inline"},
+      "5.1.2":{"Q2":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzg0&method=inline","Q3":"https://erp.mju.ac.th/openFile.aspx?id=NzgxMzg0&method=inline"},
+    };
+
+    // ===== MISSION TEMPLATE 46 KPIs =====
+    const TEMPLATE_2569 = [
+      {code:'1.1.1',name:'1.1.1 ผลการจัดอันดับ World University Ranking (WUR)',unit:'อันดับ',target:'อันดับที่ 1,201-1,500 ของโลก',strategy:1,criteria:'พิจารณาจากรายงานผลการดำเนินงานที่สนับสนุนเป้าหมายของมหาวิทยาลัย เพื่อเข้าสู่การจัดอันดับ World University Ranking (WUR)'},
+      {code:'1.1.2',name:'1.1.2 ผลการจัดอันดับ SCIMAGO',unit:'อันดับ',target:'10',strategy:1,criteria:'พิจารณาจากรายงานผลการดำเนินงานที่สนับสนุนเป้าหมายของมหาวิทยาลัย เพื่อเข้าสู่การจัดอันดับ SCIMAGO ตามเป้าหมายที่กำหนด'},
+      {code:'1.1.3',name:'1.1.3 ผลการจัดอันดับ QS ด้านเกษตรและป่าไม้',unit:'อันดับ',target:'อันดับที่ 401-450 ของโลก',strategy:1,criteria:'พิจารณาจากรายงานผลการดำเนินงานที่สนับสนุนเป้าหมายของมหาวิทยาลัย เพื่อเข้าสู่การจัดอันดับ QS ด้านเกษตรและป่าไม้ ตามเป้าหมายที่กำหนด'},
+      {code:'1.1.4',name:'1.1.4 ความสำเร็จในการร่วมสนับสนุนและขับเคลื่อนการดำเนินงานเพื่อเข้ารับการจัดอันดับ SDGs',unit:'ระดับ',target:'5',strategy:1,criteria:'พิจารณาจากการประเมินความสำเร็จตามกระบวนการ'},
+      {code:'1.1.5',name:'1.1.5 ความสำเร็จในการสนับสนุนมหาวิทยาลัยในการขับเคลื่อนนโยบาย Green U และ Green Office',unit:'ระดับ',target:'3',strategy:1,criteria:'พิจารณาจากเกณฑ์การประเมินผลการดำเนินงานตามมติที่ประชุมคณะกรรมการขับเคลื่อนยุทธศาสตร์การเป็นมหาวิทยาลัยสีเขียว'},
+      {code:'1.2.1',name:'1.2.1 ความสำเร็จของยุทธศาสตร์เกษตรอินทรีย์ (Organic University)',unit:'ร้อยละ',target:'90',strategy:1,criteria:'พิจารณาจากผลการดำเนินงานการร่วมขับเคลื่อนกิจกรรมสำคัญ'},
+      {code:'1.2.2',name:'1.2.2 ความสำเร็จของการดำเนินงานด้านเกษตรอัจฉริยะ (Intelligent Agriculture)',unit:'ร้อยละ',target:'90',strategy:1,criteria:'พิจารณาจากผลการดำเนินงานกิจกรรมสำคัญที่จะขับเคลื่อนการดำเนินงาน'},
+      {code:'2.1.1',name:'2.1.1 จำนวนนักศึกษาใหม่ระดับปริญญาตรี',unit:'คน',target:'130',strategy:2,criteria:'พิจารณาจากการนับจำนวนนักศึกษารับเข้าระดับปริญญาตรี'},
+      {code:'2.1.2',name:'2.1.2 ร้อยละของผู้สำเร็จการศึกษาภายในระยะเวลาของหลักสูตร',unit:'ร้อยละ',target:'80',strategy:2,criteria:'พิจารณาจากจำนวนนักศึกษาชั้นปีสุดท้ายระดับปริญญาตรีที่สำเร็จการศึกษา'},
+      {code:'2.1.3a',name:'2.1.3 ความสำเร็จในการพัฒนานักศึกษาสู่การเป็นผู้มีสุขภาวะที่ดี',unit:'ร้อยละ',target:'90',strategy:2,criteria:'พิจารณาจากความสำเร็จของการบรรลุเป้าหมายตามตัวชี้วัดและกิจกรรมโครงการ'},
+      {code:'2.1.3b',name:'2.1.3 ร้อยละของบัณฑิตที่มีงานทำหรือประกอบอาชีพอิสระภายใน 1 ปี',unit:'ร้อยละ',target:'80',strategy:2,criteria:'พิจารณาจากจำนวนบัณฑิตระดับปริญญาตรีที่สำเร็จในปีการศึกษา 2567 ที่ได้งานทำ'},
+      {code:'2.1.4',name:'2.1.4 ความพึงพอใจผู้ใช้บัณฑิต',unit:'ค่าเฉลี่ย',target:'4.4',strategy:2,criteria:'พิจารณาจากค่าเฉลี่ยผลการสำรวจความพึงพอใจของผู้ใช้บัณฑิต ประจำปีการศึกษา 2567'},
+      {code:'2.1.5',name:'2.1.5 รายได้เริ่มต้นเฉลี่ยต่อเดือนของบัณฑิตระดับปริญญาตรี',unit:'บาท',target:'15000',strategy:2,criteria:'พิจารณาจากจำนวนรายได้เฉลี่ยต่อเดือนเริ่มต้นของบัณฑิตปริญญาตรีที่สำเร็จการศึกษา'},
+      {code:'2.1.6',name:'2.1.6 ค่าฐานนิยม (Mode) ผลการประเมินระดับหลักสูตร',unit:'ค่าเฉลี่ย',target:'3',strategy:2,criteria:'พิจารณาจากค่าฐานนิยม (Mode) จากผลการประเมินคุณภาพการศึกษาระดับหลักสูตร'},
+      {code:'2.1.7',name:'2.1.7 จำนวนรายวิชาเรียนรู้ตลอดชีวิต',unit:'รายวิชา',target:'2',strategy:2,criteria:'พิจารณาจากการนับจำนวนรายวิชาเรียนรู้ตลอดชีวิตที่คณะกรรมการวิชาการรับทราบ'},
+      {code:'2.1.8',name:'2.1.8 จำนวนรางวัลที่นักศึกษา บุคลากร ศิษย์เก่าหรือส่วนงาน ได้รับในระดับชาติ หรือนานาชาติ',unit:'รางวัล',target:'5',strategy:2,criteria:'พิจารณาจากการนับจำนวนรางวัลที่นักศึกษา บุคลากร ศิษย์เก่า หรือส่วนงานได้รับ'},
+      {code:'2.1.9',name:'2.1.9 ร้อยละของนักศึกษาชั้นปีสุดท้ายที่ผ่านกระบวนการพัฒนาให้เป็นพลเมืองโลก',unit:'ร้อยละ',target:'90',strategy:2,criteria:'พิจารณาจากจำนวนนักศึกษาชั้นปีสุดท้ายที่ได้รับการพัฒนาตามกระบวนการทักษะศตวรรษที่ 21'},
+      {code:'2.2.1',name:'2.2.1 จำนวนเงินวิจัยด้านวิทยาศาสตร์และเทคโนโลยี',unit:'บาท',target:'5167959',strategy:2,criteria:'พิจารณาจากจำนวนเงินสนับสนุนโครงการวิจัยจากทุกแหล่งงบประมาณ'},
+      {code:'2.2.2',name:'2.2.2 ร้อยละของอาจารย์และนักวิจัยประจำที่มีผลงานวิจัย',unit:'ร้อยละ',target:'70',strategy:2,criteria:'พิจารณาจากจำนวนอาจารย์และนักวิจัยประจำที่มีผลงานวิจัย'},
+      {code:'2.2.3',name:'2.2.3 จำนวนครั้งในการผลงานวิจัยหรืองานสร้างสรรค์ที่นำไปใช้ประโยชน์',unit:'ครั้ง',target:'3',strategy:2,criteria:'พิจารณาจากจำนวนครั้งในการนำผลงานวิจัยหรืองานสร้างสรรค์มาใช้ประโยชน์'},
+      {code:'2.2.4',name:'2.2.4 ร้อยละของผลงานวิจัยที่ได้รับการตีพิมพ์เผยแพร่ตามเกณฑ์ กพอ.',unit:'ร้อยละ',target:'50',strategy:2,criteria:'พิจารณาจากจำนวนผลงานวิจัยที่ได้รับการตีพิมพ์ระดับชาติหรือนานาชาติ'},
+      {code:'2.2.5',name:'2.2.5 ร้อยละของบทความวิจัยที่ได้รับการอ้างอิง (Citation)',unit:'ร้อยละ',target:'110',strategy:2,criteria:'พิจารณาจากบทความวิจัยที่ได้รับการอ้างอิง (Citation) ในฐานข้อมูลนานาชาติ'},
+      {code:'2.2.6',name:'2.2.6 จำนวนผลงานวิจัยที่ยื่นขอจดสิทธิบัตร/อนุสิทธิบัตร/บัญชีนวัตกรรม',unit:'ผลงาน',target:'2',strategy:2,criteria:'พิจารณาจากการนับจำนวนผลงานวิจัยที่ได้ยื่นขอจดสิทธิบัตร'},
+      {code:'2.2.7',name:'2.2.7 ร้อยละของผลงานวิชาการที่เสนอขอรับการจดลิขสิทธิ์',unit:'ร้อยละ',target:'60',strategy:2,criteria:'พิจารณาจากจำนวนผลงานวิชาการที่เสนอขอรับการจดลิขสิทธิ์'},
+      {code:'2.2.8',name:'2.2.8 จำนวนองค์ความรู้งานวิจัยเพื่อพัฒนาผู้เรียน',unit:'เรื่อง',target:'10',strategy:2,criteria:'พิจารณาจากจำนวนองค์ความรู้งานวิจัยที่นำมาสู่การพัฒนาผู้เรียน'},
+      {code:'2.3.1',name:'2.3.1 จำนวนงบประมาณบริการวิชาการ',unit:'บาท',target:'745000',strategy:2,criteria:'พิจารณาจากการนับจำนวนงบประมาณบริการวิชาการจากทุกแหล่งทุน'},
+      {code:'2.3.2',name:'2.3.2 ผลกระทบด้านเศรษฐกิจ สังคม และคุณภาพชีวิตของชุมชนจากการบริการวิชาการ',unit:'ค่าเฉลี่ย',target:'4',strategy:2,criteria:'พิจารณาจากค่าเฉลี่ยผลการสำรวจผลกระทบด้านเศรษฐกิจ สังคม และคุณภาพชีวิต'},
+      {code:'2.3.3',name:'2.3.3 ระดับความสำเร็จของการบูรณาการผลงานบริการวิชาการสู่พันธกิจอื่น',unit:'ระดับ',target:'5',strategy:2,criteria:'พิจารณาจากจำนวนผลการนำความรู้และประสบการณ์จากการให้บริการวิชาการมาใช้'},
+      {code:'2.4.1',name:'2.4.1 ความสำเร็จของแผนทำนุบำรุงศิลปวัฒนธรรม',unit:'ร้อยละ',target:'80',strategy:2,criteria:'พิจารณาจากผลการดำเนินงานตามตัวชี้วัดในแผนทำนุบำรุงศิลปวัฒนธรรม'},
+      {code:'2.4.2',name:'2.4.2 องค์ความรู้ด้านทำนุบำรุงศิลปะวัฒนธรรมไทยและการอนุรักษ์ทรัพยากรธรรมชาติ',unit:'เรื่อง',target:'5',strategy:2,criteria:'พิจารณาจากจำนวนองค์ความรู้ด้านทำนุบำรุงศิลปะวัฒนธรรมไทย'},
+      {code:'3.1.1',name:'3.1.1 จำนวนนักศึกษาต่างชาติทุกระดับ / ทุกหลักสูตร',unit:'คน',target:'2',strategy:3,criteria:'พิจารณาจากจำนวนนักศึกษาชาวต่างชาติทุกระดับ และทุกหลักสูตร'},
+      {code:'3.1.2',name:'3.1.2 จำนวนอาจารย์/นักวิจัยแลกเปลี่ยน หรือบุคลากรชาวต่างชาติ (Inbound/Outbound)',unit:'คน',target:'4',strategy:3,criteria:'พิจารณาจากการนับจำนวนอาจารย์/นักวิจัย/บุคลากรชาวต่างชาติที่แลกเปลี่ยน'},
+      {code:'3.1.3',name:'3.1.3 จำนวนนักศึกษาแลกเปลี่ยนทุกระดับ ทุกหลักสูตร หรือผู้เข้ารับการฝึกอบรมชาวต่างชาติ',unit:'คน',target:'30',strategy:3,criteria:'พิจารณาจากการนับจำนวนนักศึกษาที่เข้ามาหรือไปเพื่อแลกเปลี่ยนด้วยเหตุผลทางวิชาการ'},
+      {code:'3.1.4',name:'3.1.4 จำนวนองค์ความรู้ด้านการเกษตรที่ได้รับการยอมรับในระดับนานาชาติ',unit:'เรื่อง',target:'4',strategy:3,criteria:'พิจารณาจากการนับจำนวนองค์ความรู้เกษตรที่ได้รับการยอมรับในระดับนานาชาติ'},
+      {code:'3.1.5',name:'3.1.5 ร้อยละของนักศึกษาที่มีผลสอบมาตรฐานภาษาอังกฤษ (CEFR) ตั้งแต่ B1 ขึ้นไป',unit:'ร้อยละ',target:'55',strategy:3,criteria:'พิจารณาจากนักศึกษาระดับปริญญาตรีชั้นปีสุดท้ายที่สอบผ่านมาตรฐาน CEFR ระดับ B1'},
+      {code:'4.1.1',name:'4.1.1 บุคลากรสถาบันอุดมศึกษาและนักศึกษาที่แลกเปลี่ยนความรู้สู่ภาคธุรกิจ/อุตสาหกรรม',unit:'คน',target:'4',strategy:4,criteria:'พิจารณาจากการนับจำนวนบุคลากรที่ไปถ่ายทอด/แลกเปลี่ยนความรู้แก่สถานประกอบการ'},
+      {code:'4.1.2',name:'4.1.2 ความร่วมมือเพื่อพัฒนาผู้ประกอบการและส่งเสริมการสร้างนวัตกรรมกับภาคธุรกิจ/อุตสาหกรรม',unit:'ความร่วมมือ',target:'2',strategy:4,criteria:'พิจารณาจากการนับจำนวนความร่วมมือเพื่อพัฒนาผู้ประกอบการและส่งเสริมนวัตกรรม'},
+      {code:'4.1.3',name:'4.1.3 ระบบนิเวศด้านเทคโนโลยีและนวัตกรรมเพื่อเร่งพัฒนาผู้ประกอบการ',unit:'ระดับ',target:'5',strategy:4,criteria:'พิจารณาจากการดำเนินงานตามขั้นตอนทั้ง 5 ขั้นตอน (A-E)'},
+      {code:'5.1.1',name:'5.1.1 ความสำเร็จในการเตรียมความพร้อมเพื่อเข้ารับการประเมินองค์กรสู่ความเป็นเลิศ (EdPEx)',unit:'ระดับ',target:'5',strategy:5,criteria:'พิจารณาจากการดำเนินการตามแนวทางการนำเกณฑ์ EdPEx ไปใช้ในการพัฒนาองค์กร'},
+      {code:'5.1.2',name:'5.1.2 ร้อยละของบุคลากรที่มีตำแหน่งทางวิชาการ',unit:'ร้อยละ',target:'68.75',strategy:5,criteria:'พิจารณาจากการนับจำนวนคณาจารย์ที่มีตำแหน่งทางวิชาการ'},
+      {code:'5.1.3',name:'5.1.3 ร้อยละของบุคลากรที่มีผลการประเมินสมรรถนะเป็นไปตามมาตรฐาน',unit:'ร้อยละ',target:'80',strategy:5,criteria:'พิจารณาจากผลประเมินสมรรถนะในระบบ PMS'},
+      {code:'5.2.1',name:'5.2.1 ร้อยละของงบประมาณเงินรายได้ที่ได้รับจริงต่อประมาณการเงินรายได้',unit:'ร้อยละ',target:'95',strategy:5,criteria:'พิจารณาจากจำนวนงบประมาณเงินรายได้ที่ได้รับจริงของส่วนงาน'},
+      {code:'5.2.2',name:'5.2.2 จำนวนเงินรายได้จากการให้บริการ',unit:'บาท',target:'500000',strategy:5,criteria:'พิจารณาจากการนับจำนวนงบประมาณเงินรายได้ที่เกิดในระบบ E-Fin'},
+      {code:'5.2.3',name:'5.2.3 จำนวนเงินในกองทุนเงินสะสมเพื่อความมั่นคง',unit:'บาท',target:'25428081',strategy:5,criteria:'พิจารณาจากการนับยอดรวมของจำนวนเงินสะสมรวมในกองทุนสะสมเพื่อความมั่นคง'},
+      {code:'5.2.4',name:'5.2.4 ปริมาณการใช้ไฟฟ้าเปรียบเทียบกับปีที่ผ่านมา',unit:'ร้อยละ',target:'เพิ่มขึ้น 2%',strategy:5,criteria:'พิจารณาผลการดำเนินงานจากปริมาณการใช้ไฟฟ้าต่อหัวบุคลากรและนักศึกษา'},
+      {code:'5.2.5',name:'5.2.5 การใช้จ่ายงบประมาณแผ่นดินงบลงทุนตามมาตรการเร่งรัดการเบิกจ่าย ปีงบประมาณ พ.ศ. 2569',unit:'ระดับ',target:'5',strategy:5,criteria:'พิจารณาจากประเมินผลการใช้จ่ายงบประมาณแผ่นดิน (งบลงทุน) ตามมาตรการเร่งรัดการเบิกจ่าย'},
+    ];
+
+    // ===== PROACTIVE TEMPLATE 10 KPIs =====
+    const PRO_TEMPLATE = [
+      {code:'1.1.1',name:'1.1.1 มีระบบบันทึกและประเมินนักศึกษาที่ผ่านภาคปฏิบัติ',unit:'ระดับ',target:'3',strategy:1},
+      {code:'1.1.2',name:'1.1.2 จำนวนผลงาน Practice-based Project / Problem-based Project / Area based Project',unit:'ชิ้นงาน',target:'3',strategy:1},
+      {code:'1.1.3',name:'1.1.3 มีการจัดทำแพลตฟอร์มและแผนดำเนินการพัฒนานักศึกษา',unit:'ระดับ',target:'3',strategy:1},
+      {code:'2.2.1',name:'2.2.1 ความสำเร็จในการนำเทคโนโลยีดิจิทัลมาใช้ในการดำเนินงาน',unit:'ระดับ',target:'3',strategy:2},
+      {code:'2.2.2',name:'2.2.2 ความสำเร็จในการพัฒนาเครือข่ายศิษย์เก่าและภาคีทางธุรกิจ',unit:'ระดับ',target:'4',strategy:2},
+      {code:'2.2.3',name:'2.2.3 ความสำเร็จในการนำผลงานวิจัยไปใช้ประโยชน์เชิงพาณิชย์หรือชุมชน',unit:'ระดับ',target:'5',strategy:2},
+      {code:'3.3.1',name:'3.3.1 ความสำเร็จในการพัฒนาสมรรถนะบุคลากรตามยุทธศาสตร์คณะ',unit:'ระดับ',target:'3',strategy:3},
+      {code:'3.3.2',name:'3.3.2 ความสำเร็จในการดำเนินงานด้านสิ่งแวดล้อม (Green Office)',unit:'ระดับ',target:'4',strategy:3},
+      {code:'4.4.1',name:'4.4.1 ความสำเร็จในการสร้างความร่วมมือกับมหาวิทยาลัยต่างประเทศ',unit:'MOU/ข้อตกลง',target:'3',strategy:4},
+      {code:'5.5.1',name:'5.5.1 ความสำเร็จในการสร้างรายได้จากการบริการวิชาการ',unit:'ระดับ',target:'5',strategy:5},
+    ];
+
+    // ===== Excel data (from Python extraction) =====
+    const EXCEL_MISSION = {"1.1.1":{"Q2":{"result":"1501","percent":"100.0","detail":"อ้างอิงข้อมูลจากส่วนกลาง"},"Q3":{"result":"1501","percent":"100.0","detail":"อ้างอิงข้อมูลจากส่วนกลาง"}},"1.1.2":{"Q2":{"result":"13","percent":"76.92","detail":"อ้างอิงข้อมูลจากส่วนกลาง"},"Q3":{"result":"13","percent":"76.92","detail":"อ้างอิงข้อมูลจากส่วนกลาง"}},"1.1.3":{"Q2":{"result":"401","percent":"100.0","detail":"อ้างอิงข้อมูลจากส่วนกลาง"},"Q3":{"result":"401","percent":"100.0","detail":"อ้างอิงข้อมูลจากส่วนกลาง"}},"1.1.4":{"Q2":{"result":"None","percent":"None","detail":"-"},"Q3":{"result":"None","percent":"None","detail":"-"}},"1.1.5":{"Q2":{"result":"None","percent":"None","detail":"-"},"Q3":{"result":"None","percent":"None","detail":"-"}},"1.2.1":{"Q2":{"result":"22.22","percent":"24.69","detail":"อ้างอิงข้อมูลจากส่วนกลาง"},"Q3":{"result":"62.5","percent":"69.44","detail":"อ้างอิงข้อมูลจากส่วนกลาง"}},"1.2.2":{"Q2":{"result":"16.67","percent":"18.52","detail":"อ้างอิงข้อมูลจากส่วนกลาง"},"Q3":{"result":"75.0","percent":"83.33","detail":"อ้างอิงข้อมูลจากส่วนกลาง"}},"2.1.1":{"Q2":{"result":"None","percent":"None","detail":"รอข้อมูลนักศึกษาใหม่ระดับปริญญาตรี ปีการศึกษา 2569"},"Q3":{"result":"133","percent":"100.0","detail":"ข้อมูลนักศึกษาใหม่ระดับปริญญาตรี ปีการศึกษา 2569"}},"2.1.2":{"Q2":{"result":"0","percent":"0.0","detail":"-"},"Q3":{"result":"0","percent":"0.0","detail":"-"}},"2.1.3":{"Q2":{"result":"74.29","percent":"92.86","detail":"มีบัณฑิตตอบแบบสอบถาม จำนวน 91 คน มีงานทำ จำนวน 76 คน"},"Q3":{"result":"74.29","percent":"92.86","detail":"มีบัณฑิตตอบแบบสอบถาม จำนวน 91 คน มีงานทำ จำนวน 76 คน"}},"2.1.4":{"Q2":{"result":"None","percent":"None","detail":"รอข้อมูลจากส่วนกลาง"},"Q3":{"result":"None","percent":"None","detail":"รอข้อมูลจากส่วนกลาง"}},"2.1.5":{"Q2":{"result":"15840","percent":"100.0","detail":"อ้างอิงข้อมูลจากส่วนกลาง"},"Q3":{"result":"15840","percent":"100.0","detail":"อ้างอิงข้อมูลจากส่วนกลาง"}},"2.1.6":{"Q2":{"result":"None","percent":"None","detail":"รอผลการประเมินของหลักสูตร"},"Q3":{"result":"None","percent":"None","detail":"รอผลการประเมินของหลักสูตร"}},"2.1.7":{"Q2":{"result":"2","percent":"100.0","detail":"1. นวัตกรรมปลาน้ำจืดสำหรับผู้ประกอบการ\n2. หลักสูตรนวัตกรรมการเพิ่มมูลค่าผลผลิตทางการเกษตรเพื่อขับเคลื่อนเศรษฐกิจ BCG (โครงการบัณฑิตพันธุ์ใหม่ฯ)"},"Q3":{"result":"2","percent":"100.0","detail":"1. นวัตกรรมปลาน้ำจืดสำหรับผู้ประกอบการ\n2. หลักสูตรนวัตกรรมการเพิ่มมูลค่าผลผลิตทางการเกษตรเพื่อขับเคลื่อนเศรษฐกิจ BCG (โครงการบัณฑิตพันธุ์ใหม่ฯ)"}},"2.1.8":{"Q2":{"result":"12","percent":"100.0","detail":"คณะมีจำนวนรางวัล 12 รางวัล"},"Q3":{"result":"19","percent":"100.0","detail":"คณะมีจำนวนรางวัล 19 รางวัล"}},"2.1.9":{"Q2":{"result":"100","percent":"100.0","detail":"ร้อยละของนักศึกษาชั้นปีสุดท้ายที่ผ่านกระบวนการพัฒนาให้เป็นพลเมืองโลก ร้อยละ 100"},"Q3":{"result":"100","percent":"100.0","detail":"ร้อยละของนักศึกษาชั้นปีสุดท้ายที่ผ่านกระบวนการพัฒนาให้เป็นพลเมืองโลก ร้อยละ 100"}},"2.2.1":{"Q2":{"result":"9088219","percent":"100.0","detail":"คณะฯ มีเงินสนับสนุนงานวิจัย 9,088,219 บาท"},"Q3":{"result":"9088219","percent":"100.0","detail":"คณะฯ มีเงินสนับสนุนงานวิจัย 9,088,219 บาท"}},"2.2.2":{"Q2":{"result":"60","percent":"85.71","detail":"อาจารย์ประจำที่มีงานวิจัย 9 คน / อาจารย์ประจำ 15 คน = ร้อยละ 60"},"Q3":{"result":"60","percent":"85.71","detail":"อาจารย์ประจำที่มีงานวิจัย 9 คน / อาจารย์ประจำ 15 คน = ร้อยละ 60"}},"2.2.3":{"Q2":{"result":"8","percent":"100.0","detail":"นำผลงานวิจัยไปใช้ประโยชน์ 8 ครั้ง"},"Q3":{"result":"8","percent":"100.0","detail":"นำผลงานวิจัยไปใช้ประโยชน์ 8 ครั้ง"}},"2.2.4":{"Q2":{"result":"106.25","percent":"100.0","detail":"งานวิจัยที่ตีพิมพ์ 17 เรื่อง / อาจารย์ 16 คน = ร้อยละ 106.25"},"Q3":{"result":"106.25","percent":"100.0","detail":"งานวิจัยที่ตีพิมพ์ 17 เรื่อง / อาจารย์ 16 คน = ร้อยละ 106.25"}},"2.2.5":{"Q2":{"result":"1112.5","percent":"100.0","detail":"บทความที่ได้รับการอ้างอิง 178 เรื่อง / อาจารย์ 16 คน = ร้อยละ 1,112.50"},"Q3":{"result":"1112.5","percent":"100.0","detail":"บทความที่ได้รับการอ้างอิง 178 เรื่อง / อาจารย์ 16 คน = ร้อยละ 1,112.50"}},"2.2.6":{"Q2":{"result":"1","percent":"50.0","detail":"ยื่นขอจดทะเบียนอนุสิทธิบัตร สูตรขนมเลียผสมซินไบโอติกสำหรับแมว"},"Q3":{"result":"1","percent":"50.0","detail":"ยื่นขอจดทะเบียนอนุสิทธิบัตร สูตรขนมเลียผสมซินไบโอติกสำหรับแมว"}},"2.2.7":{"Q2":{"result":"18.75","percent":"31.25","detail":"ผลงานวิชาการที่ขอจดลิขสิทธิ์ 3 เรื่อง / อาจารย์ 16 คน = ร้อยละ 18.75"},"Q3":{"result":"18.75","percent":"31.25","detail":"ผลงานวิชาการที่ขอจดลิขสิทธิ์ 3 เรื่อง / อาจารย์ 16 คน = ร้อยละ 18.75"}},"2.2.8":{"Q2":{"result":"15","percent":"100.0","detail":"มีการนำองค์ความรู้งานวิจัยมาประยุกต์ใช้ในการเรียนการสอน 15 เรื่อง"},"Q3":{"result":"15","percent":"100.0","detail":"มีการนำองค์ความรู้งานวิจัยมาประยุกต์ใช้ในการเรียนการสอน 15 เรื่อง"}},"2.3.1":{"Q2":{"result":"745000","percent":"100.0","detail":"มีจำนวน 10 โครงการ"},"Q3":{"result":"745000","percent":"100.0","detail":"มีจำนวน 10 โครงการ"}},"2.3.2":{"Q2":{"result":"None","percent":"None","detail":"รอผลประเมินเมื่อสิ้นสุดการจัดทำโครงการ"},"Q3":{"result":"None","percent":"None","detail":"รอผลประเมินเมื่อสิ้นสุดการจัดทำโครงการ"}},"2.3.3":{"Q2":{"result":"None","percent":"None","detail":"รอผลการดำเนินงานเมื่อสิ้นสุดการจัดทำโครงการ"},"Q3":{"result":"1.67","percent":"33.4","detail":"โครงการบริการวิชาการ 10 โครงการ มีการบูรณาการ 1 โครงการ"}},"2.4.1":{"Q2":{"result":"None","percent":"None","detail":"-"},"Q3":{"result":"None","percent":"None","detail":"-"}},"2.4.2":{"Q2":{"result":"0","percent":"0.0","detail":"อยู่ระหว่างดำเนินการ"},"Q3":{"result":"0","percent":"0.0","detail":"อยู่ระหว่างดำเนินการ"}},"3.1.1":{"Q2":{"result":"1","percent":"50.0","detail":"Mr. Noylamphanh Phongsavath"},"Q3":{"result":"1","percent":"50.0","detail":"Mr. Noylamphanh Phongsavath"}},"3.1.2":{"Q2":{"result":"2","percent":"50.0","detail":"รศ.ดร.อภินันท์ สุวรรณรักษ์ เข้าร่วมประชุมวิชาการ 2025 Southeast Asia Biodiversity Workshop ณ สาธารณรัฐประชาชนจีน"},"Q3":{"result":"2","percent":"50.0","detail":"รศ.ดร.อภินันท์ สุวรรณรักษ์ เข้าร่วมประชุมวิชาการ 2025 Southeast Asia Biodiversity Workshop ณ สาธารณรัฐประชาชนจีน"}},"3.1.3":{"Q2":{"result":"18","percent":"60.0","detail":"นายสุชน สมคิด เข้าร่วมฝึกอบรม Agricultural Productivity and Sustainability ณ Central Luzon State University, Philippines"},"Q3":{"result":"46","percent":"100.0","detail":"นายสุชน สมคิด เข้าร่วมฝึกอบรม Agricultural Productivity and Sustainability ณ Central Luzon State University, Philippines"}},"3.1.4":{"Q2":{"result":"2","percent":"50.0","detail":"รศ.ดร.อภินันท์ สุวรรณรักษ์ บรรยายพิเศษ Freshwater Fish of Thailand ณ Kunming Institute of Zoology, จีน"},"Q3":{"result":"3","percent":"75.0","detail":"รศ.ดร.อภินันท์ สุวรรณรักษ์ บรรยายพิเศษ Freshwater Fish of Thailand ณ Kunming Institute of Zoology, จีน"}},"3.1.5":{"Q2":{"result":"None","percent":"None","detail":"-"},"Q3":{"result":"None","percent":"None","detail":"-"}},"4.1.1":{"Q2":{"result":"0","percent":"0.0","detail":"-"},"Q3":{"result":"0","percent":"0.0","detail":"-"}},"4.1.2":{"Q2":{"result":"2","percent":"100.0","detail":"บุคลากร 13 คน เข้าร่วมฝึกอบรม AI และการพัฒนาเว็บไซต์"},"Q3":{"result":"2","percent":"100.0","detail":"บุคลากร 13 คน เข้าร่วมฝึกอบรม AI และการพัฒนาเว็บไซต์"}},"4.1.3":{"Q2":{"result":"4","percent":"80.0","detail":"ดำเนินการครบ 4 ใน 5 ขั้นตอน (A-D)"},"Q3":{"result":"4","percent":"80.0","detail":"ดำเนินการครบ 4 ใน 5 ขั้นตอน (A-D)"}},"5.1.1":{"Q2":{"result":"None","percent":"None","detail":"รอผลการดำเนินงานสิ้นเดือนกรกฎาคม 2569"},"Q3":{"result":"None","percent":"None","detail":"รอผลการดำเนินงานสิ้นเดือนกรกฎาคม 2569"}},"5.1.2":{"Q2":{"result":"80","percent":"100.0","detail":"อาจารย์ที่มีตำแหน่งทางวิชาการ 11 คน + ยื่นขอ 1 คน = 12 คน / อาจารย์ทั้งหมด 16 คน"},"Q3":{"result":"80","percent":"100.0","detail":"อาจารย์ที่มีตำแหน่งทางวิชาการ 11 คน + ยื่นขอ 1 คน = 12 คน / อาจารย์ทั้งหมด 16 คน"}},"5.1.3":{"Q2":{"result":"None","percent":"None","detail":"รอข้อมูลจากส่วนกลาง"},"Q3":{"result":"None","percent":"None","detail":"รอข้อมูลจากส่วนกลาง"}},"5.2.1":{"Q2":{"result":"25.85","percent":"27.21","detail":"รายรับจริง 1,704,153.52 บาท / ประมาณการ 6,590,740 บาท (ข้อมูล 31 มี.ค. 2569)"},"Q3":{"result":"36.72","percent":"38.65","detail":"รายรับจริง 2,419,885.81 บาท / ประมาณการ 6,590,740 บาท (ข้อมูล 31 พ.ค. 2569)"}},"5.2.2":{"Q2":{"result":"101154.52","percent":"20.23","detail":"ค่าสมัครสอบ 1,350 + ค่าเช่าพื้นที่ 9,000 + ค่าเช่าห้องประชุม 5,940 + เครื่องมือวิทย์ 1,125 + ฟาร์ม 24,651 + ทุนภายนอก 59,088.52 บาท"},"Q3":{"result":"101154.52","percent":"20.23","detail":"ค่าสมัครสอบ 1,350 + ค่าเช่าพื้นที่ 9,000 + ค่าเช่าห้องประชุม 5,940 + เครื่องมือวิทย์ 1,125 + ฟาร์ม 24,651 + ทุนภายนอก 59,088.52 บาท"}},"5.2.3":{"Q2":{"result":"25453398.21","percent":"100.0","detail":"ข้อมูลในระบบ E-Fin วันที่ 31 มีนาคม 2569"},"Q3":{"result":"25453398.21","percent":"100.0","detail":"ข้อมูลในระบบ E-Fin วันที่ 31 มีนาคม 2569"}},"5.2.4":{"Q2":{"result":"None","percent":"None","detail":"รอข้อมูลจากส่วนกลาง"},"Q3":{"result":"None","percent":"None","detail":"รอข้อมูลจากส่วนกลาง"}},"5.2.5":{"Q2":{"result":"5","percent":"100.0","detail":"ลงระบบ e-GP ครบถ้วนทุกรายการ"},"Q3":{"result":"5","percent":"100.0","detail":"ลงระบบ e-GP ครบถ้วนทุกรายการ"}}};
+
+    const EXCEL_PROACTIVE = {"1.1.1":{"score":"1","percent":"33.33","detail":"มีการประชุมผู้เกี่ยวข้องร่างเอกสารเพื่อจัดทำระบบบันทึกและประเมินผลการเรียนรู้เชิงปฏิบัติ","owner":"รองวิชาการฯ"},"1.1.2":{"score":"9","percent":"100.0","detail":"ชิ้นงานที่นักศึกษาสร้างสรรค์ขึ้นโดยใช้การเรียนรู้ผ่านการปฏิบัติ จำนวน 9 ชิ้นงาน","owner":"รองวิจัยฯ"},"1.1.3":{"score":"2","percent":"66.67","detail":"มีการรวบรวมข้อมูลประกอบการเพื่อจัดทำร่างแพลตฟอร์มและแผนดำเนินการพัฒนานักศึกษา","owner":"รองวิชาการฯ / รองพัฒนานักศึกษา ฯ"},"2.2.1":{"score":"2","percent":"66.67","detail":"มีการศึกษา สำรวจความเป็นไปได้ และแลกเปลี่ยนเรียนรู้ข้อมูลกับผู้เกี่ยวข้อง ซึ่งอยู่ระหว่างการออกแบบโครงสร้างแนวทางเบื้องต้นในการนำเทคโนโลยีดิจิทัลปัญญาประดิษฐ์ (AI) มาใช้","owner":"รองพัฒนานักศึกษา ฯ"},"2.2.2":{"score":"4","percent":"100.0","detail":"มีการจัดกิจกรรมรับฟังความคิดเห็นกับตัวแทนศิษย์เก่า ในกิจกรรมเสวนาศิษย์เก่าประมงแม่โจ้ (ประมงแม่โจ้สัญจร) วันพุธที่ 20 พฤษภาคม พ.ศ. 2569","owner":"รองวิชาการฯ / รองพัฒนานักศึกษา ฯ"},"2.2.3":{"score":"5","percent":"100.0","detail":"มีผลงานวิจัย เรื่องการยกระดับผลิตภัณฑ์อ่องปูนาวิสาหกิจชุมชนศูนย์การเรียนรู้การเพาะเลี้ยงปูนาอำเภอสันทราย ช่วยให้ยอดขายเพิ่มขึ้นเป็น 150%","owner":"รองวิจัยฯ"},"3.3.1":{"score":"1","percent":"33.33","detail":"ยังไม่มีการดำเนินการด้าน JD และการประเมินสมรรถนะบุคลากรที่สอดคล้องกับยุทธศาสตร์คณะ","owner":"คณบดี/ผู้อำนวยการสำนักงานคณบดี"},"3.3.2":{"score":"4","percent":"100.0","detail":"คณะได้จัดทำโครงการคณะสีเขียว (Green Office) เพื่อรองรับการขับเคลื่อนนโยบายสำนักงานสีเขียวของคณะและสนับสนุนนโยบาย Green University ของมหาวิทยาลัย","owner":"คณบดี/ผู้อำนวยการสำนักงานคณบดี"},"4.4.1":{"score":"3","percent":"100.0","detail":"วันที่ 24 เมษายน 2569 คณบดีพร้อมคณะผู้บริหาร ต้อนรับ Prof. Windodo และคณะจาก Universitas Brawijaya สาธารณรัฐอินโดนีเซีย และจัดทำร่าง MOU ร่วมกัน","owner":"คณบดี"},"5.5.1":{"score":"5","percent":"100.0","detail":"มีรายได้จากการจัดฝึกอบรมการเพาะเลี้ยงปลาชะโอน จำนวน 6 รุ่น มีผู้เข้าร่วม 176 คน มีรายรับ 158,400 บาท","owner":"คณบดี/ผู้อำนวยการสำนักงานคณบดี"}};
+
+    function buildMissionData() {
+      return {
+        kpis: TEMPLATE_2569.map(k => {
+          const raw = EXCEL_MISSION[k.code] || EXCEL_MISSION[k.code.replace(/a|b$/,'')];
+          const normalize = (qd, qkey) => {
+            if (!qd) return {result:'',percent:'',detail:'',link:''};
+            const r = (!qd.result || qd.result==='None') ? '' : qd.result;
+            const p = (!qd.percent || qd.percent==='None') ? '' : qd.percent;
+            return {result:r, percent:p, detail:qd.detail||'', link: LINKS[k.code]?.[qkey]||''};
+          };
+          const q2 = normalize(raw?.Q2, 'Q2');
+          const q3 = normalize(raw?.Q3, 'Q3');
+          return {...k, quarters:{Q1:{...q2}, Q2:q2, Q3:q3, Q4:{result:'',percent:'',detail:'',link:''}}};
+        })
+      };
+    }
+
+    function buildProactiveData() {
+      return {
+        kpis: PRO_TEMPLATE.map(k => {
+          const raw = EXCEL_PROACTIVE[k.code];
+          const q = raw ? {score:raw.score, percent:raw.percent, detail:raw.detail, owner:raw.owner, link:''} : {score:'',percent:'',detail:'',owner:'',link:''};
+          const empty = {score:'',percent:'',detail:'',owner:'',link:''};
+          return {...k, quarters:{Q1:{...q}, Q2:{...q}, Q3:{...q}, Q4:{...empty}}};
+        })
+      };
+    }
+
+    // ===== Farm default ponds =====
+    const DIRT_PONDS = [
+      ...['A1','A2','A3','A4'].map(id=>({id,group:'A',size:'',note:'',active:true})),
+      ...['B1','B2','B3','B4','B5','B6','B7'].map(id=>({id,group:'B',size:'',note:'',active:true})),
+      ...['C1','C2','C3','C4','C5','C6','C7','C8','C9'].map(id=>({id,group:'C',size:'',note:'',active:true})),
+      ...['D1','D2','D3','D4','D5','D6','D7','D8'].map(id=>({id,group:'D',size:'',note:'',active:true})),
+      ...['E1','E2','E3','E4','E5','E6','E7','E8','E9','E10','E11','E12'].map(id=>({id,group:'E',size:'',note:'',active:true})),
+      ...['F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','F13'].map(id=>({id,group:'F',size:'',note:'',active:true})),
+    ];
+    const SAB_PONDS = Array.from({length:27},(_,i)=>({id:`SAB${i+1}`,group:'SAB',size:'',note:'',active:true}));
+    const SAO_PONDS = Array.from({length:24},(_,i)=>({id:`SAO${String(i+1).padStart(2,'0')}`,group:'SAO',size:'',note:'',active:true}));
+
+    async function seedAll() {
+      const log = document.getElementById('log');
+      const btn = document.getElementById('btn');
+      btn.disabled = true;
+
+      const addLog = (msg, ok=true) => {
+        const p = document.createElement('p');
+        p.style.color = ok ? '#10b981' : '#ef4444';
+        p.textContent = (ok?'✓ ':'✗ ') + msg;
+        log.appendChild(p);
+        log.scrollTop = log.scrollHeight;
+      };
+
+      try {
+        addLog('กำลัง seed Mission 2569...', true);
+        const mData = buildMissionData();
+        await setDoc(doc(db,'mission','2569'), mData);
+        addLog(`Mission: ${mData.kpis.length} ตัวชี้วัด ✓`, true);
+
+        addLog('กำลัง seed Proactive 2569...', true);
+        const pData = buildProactiveData();
+        await setDoc(doc(db,'proactive','2569'), pData);
+        addLog(`Proactive: ${pData.kpis.length} ตัวชี้วัด ✓`, true);
+
+        addLog('กำลัง seed years...', true);
+        await setDoc(doc(db,'app_meta','kpi_years'), {years:[2569]});
+        addLog('Years: [2569] ✓', true);
+
+        addLog('กำลัง seed Farm บ่อดิน (53 บ่อ)...', true);
+        await setDoc(doc(db,'farm','dirt_ponds'), {data: DIRT_PONDS});
+        addLog(`Farm บ่อดิน: ${DIRT_PONDS.length} บ่อ ✓`, true);
+
+        addLog('กำลัง seed Farm SAB (27 บ่อ)...', true);
+        await setDoc(doc(db,'farm','sab_ponds'), {data: SAB_PONDS});
+        addLog(`Farm SAB: ${SAB_PONDS.length} บ่อ ✓`, true);
+
+        addLog('กำลัง seed Farm SAO (24 บ่อ)...', true);
+        await setDoc(doc(db,'farm','sao_ponds'), {data: SAO_PONDS});
+        addLog(`Farm SAO: ${SAO_PONDS.length} บ่อ ✓`, true);
+
+        addLog('', true);
+        addLog('🎉 Seed สำเร็จทั้งหมด! ปิดหน้านี้แล้วเปิด mission-admin.html', true);
+        document.getElementById('done-msg').style.display = 'block';
+      } catch(e) {
+        addLog('Error: ' + e.message, false);
+        btn.disabled = false;
+      }
+    }
+
+    window.seedAll = seedAll;
+  </script>
+  <style>
+    body { font-family: 'Sarabun', sans-serif; background: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .card { background: white; border-radius: 16px; padding: 40px; max-width: 560px; width: 100%; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    h1 { color: #1e3a5f; font-size: 22px; margin-bottom: 8px; }
+    p.sub { color: #64748b; font-size: 14px; margin-bottom: 24px; }
+    button { background: #1e3a5f; color: white; border: none; border-radius: 10px; padding: 12px 28px; font-size: 15px; font-family: 'Sarabun', sans-serif; cursor: pointer; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #log { margin-top: 20px; background: #0f172a; color: #94a3b8; border-radius: 8px; padding: 16px; font-size: 13px; min-height: 80px; max-height: 300px; overflow-y: auto; font-family: monospace; }
+    #done-msg { display:none; margin-top:16px; background:#dcfce7; color:#15803d; border-radius:8px; padding:12px 16px; font-size:14px; }
+    #done-msg a { color:#15803d; font-weight:600; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🔥 Seed ข้อมูลเข้า Firestore</h1>
+    <p class="sub">อัปโหลดข้อมูลตัวชี้วัดจาก Excel ทั้งสองไฟล์เข้า Firebase<br>Mission: 46 ตัวชี้วัด (Q2+Q3) · Proactive: 10 ตัวชี้วัด (Q3)</p>
+    <button id="btn" onclick="seedAll()">เริ่ม Seed ข้อมูล</button>
+    <div id="log"><p style="color:#475569">กด "เริ่ม Seed ข้อมูล" เพื่ออัปโหลด...</p></div>
+    <div id="done-msg">
+      ✅ ข้อมูลอยู่ใน Firestore แล้ว — ปิดหน้านี้แล้วเปิดใช้งาน
+      <a href="mission-admin.html">mission-admin.html</a> หรือ
+      <a href="executive-main.html">executive-main.html</a>
+    </div>
+  </div>
+</body>
+</html>

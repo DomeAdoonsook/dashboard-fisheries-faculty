@@ -541,7 +541,7 @@
 
     <!-- Tab 3: แนบ PDF -->
     <div class="panel" id="panel-pdf">
-      <div class="panel-title">แนบ PDF หลักฐาน</div>
+      <div class="panel-title">แนบลิงก์หลักฐาน</div>
       <div class="panel-sub">อัปโหลดไฟล์ PDF หลักฐานประกอบการรายงานแต่ละตัวชี้วัด</div>
       <div class="pdf-list" id="pdfList"></div>
     </div>
@@ -678,16 +678,16 @@ const Q_DATA_2569 = {
 };
 
 const TEMPLATE_2569 = [
-  {code:'1.1.1', name:'ระบบบันทึกและประเมินนักศึกษาที่ผ่านภาคปฏิบัติ / ฝึกงาน / ปฏิบัติงานภาคสนาม / ห้องปฏิบัติการมาตรฐานตามที่หลักสูตรกำหนด', unit:'ระดับ', target:'3', strategy:1},
-  {code:'1.1.2', name:'จำนวนผลงาน Practice-based Project / Problem-based Project / Area based Project', unit:'ชิ้นงาน', target:'3', strategy:1},
-  {code:'1.1.3', name:'มีการจัดทำผลตอบแทนแผนพัฒนานักศึกษาจากการเป็นผู้ประกอบการ พัฒนาบัตรและการบริหารจัดการทรัพยากร ตามมาตรฐานของหลักสูตร', unit:'ระดับ', target:'3', strategy:1},
-  {code:'2.2.1', name:'ระดับการบูรณาการเทคโนโลยีดิจิทัล ปัญญาประดิษฐ์ (AI) ในพันธกิจหลักขององค์กร', unit:'ระดับ', target:'3', strategy:2},
-  {code:'2.2.2', name:'ระดับประสิทธิผลของการแก้ไขรับฟังตอบสนองความต้องการผู้รับบริการผู้มีส่วนได้เสียเพื่อการพัฒนาการเรียนการสอนและการบริหารจัดการสร้างความร่วมมือ', unit:'ระดับ', target:'3', strategy:2},
-  {code:'2.2.3', name:'ระดับความโดดเด่นของผลงานวิจัยและนวัตกรรมที่สามารถใช้ประโยชน์และสร้างผลกระทบต่อยุทธศาสตร์คณะ', unit:'ระดับ', target:'3', strategy:2},
-  {code:'3.3.1', name:'ระดับความสามารถขององค์กรระบุบุคลากรกับ Job Description ตามมาตรฐานวิชาชีพ', unit:'ระดับ', target:'3', strategy:3},
-  {code:'3.3.2', name:'ระดับความโดดเด่นหน้าการพัฒนา FTAR-IWA สู่การเป็น Green & Professional Living Faculty', unit:'ระดับ', target:'3', strategy:3},
-  {code:'4.4.1', name:'ระดับบทบาทของ FTAR ในการเป็นศูนย์กลางเครือข่ายความร่วมมือสนับสนุนการประมงและทรัพยากรน้ำระดับนานาชาติ', unit:'ระดับ', target:'3', strategy:4},
-  {code:'5.5.1', name:'ระดับขีดความสามารถของ FTAR ในการสร้างรายได้จากบริการวิชาการ นวัตกรรม และธุรกิจวิชาชีพที่สนับสนุนธุรกิจหลักขององค์กร', unit:'ระดับ', target:'3', strategy:5},
+  {code:'1.1.1', name:'1.1.1 มีระบบบันทึกและประเมินนักศึกษาที่ผ่านภาคปฏิบัติ / ฝึกงาน / ปฏิบัติงานภาคสนาม / ห้องปฏิบัติการมาตรฐานตามที่หลักสูตรกำหนด', unit:'ระดับ', target:'3', strategy:1},
+  {code:'1.1.2', name:'1.1.2 จำนวนผลงาน Practice-based Project / Problem-based Project / Area based Project', unit:'ชิ้นงาน', target:'3', strategy:1},
+  {code:'1.1.3', name:'1.1.3 มีการจัดทำแพลตฟอร์มและแผนดำเนินการพัฒนานักศึกษา', unit:'ระดับ', target:'3', strategy:1},
+  {code:'2.2.1', name:'2.2.1 ความสำเร็จในการนำเทคโนโลยีดิจิทัล ปัญญาประดิษฐ์ (AI) มาใช้ในการดำเนินงาน', unit:'ระดับ', target:'3', strategy:2},
+  {code:'2.2.2', name:'2.2.2 ความสำเร็จในการพัฒนาเครือข่ายศิษย์เก่าและภาคีทางธุรกิจ', unit:'ระดับ', target:'4', strategy:2},
+  {code:'2.2.3', name:'2.2.3 ความสำเร็จในการนำผลงานวิจัยไปใช้ประโยชน์เชิงพาณิชย์หรือชุมชน', unit:'ระดับ', target:'5', strategy:2},
+  {code:'3.3.1', name:'3.3.1 ความสำเร็จในการพัฒนาสมรรถนะบุคลากรตามยุทธศาสตร์คณะ', unit:'ระดับ', target:'3', strategy:3},
+  {code:'3.3.2', name:'3.3.2 ความสำเร็จในการดำเนินงานด้านสิ่งแวดล้อม (Green Office)', unit:'ระดับ', target:'4', strategy:3},
+  {code:'4.4.1', name:'4.4.1 ความสำเร็จในการสร้างความร่วมมือกับมหาวิทยาลัยต่างประเทศ', unit:'MOU/ข้อตกลง', target:'3', strategy:4},
+  {code:'5.5.1', name:'5.5.1 ความสำเร็จในการสร้างรายได้จากการบริการวิชาการ', unit:'ระดับ', target:'5', strategy:5},
 ];
 
 // ===== State =====
@@ -843,7 +843,7 @@ function renderEditTable() {
 
     html += `<tr>
       <td style="font-weight:700;color:var(--primary);white-space:nowrap;">${kpi.code}</td>
-      <td style="max-width:200px;min-width:150px;word-break:break-word;font-size:12px;line-height:1.4;">${escHtml(kpi.name)}</td>
+      <td style="max-width:200px;min-width:150px;word-break:break-word;font-size:12px;line-height:1.4;">${escHtml(kpi.name.replace(/^\d+\.\d+\.\d+\s*/,''))}</td>
       <td style="max-width:60px;"><input class="td-input" value="${escHtml(kpi.unit||'')}" onchange="onMetaChange(${idx},'unit',this.value)" style="min-width:50px;"></td>
       <td style="max-width:60px;"><input class="td-input" value="${escHtml(kpi.target||'')}" onchange="onMetaChange(${idx},'target',this.value)" style="min-width:40px;"></td>
       <td>
@@ -1093,48 +1093,35 @@ function confirmImport() {
 function renderPdfList() {
   const data = getData();
   const html = data.kpis.map(kpi => {
-    const pdfData = localStorage.getItem(pdfKey(kpi.code, currentQuarter));
-    const hasFile = !!pdfData;
+    const q = kpi.quarters?.[`Q${currentQuarter}`] || {};
+    const userLink = q.userLink || '';
+    const erpLink = LINKS[kpi.code] || '';
     return `<div class="pdf-item">
       <div class="pdf-item-left">
         <div class="pdf-code">${kpi.code}</div>
-        <div class="pdf-name">${escHtml(kpi.name.replace(/^\d+\.\d+\.\d+\S*\s*/,''))}</div>
+        <div class="pdf-name">${kpi.name.replace(/^\d+\.\d+\.\d+\S*\s*/,'')}</div>
       </div>
-      <div class="pdf-actions">
-        ${LINKS[kpi.code] ? `<a class="btn-view-pdf" href="${LINKS[kpi.code]}" target="_blank">🔗 ลิงก์</a>` : ''}
-        ${hasFile
-          ? `<span class="pdf-status-ok">✓ มีไฟล์แล้ว</span>
-             <a class="btn-view-pdf" href="${pdfData}" target="_blank">ดู PDF</a>
-             <button class="btn-danger-sm" onclick="removePdf('${kpi.code}')">ลบ</button>`
-          : `<span class="pdf-status-none">ยังไม่มีไฟล์</span>`}
-        <button class="btn-upload-pdf" onclick="triggerPdfUpload('${kpi.code}')">+ แนบ PDF</button>
+      <div class="pdf-actions" style="flex:1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        ${erpLink ? `<a class="btn-view-pdf" href="${erpLink}" target="_blank">🔗 ลิงก์</a>` : ''}
+        <input type="url" placeholder="วาง URL หลักฐาน..." value="${userLink.replace(/"/g,'&quot;')}"
+          style="flex:1;min-width:180px;padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;font-family:inherit;"
+          onchange="saveLinkForKpi('${kpi.code}', this.value)"
+          oninput="saveLinkForKpi('${kpi.code}', this.value)">
+        ${userLink ? `<a href="${userLink}" target="_blank" style="font-size:12px;color:#2563eb;white-space:nowrap;">เปิด ↗</a>` : ''}
       </div>
     </div>`;
   }).join('');
-  document.getElementById('pdfList').innerHTML = html;
+  document.getElementById('pdfList').innerHTML = html || '<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px">ยังไม่มีข้อมูล</div>';
 }
 
-function triggerPdfUpload(code) {
-  currentPdfCode = code;
-  document.getElementById('pdfFileInput').value = '';
-  document.getElementById('pdfFileInput').click();
-}
-
-function onPdfSelected(e) {
-  const file = e.target.files[0];
-  if (!file || !currentPdfCode) return;
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    localStorage.setItem(pdfKey(currentPdfCode, currentQuarter), ev.target.result);
-    renderPdfList();
-  };
-  reader.readAsDataURL(file);
-}
-
-function removePdf(code) {
-  if (!confirm('ต้องการลบไฟล์ PDF นี้หรือไม่?')) return;
-  localStorage.removeItem(pdfKey(code, currentQuarter));
-  renderPdfList();
+function saveLinkForKpi(code, url) {
+  const data = getData();
+  const kpi = data.kpis.find(k => k.code === code);
+  if (!kpi) return;
+  if (!kpi.quarters) kpi.quarters = {};
+  if (!kpi.quarters[`Q${currentQuarter}`]) kpi.quarters[`Q${currentQuarter}`] = {};
+  kpi.quarters[`Q${currentQuarter}`].userLink = url.trim();
+  saveData(data);
 }
 
 // ===== Alert =====

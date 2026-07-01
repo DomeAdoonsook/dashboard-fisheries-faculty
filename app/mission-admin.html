@@ -938,8 +938,8 @@
 
       <!-- ===== Tab: PDF ===== -->
       <div class="panel" id="panel-pdf">
-        <div class="panel-title">แนบ PDF หลักฐาน</div>
-        <div class="panel-sub">อัปโหลดไฟล์ PDF หลักฐานประกอบการรายงานแต่ละตัวชี้วัด</div>
+        <div class="panel-title">แนบลิงก์หลักฐาน</div>
+        <div class="panel-sub">วาง URL หลักฐานอ้างอิงประกอบการรายงานแต่ละตัวชี้วัด</div>
 
         <div class="alert alert-success" id="pdf-success">อัปโหลด PDF สำเร็จ!</div>
 
@@ -1055,7 +1055,8 @@
 
     // ===== Year =====
     const DEFAULT_YEAR = 2569;
-    function getYears() { return JSON.parse(localStorage.getItem('kpi_years') || '[2569]'); }
+    let _yearsCache = [2569];
+    function getYears() { return _yearsCache; }
     function getCurrentYear() { return parseInt(sessionStorage.getItem('current_year') || DEFAULT_YEAR); }
     function onYearChange(y) { sessionStorage.setItem('current_year', y); loadData(); }
 
@@ -1182,7 +1183,7 @@
 
     // In-memory cache — loaded once on init, sync access throughout
     let _dataCache = { kpis: [] };
-    let _stratCache = [...DEFAULT_STRATEGIES];
+    let _stratCache = [];
 
     // Synchronous getters (use cache)
     function getData() { return _dataCache; }
@@ -1307,7 +1308,7 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><span style="font-size:11px;font-weight:700;color:var(--primary)">${kpi.code}</span></td>
-          <td style="font-size:12px">${kpi.name}</td>
+          <td style="font-size:12px">${kpi.name.replace(/^\d+\.\d+\.\d+\S*\s*/,'')}</td>
           <td style="font-size:12px">${kpi.unit}</td>
           <td style="font-size:12px;text-align:center">${kpi.target}</td>
           <td style="font-size:12px;text-align:center">${kpi.result}</td>
@@ -1527,60 +1528,38 @@
       }
 
       data.kpis.forEach(kpi => {
-        const pdfKey = `pdf_mission_${getCurrentYear()}_${kpi.code}_Q${currentQuarter}`;
-        const hasPdf = !!localStorage.getItem(pdfKey);
         const q = kpi.quarters?.[`Q${currentQuarter}`] || {};
+        const userLink = q.userLink || '';
+        const erpLink = q.link || '';
         const div = document.createElement('div');
         div.className = 'pdf-item';
+        div.style.cssText = 'display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;';
         div.innerHTML = `
-          <div class="pdf-item-left">
+          <div class="pdf-item-left" style="flex:0 0 auto;min-width:200px;">
             <div class="pdf-code">${kpi.code}</div>
             <div class="pdf-name">${kpi.name.replace(/^\d+\.\d+\.\d+\S*\s*/,'')}</div>
           </div>
-          <div class="pdf-actions">
-            ${q.link ? `<a class="btn-view-pdf" href="${q.link}" target="_blank">🔗 ลิงก์ ERP</a>` : ''}
-            ${hasPdf
-              ? `<span class="pdf-status-ok">✓ แนบแล้ว</span>
-                 <a class="btn-view-pdf" href="${localStorage.getItem(pdfKey)}" target="_blank">ดู PDF</a>
-                 <button class="btn-danger-sm" onclick="removePdf('${kpi.code}')">ลบ</button>`
-              : `<span class="pdf-status-none">ยังไม่มีไฟล์</span>
-                 <button class="btn-upload-pdf" onclick="triggerPdfUpload('${kpi.code}')">+ แนบ PDF</button>`
-            }
+          <div style="flex:1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            ${erpLink ? `<a href="${erpLink}" target="_blank" style="font-size:12px;color:#2563eb;white-space:nowrap;">🔗 ลิงก์ ERP</a>` : ''}
+            <input type="url" placeholder="วาง URL หลักฐาน..." value="${userLink.replace(/"/g,'&quot;')}"
+              style="flex:1;min-width:200px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;"
+              onchange="saveLinkForKpi('${kpi.code}', this.value)"
+              oninput="saveLinkForKpi('${kpi.code}', this.value)">
+            ${userLink ? `<a href="${userLink}" target="_blank" style="font-size:12px;color:#2563eb;white-space:nowrap;">เปิด ↗</a>` : ''}
           </div>
         `;
         list.appendChild(div);
       });
     }
 
-    let uploadingCode = '';
-    function triggerPdfUpload(code) {
-      uploadingCode = code;
-      document.getElementById('pdf-input').click();
-    }
-
-    function handlePdfUpload(e) {
-      const file = e.target.files[0];
-      if (!file || !uploadingCode) return;
-      const reader = new FileReader();
-      reader.onload = function(ev) {
-        const pdfKey = `pdf_mission_${getCurrentYear()}_${uploadingCode}_Q${currentQuarter}`;
-        try {
-          localStorage.setItem(pdfKey, ev.target.result);
-          showAlert('pdf-success', `แนบ PDF สำหรับ ${uploadingCode} สำเร็จ!`);
-          renderPdfList();
-        } catch(err) {
-          showAlert('pdf-success', 'ไม่สามารถบันทึก PDF ได้ (ขนาดไฟล์อาจใหญ่เกิน)');
-        }
-        uploadingCode = '';
-        e.target.value = '';
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function removePdf(code) {
-      const pdfKey = `pdf_mission_${getCurrentYear()}_${code}_Q${currentQuarter}`;
-      localStorage.removeItem(pdfKey);
-      renderPdfList();
+    function saveLinkForKpi(code, url) {
+      const data = getData();
+      const kpi = data.kpis.find(k => k.code === code);
+      if (!kpi) return;
+      if (!kpi.quarters) kpi.quarters = {};
+      if (!kpi.quarters[`Q${currentQuarter}`]) kpi.quarters[`Q${currentQuarter}`] = {};
+      kpi.quarters[`Q${currentQuarter}`].userLink = url.trim();
+      saveData(data);
     }
 
     // ===== Alert Helper =====
@@ -1670,13 +1649,15 @@
     });
 
     // ===== Init =====
-    renderYearSelect();
-
     async function _init() {
-      // รอ Firebase module โหลดเสร็จก่อน
       if (!window._firebaseReady) {
         await new Promise(r => window.addEventListener('firebase-ready', r, {once:true}));
       }
+      // โหลด years จาก Firestore
+      _stratCache = [...DEFAULT_STRATEGIES];
+      const yearsMeta = await window._fsGet('app_meta', 'kpi_years');
+      if (yearsMeta && yearsMeta.years) _yearsCache = yearsMeta.years;
+      renderYearSelect();
       await initData();
       renderStrategyList();
       loadData();

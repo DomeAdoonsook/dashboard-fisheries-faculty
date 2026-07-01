@@ -1373,9 +1373,10 @@
         }
 
         const q = kpi.quarters?.[`Q${currentQuarter}`] || {};
-        const pct = parseFloat(q.percent);
-        const dotColor = isNaN(pct) || q.percent === '' ? '#cbd5e1' : pct >= 100 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
-        const statusText = isNaN(pct) || q.percent === '' ? 'ยังไม่มีข้อมูล' : pct >= 100 ? 'ผ่าน' : pct >= 50 ? 'กำลังดำเนินการ' : 'ต้องเร่ง';
+        const noData = q.result == null && q.percent == null;
+        const pct = parseFloat(q.percent || '0');
+        const dotColor = noData ? '#cbd5e1' : pct >= 100 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
+        const statusText = noData ? 'ยังไม่มีข้อมูล' : pct >= 100 ? 'ผ่าน' : pct >= 50 ? 'กำลังดำเนินการ' : 'ต้องเร่ง';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -1383,8 +1384,8 @@
           <td style="font-size:12px;max-width:200px">${kpi.name.replace(/^\d+\.\d+\.\d+\S*\s*/,'')}</td>
           <td><input class="td-input" type="text" value="${kpi.unit||''}" placeholder="หน่วย" data-code="${kpi.code}" data-field="unit" oninput="onMetaChange(this)" style="text-align:center;min-width:60px"></td>
           <td style="min-width:90px;max-width:130px;"><textarea class="td-input" data-code="${kpi.code}" data-field="target" oninput="onMetaChange(this)" style="min-height:36px;resize:none;word-break:break-word;">${kpi.target||''}</textarea></td>
-          <td><input class="td-input" type="number" value="${q.result ?? ''}" placeholder="-" data-code="${kpi.code}" data-field="result" step="0.01" oninput="onFieldChange(this)"></td>
-          <td><input class="td-input" type="number" value="${q.percent ?? ''}" placeholder="%" data-code="${kpi.code}" data-field="percent" step="0.01" oninput="onFieldChange(this)"></td>
+          <td><input class="td-input" type="number" value="${q.result ?? '0'}" placeholder="0" data-code="${kpi.code}" data-field="result" step="0.01" oninput="onFieldChange(this)"></td>
+          <td><input class="td-input" type="number" value="${q.percent ?? '0'}" placeholder="0" data-code="${kpi.code}" data-field="percent" step="0.01" oninput="onFieldChange(this)"></td>
           <td style="text-align:center"><span title="${statusText}" style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${dotColor}"></span></td>
           <td><textarea class="td-input" placeholder="รายละเอียด..." data-code="${kpi.code}" data-field="detail" oninput="onFieldChange(this)">${q.detail||''}</textarea></td>
           <td style="white-space:nowrap">

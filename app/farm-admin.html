@@ -836,6 +836,7 @@
                 <th>ต้นทุน (บาท)</th>
                 <th>กำไร (บาท)</th>
                 <th>สถานะ</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="history-tbody"></tbody>
@@ -1932,8 +1933,21 @@ function renderHistory() {
       <td>${c.totalCost ? c.totalCost.toLocaleString('th-TH',{minimumFractionDigits:0}) : '—'}</td>
       <td>${profit}</td>
       <td>${statusBadge}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteCycle('${c.id}')">ลบ</button></td>
     </tr>`;
-  }).join('') || '<tr><td colspan="11" style="text-align:center;color:var(--text-muted);padding:24px;">ยังไม่มีข้อมูล</td></tr>';
+  }).join('') || '<tr><td colspan="12" style="text-align:center;color:var(--text-muted);padding:24px;">ยังไม่มีข้อมูล</td></tr>';
+}
+
+function deleteCycle(cycleId) {
+  const cycles = load(SK_CYCLES,[]);
+  const cycle = cycles.find(c => c.id === cycleId);
+  if (!cycle) return;
+  if (!confirm(`ยืนยันลบรอบการเลี้ยง บ่อ ${cycle.pondId} Crop ${cycle.cropNo}?\nข้อมูล log การให้อาหาร/ยาในช่วงวันที่ของรอบนี้จะถูกลบด้วย และไม่สามารถกู้คืนได้`)) return;
+  save(SK_CYCLES, cycles.filter(c => c.id !== cycleId));
+  const endDate = cycle.harvestDate || new Date().toISOString().slice(0,10);
+  const logs = load(SK_LOGS,[]);
+  save(SK_LOGS, logs.filter(l => !(l.pondId === cycle.pondId && l.date >= cycle.startDate && l.date <= endDate)));
+  renderHistory();
 }
 
 // ===== Helpers =====

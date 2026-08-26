@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Seed HR Firestore — Dashboard คณะประมง</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+    const cfg = {
+      apiKey:"AIzaSyDK--LHu280flT2UBqQc85cZAgZ0gSu7m4",
+      authDomain:"dashboard-fisheries.firebaseapp.com",
+      projectId:"dashboard-fisheries",
+      storageBucket:"dashboard-fisheries.firebasestorage.app",
+      messagingSenderId:"1002413057784",
+      appId:"1:1002413057784:web:c6cba7563409e62cbcfd0d"
+    };
+    const app = initializeApp(cfg);
+    const db = getFirestore(app);
+
+    function uid() { return 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,9); }
+
+    // ===== ทำเนียบบุคลากร (จาก Table 1) =====
+    const PERSONNEL_RAW = [
+      // สายวิชาการ
+      {name:'ผศ.ดร.จิราพร โรจน์ทินกร', empNo:'447', position:'ผู้ช่วยศาสตราจารย์', level:'', hireDate:'18 ก.ค. 2537', adminRole:'ว่าง', empType:'ข้าราชการ', track:'วิชาการ', unit:''},
+      {name:'รศ.ดร.ชนกันต์ จิตมนัส', empNo:'011', position:'รองศาสตราจารย์', level:'', hireDate:'01 มิ.ย. 2544', adminRole:'รองคณบดีฝ่ายวิชาการและประกันคุณภาพการศึกษา', empType:'พนง.มหาวิทยาลัย', track:'วิชาการ', unit:''},
+      {name:'(อัตราว่างมีเงิน)', empNo:'1006', position:'อาจารย์', level:'', hireDate:'', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'วิชาการ', unit:''},
+      {name:'ผศ.ดร.อานุภาพ วรรณคนาพล', empNo:'1074', position:'ผู้ช่วยศาสตราจารย์', level:'', hireDate:'19 ธ.ค. 2545', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'วิชาการ', unit:''},
+      {name:'อ.ดร.นงพงา แสงเจริญ', empNo:'1185', position:'อาจารย์', level:'', hireDate:'04 ม.ค. 2565', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'วิชาการ', unit:''},
+      {name:'ผศ.ดร.จอมสุดา ดวงวงษา', empNo:'358', position:'ผู้ช่วยศาสตราจารย์', level:'', hireDate:'01 ส.ค. 2549', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'วิชาการ', unit:''},
+      {name:'ผศ.ดร.สุดาพร ตงศิริ', empNo:'360', position:'ผู้ช่วยศาสตราจารย์', level:'', hireDate:'01 ส.ค. 2551', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'วิชาการ', unit:''},
+      {name:'อ.ดร.ขจรเกียรติ์ ศรีนวลสม', empNo:'361', position:'อาจารย์', level:'', hireDate:'01 ส.ค. 2548', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'วิชาการ', unit:''},
+      {name:'ผศ.ดร.ดารชาต์ เทียมเมือง', empNo:'411', position:'ผู้ช่วยศาสตราจารย์', level:'', hireDate:'03 ก.ย. 2555', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'วิชาการ', unit:''},
+      {name:'อ.ดร.โดม อดุลย์สุข', empNo:'483', position:'อาจารย์', level:'', hireDate:'01 ต.ค. 2562', adminRole:'รองคณบดีฝ่ายพัฒนานักศึกษาและกิจการพิเศษ', empType:'พนง.มหาวิทยาลัย', track:'วิชาการ', unit:''},
+      {name:'รศ.ดร.นิสรา กิจเจริญ', empNo:'629', position:'รองศาสตราจารย์', level:'', hireDate:'12 พ.ย. 2555', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'วิชาการ', unit:''},
+      {name:'ผศ.ดร.อุดมลักษณ์ สมพงษ์', empNo:'656', position:'ผู้ช่วยศาสตราจารย์', level:'', hireDate:'01 ธ.ค. 2551', adminRole:'รองคณบดีฝ่ายวิจัยและบริการวิชาการ', empType:'พนง.มหาวิทยาลัย', track:'วิชาการ', unit:''},
+      {name:'รศ.ดร.ดวงพร อมรเลิศพิศาล', empNo:'657', position:'รองศาสตราจารย์', level:'', hireDate:'22 เม.ย. 2552', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'วิชาการ', unit:''},
+      {name:'อ.ดร.วาธิณี อินทรพงษ์นุวัฒน์', empNo:'860', position:'อาจารย์', level:'', hireDate:'01 ก.พ. 2559', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'วิชาการ', unit:''},
+      {name:'อ.ดร.กานต์ ทิพยาไกรศรี', empNo:'862', position:'อาจารย์', level:'', hireDate:'01 พ.ย. 2559', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'วิชาการ', unit:''},
+      {name:'รศ.ดร.จงกล พรมยะ', empNo:'ข325', position:'รองศาสตราจารย์', level:'', hireDate:'01 มิ.ย. 2560', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'วิชาการ', unit:''},
+      {name:'รศ.ดร.อภินันท์ สุวรรณรักษ์', empNo:'ข498', position:'รองศาสตราจารย์', level:'', hireDate:'01 ต.ค. 2563', adminRole:'คณบดี', empType:'พนง.มหาวิทยาลัย', track:'วิชาการ', unit:''},
+      // สำนักงานคณบดี / สายสนับสนุน
+      {name:'นางจรรยา ภูคำวงศ์', empNo:'412', position:'ผู้อำนวยการสำนักงานคณบดี', level:'ผู้อำนวยการสำนักงานคณบดี', hireDate:'01 เม.ย. 2548', adminRole:'ผู้อำนวยการสำนักงานคณบดี', empType:'พนง.มหาวิทยาลัย', track:'สนับสนุน', unit:'สำนักงานคณบดี'},
+      {name:'น.ส.จิราพร มอญเลิศ', empNo:'512', position:'หัวหน้างานบริหารและธุรการ', level:'หัวหน้างาน', hireDate:'01 ต.ค. 2552', adminRole:'หัวหน้างานบริหารและธุรการ', empType:'พนง.มหาวิทยาลัย', track:'สนับสนุน', unit:'งานบริหารและธุรการ'},
+      {name:'นายวีระวัฒน์ ฟังเย็น', empNo:'514', position:'นักวิชาการคอมพิวเตอร์', level:'ปฏิบัติการ', hireDate:'14 ต.ค. 2551', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'สนับสนุน', unit:'งานบริหารและธุรการ'},
+      {name:'นายเกษม สมบัติ', empNo:'986', position:'นักบริหารงานอาคารสถานที่', level:'ปฏิบัติการ', hireDate:'01 ก.พ. 2555', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'สนับสนุน', unit:'งานบริหารและธุรการ'},
+      {name:'ว่าที่ ร.ต.เอกรินทร์ แสนแก้ว', empNo:'076', position:'ผู้ปฏิบัติงานบริหาร', level:'', hireDate:'01 มิ.ย. 2560', adminRole:'ว่าง', empType:'พนักงานส่วนงาน', track:'สนับสนุน', unit:'งานบริหารและธุรการ'},
+      {name:'นายพงษ์ศักดิ์ กองคำ', empNo:'078', position:'ผู้ปฏิบัติงานการเกษตร', level:'', hireDate:'01 ต.ค. 2549', adminRole:'ว่าง', empType:'พนักงานส่วนงาน', track:'สนับสนุน', unit:'งานบริหารและธุรการ'},
+      {name:'นางพิไลวรรณ จันต๊ะตา', empNo:'564', position:'นักวิชาการพัสดุ', level:'ปฏิบัติการ', hireDate:'01 มิ.ย. 2550', adminRole:'หัวหน้างานคลังและพัสดุ', empType:'พนง.มหาวิทยาลัย', track:'สนับสนุน', unit:'งานคลังและพัสดุ'},
+      {name:'น.ส.อรพรรณ พรหมใจ', empNo:'565', position:'นักวิชาการเงินและบัญชี', level:'ปฏิบัติการ', hireDate:'15 มิ.ย. 2553', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'สนับสนุน', unit:'งานคลังและพัสดุ'},
+      {name:'นางกัลยารัตน์ วงศ์แก้ว', empNo:'513', position:'หัวหน้างานนโยบาย แผน และประกันคุณภาพ', level:'หัวหน้างาน', hireDate:'01 มิ.ย. 2550', adminRole:'หัวหน้างานนโยบายแผนและประกันคุณภาพ', empType:'พนง.มหาวิทยาลัย', track:'สนับสนุน', unit:'งานนโยบาย แผน และประกันคุณภาพ'},
+      {name:'น.ส.ศิรินยา อ้นแก้ว', empNo:'887', position:'นักวิชาการศึกษา', level:'ปฏิบัติการ', hireDate:'07 ก.ค. 2557', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'สนับสนุน', unit:'งานนโยบาย แผน และประกันคุณภาพ'},
+      {name:'นายวินัย การะเกตุ', empNo:'ล086', position:'ผู้ปฏิบัติงานวิทยาศาสตร์', level:'ปฏิบัติงาน', hireDate:'01 ก.ค. 2560', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'สนับสนุน', unit:'งานบริการวิชาการและวิจัย'},
+      {name:'นายดุสิต ดวงบาล', empNo:'077', position:'ผู้ปฏิบัติงานการเกษตร', level:'', hireDate:'06 มี.ค. 2561', adminRole:'ว่าง', empType:'พนักงานส่วนงาน', track:'สนับสนุน', unit:'งานบริการวิชาการและวิจัย'},
+      {name:'นายประจันทร์ วงค์แสง', empNo:'079', position:'ผู้ปฏิบัติงานประมง', level:'', hireDate:'01 พ.ย. 2554', adminRole:'ว่าง', empType:'พนักงานส่วนงาน', track:'สนับสนุน', unit:'งานบริการวิชาการและวิจัย'},
+      {name:'ดร.ภัสสร์พัณณ์ ศรีวิชัย', empNo:'002', position:'นักวิทยาศาสตร์', level:'ปฏิบัติการ', hireDate:'01 ก.พ. 2543', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'สนับสนุน', unit:'งานบริการการศึกษาและกิจการนักศึกษา'},
+      {name:'ดร.เทพพิทักษ์ บุญทา', empNo:'058', position:'นักวิทยาศาสตร์', level:'ปฏิบัติการ', hireDate:'22 พ.ย. 2556', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'สนับสนุน', unit:'งานบริการการศึกษาและกิจการนักศึกษา'},
+      {name:'น.ส.น้ำเพชร ประกอบศิลป์', empNo:'1107', position:'นักวิทยาศาสตร์', level:'ปฏิบัติการ', hireDate:'01 ต.ค. 2556', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'สนับสนุน', unit:'งานบริการการศึกษาและกิจการนักศึกษา'},
+      {name:'นางอัจฉรา เสาวฤทธิ์', empNo:'362', position:'หัวหน้างานบริการการศึกษาและกิจการนักศึกษา', level:'หัวหน้างาน', hireDate:'29 มิ.ย. 2549', adminRole:'หัวหน้างานบริการการศึกษาและกิจการนักศึกษา', empType:'พนง.มหาวิทยาลัย', track:'สนับสนุน', unit:'งานบริการการศึกษาและกิจการนักศึกษา'},
+      {name:'น.ส.ณัฏฐกานต์ มุกดาจตุรพักตร์', empNo:'611', position:'นักวิทยาศาสตร์', level:'ปฏิบัติการ', hireDate:'01 ต.ค. 2551', adminRole:'หัวหน้างานบริการวิชาการและวิจัย', empType:'พนง.มหาวิทยาลัย', track:'สนับสนุน', unit:'งานบริการการศึกษาและกิจการนักศึกษา'},
+      {name:'นายประเสริฐ ประสงค์ผล', empNo:'612', position:'นักวิชาการประมง', level:'ปฏิบัติการ', hireDate:'01 ส.ค. 2554', adminRole:'ว่าง', empType:'พนง.มหาวิทยาลัย', track:'สนับสนุน', unit:'งานบริการการศึกษาและกิจการนักศึกษา'},
+    ];
+
+    // ===== ตำแหน่งวิชาการ (จาก Table 3) =====
+    const ACADEMIC_RAW = [
+      {name:'ผศ.ดร.อานุภาพ วรรณคนาพล', field:'เพาะเลี้ยงสัตว์น้ำ', currentPosition:'ผู้ช่วยศาสตราจารย์', currentDate:'1 เม.ย. 2563', nextPosition:'รศ. (1 เม.ย. 2571)', nextYear:'2565 - 2569', program:'วิทยาศาสตรบัณฑิต สาขาวิชาการประมงและนวัตกรรมการผลิตสัตว์น้ำ'},
+      {name:'รศ.ดร.จงกล พรมยะ', field:'ชีววิทยา', currentPosition:'รองศาสตราจารย์', currentDate:'ก.ย. 2563', nextPosition:'', nextYear:'2569 - 2573', program:'วิทยาศาสตรบัณฑิต สาขาวิชาการประมงและนวัตกรรมการผลิตสัตว์น้ำ'},
+      {name:'อาจารย์ ดร.นงพงา แสงเจริญ', field:'ผลิตภัณฑ์ประมง', currentPosition:'อาจารย์', currentDate:'', nextPosition:'ผศ. (4 ม.ค. 2570)', nextYear:'2568 - 2572', program:'วิทยาศาสตรบัณฑิต สาขาวิชาการประมงและนวัตกรรมการผลิตสัตว์น้ำ'},
+      {name:'รศ.ดร.นิสรา กิจเจริญ', field:'เพาะเลี้ยงสัตว์น้ำ', currentPosition:'รองศาสตราจารย์', currentDate:'3 ส.ค. 2566', nextPosition:'', nextYear:'2568 - 2572', program:'วิทยาศาสตรบัณฑิต สาขาวิชาการประมงและนวัตกรรมการผลิตสัตว์น้ำ'},
+      {name:'อ.ดร.โดม อดุลย์สุข', field:'วิศวกรรมศาสตร์สิ่งแวดล้อม', currentPosition:'อาจารย์', currentDate:'', nextPosition:'ผศ. (6 มี.ค 2569) (อยู่ระหว่างการยื่นขอ)', nextYear:'2569 - 2573', program:'วิทยาศาสตรบัณฑิต สาขาวิชาการประมงและนวัตกรรมการผลิตสัตว์น้ำ'},
+      {name:'ผศ.ดร.จอมสุดา ดวงวงษา', field:'สัตวศาสตร์', currentPosition:'ผู้ช่วยศาสตราจารย์', currentDate:'23 มี.ค. 2565', nextPosition:'รศ. (23 มี.ค. 2577)', nextYear:'2569 - 2573', program:'วิทยาศาสตรบัณฑิต สาขาวิชานวัตกรรมการจัดการธุรกิจประมง'},
+      {name:'รศ.ดร.ดวงพร อมรเลิศพิศาล', field:'เทคโนโลยีชีวภาพ', currentPosition:'รองศาสตราจารย์', currentDate:'8 เม.ย. 2564', nextPosition:'', nextYear:'2569 - 2573', program:'วิทยาศาสตรบัณฑิต สาขาวิชานวัตกรรมการจัดการธุรกิจประมง'},
+      {name:'อ.ดร.วาธิณี อินทรพงษ์นุวัฒน์', field:'ผลิตภัณฑ์ประมง', currentPosition:'อาจารย์', currentDate:'', nextPosition:'ผศ. (1 ต.ค. 2567) (ยังไม่ได้ยื่นขอ)', nextYear:'2565 - 2569', program:'วิทยาศาสตรบัณฑิต สาขาวิชานวัตกรรมการจัดการธุรกิจประมง'},
+      {name:'ผศ.ดร.ดารชาต์ เทียมเมือง', field:'การจัดการปะมง', currentPosition:'ผู้ช่วยศาสตราจารย์', currentDate:'24 ต.ค. 2561', nextPosition:'รศ. (1 ต.ค. 2574)', nextYear:'2569 - 2573', program:'วิทยาศาสตรบัณฑิต สาขาวิชานวัตกรรมการจัดการธุรกิจประมง'},
+      {name:'รศ.ดร.ชนกันต์ จิตมนัส', field:'การจัดการสิ่งแวดล้อม', currentPosition:'รองศาสตราจารย์', currentDate:'มิ.ย. 2564', nextPosition:'', nextYear:'2569 - 2573', program:'หลักสูตรระดับบัณฑิตศึกษา'},
+      {name:'ผศ.ดร.อุดมลักษณ์ สมพงษ์', field:'ชีววิทยา', currentPosition:'ผู้ช่วยศาสตราจารย์', currentDate:'20 ก.ย. 2561', nextPosition:'รศ. (1 ต.ค. 2570)', nextYear:'2569 - 2573', program:'หลักสูตรระดับบัณฑิตศึกษา'},
+      {name:'ผศ.ดร.สุดาพร ตงศิริ', field:'เทคโนโลยีชีวภาพ', currentPosition:'ผู้ช่วยศาสตราจารย์', currentDate:'20 ก.ย. 2561', nextPosition:'รศ. (16 ต.ค. 2572)', nextYear:'2569 - 2573', program:'หลักสูตรระดับบัณฑิตศึกษา'},
+      {name:'รศ.ดร.อภินันท์ สุวรรณรักษ์', field:'Aquatic Ecology', currentPosition:'รองศาสตราจารย์', currentDate:'ส.ค. 2562', nextPosition:'', nextYear:'2565 - 2569', program:'ไม่สังกัดหลักสูตร'},
+      {name:'ผศ.ดร.จิราพร โรจน์ทินกร', field:'Aquatic Biosciences', currentPosition:'ผู้ช่วยศาสตราจารย์', currentDate:'ม.ค. 2557', nextPosition:'รศ. (ภายใน 7 ปีหลังจากได้ ผศ.)', nextYear:'2567 - 2571', program:'ไม่สังกัดหลักสูตร'},
+      {name:'อ.ดร.ขจรเกียรติ์ ศรีนวลสม', field:'ชีววิทยา, การประมง', currentPosition:'อาจารย์', currentDate:'', nextPosition:'ผศ. (16 ต.ค. 2573)', nextYear:'2567 - 2571', program:'ไม่สังกัดหลักสูตร'},
+      {name:'อ.ดร.กานต์ ทิพยาไกรศรี', field:'Marine Life Science', currentPosition:'อาจารย์', currentDate:'', nextPosition:'ผศ. (1 ต.ค. 2572)', nextYear:'2565 - 2569', program:'ไม่สังกัดหลักสูตร'},
+    ];
+
+    // ===== แผนเกษียณอายุ (Table 2 สายวิชาการ + Table 4 สายสนับสนุน) =====
+    const RETIREMENT_RAW = [
+      // สายวิชาการ (Table 2)
+      {name:'ผศ.ดร.จิราพร โรจน์ทินกร', position:'ผู้ช่วยศาสตราจารย์', track:'วิชาการ', year:2569},
+      {name:'รศ.ดร.จงกล พรมยะ', position:'รองศาสตราจารย์', track:'วิชาการ', year:2570},
+      {name:'รศ.ดร.ดวงพร อมรเลิศพิศาล', position:'รองศาสตราจารย์', track:'วิชาการ', year:2571},
+      {name:'รศ.ดร.ชนกันต์ จิตมนัส', position:'รองศาสตราจารย์', track:'วิชาการ', year:2571},
+      {name:'รศ.ดร.อภินันท์ สุวรรณรักษ์', position:'รองศาสตราจารย์', track:'วิชาการ', year:2574},
+      {name:'ผศ.ดร.สุดาพร ตงศิริ', position:'ผู้ช่วยศาสตราจารย์', track:'วิชาการ', year:2575},
+      {name:'ผศ.ดร.จอมสุดา ดวงวงษา', position:'ผู้ช่วยศาสตราจารย์', track:'วิชาการ', year:2576},
+      {name:'ผศ.ดร.อานุภาพ วรรณคนาพล', position:'ผู้ช่วยศาสตราจารย์', track:'วิชาการ', year:2578},
+      {name:'อ.ดร.ขจรเกียรติ์ ศรีนวลสม', position:'อาจารย์', track:'วิชาการ', year:2579},
+      {name:'ผศ.ดร.อุดมลักษณ์ สมพงษ์', position:'ผู้ช่วยศาสตราจารย์', track:'วิชาการ', year:2580},
+      {name:'ผศ.ดร.ดารชาต์ เทียมเมือง', position:'ผู้ช่วยศาสตราจารย์', track:'วิชาการ', year:2581},
+      {name:'อาจารย์ ดร.วาธิณี อินทรพงษ์นุวัฒน์', position:'อาจารย์', track:'วิชาการ', year:2584},
+      {name:'อาจารย์ ดร.นงพงา แสงเจริญ', position:'อาจารย์', track:'วิชาการ', year:2584},
+      {name:'รศ.ดร.นิสรา กิจเจริญ', position:'รองศาสตราจารย์', track:'วิชาการ', year:2585},
+      {name:'อาจารย์ ดร.โดม อดุลย์สุข', position:'อาจารย์', track:'วิชาการ', year:2586},
+      {name:'อาจารย์ ดร.กานต์ ทิพยาไกรศรี', position:'อาจารย์', track:'วิชาการ', year:2595},
+      // สายสนับสนุน (Table 4) — ปีที่ระบุเท่านั้น (ไม่รวม 4 รายที่จ้างรายปี ไม่มีปีเกษียณแน่นอน)
+      {name:'นายวินัย การะเกตุ', position:'ผู้ปฏิบัติงานวิทยาศาสตร์', track:'สนับสนุน', year:2569},
+      {name:'นายเกษม สมบัติ', position:'นักบริหารงานอาคารสถานที่', track:'สนับสนุน', year:2572},
+      {name:'นางจรรยา ภูคำวงศ์', position:'ผู้อำนวยการสำนักงานคณบดี', track:'สนับสนุน', year:2574},
+      {name:'ดร.ภัสสร์พัณณ์ ศรีวิชัย', position:'นักวิทยาศาสตร์', track:'สนับสนุน', year:2579},
+      {name:'นายประเสริฐ ประสงค์ผล', position:'นักวิชาการประมง', track:'สนับสนุน', year:2581},
+      {name:'นางพิไลวรรณ จันต๊ะตา', position:'นักวิชาการพัสดุ', track:'สนับสนุน', year:2582},
+      {name:'น.ส.น้ำเพชร ประกอบศิลป์', position:'นักวิทยาศาสตร์', track:'สนับสนุน', year:2584},
+      {name:'นางสาวณัฏฐกานต์ มุกดาจตุรพักตร์', position:'นักวิทยาศาสตร์', track:'สนับสนุน', year:2584},
+      {name:'นางอัจฉรา เสาวฤทธิ์', position:'หัวหน้างานบริการการศึกษาและกิจการนักศึกษา', track:'สนับสนุน', year:2585},
+      {name:'นายวีระวัฒน์ ฟังเย็น', position:'นักวิชาการคอมพิวเตอร์', track:'สนับสนุน', year:2586},
+      {name:'น.ส.จิราพร มอญเลิศ', position:'หัวหน้างานบริหารและธุรการ', track:'สนับสนุน', year:2586},
+      {name:'นางกัลยารัตน์ วงศ์แก้ว', position:'หัวหน้างานนโยบาย แผน และประกันคุณภาพ', track:'สนับสนุน', year:2587},
+      {name:'ดร.เทพพิทักษ์ บุญทา', position:'นักวิทยาศาสตร์', track:'สนับสนุน', year:2588},
+      {name:'น.ส.อรพรรณ พรหมใจ', position:'นักวิชาการเงินและบัญชี', track:'สนับสนุน', year:2588},
+      {name:'น.ส.ศิรินยา อ้นแก้ว', position:'นักวิชาการศึกษา', track:'สนับสนุน', year:2590},
+    ];
+
+    // ===== แผนตำแหน่งสายสนับสนุน (Table 5) — match ชื่อ กับ personnel ที่จะสร้าง =====
+    // {name, year, targetPosition}
+    const SUPPORT_PLAN_RAW = [
+      {name:'นางพิไลวรรณ จันต๊ะตา', year:2569, targetPosition:'ชำนาญการ'},
+      {name:'นางสาวณัฏฐกานต์ มุกดาจตุรพักตร์', year:2571, targetPosition:'ชำนาญการ'},
+      {name:'นายวีระวัฒน์ ฟังเย็น', year:2571, targetPosition:'ชำนาญการ'},
+      {name:'น.ส.อรพรรณ พรหมใจ', year:2571, targetPosition:'ชำนาญการ'},
+      {name:'นายประเสริฐ ประสงค์ผล', year:2570, targetPosition:'ชำนาญการ'},
+      {name:'ดร.เทพพิทักษ์ บุญทา', year:2570, targetPosition:'ชำนาญการ'},
+      {name:'ดร.ภัสสร์พัณณ์ ศรีวิชัย', year:2569, targetPosition:'ชำนาญการ'},
+      {name:'นางสาวศิรินยา อ้นแก้ว', year:2571, targetPosition:'ชำนาญการ'},
+    ];
+
+    async function seedAll() {
+      const log = document.getElementById('log');
+      const btn = document.getElementById('btn');
+      btn.disabled = true;
+
+      const addLog = (msg, ok=true) => {
+        const p = document.createElement('p');
+        p.style.color = ok ? '#10b981' : '#ef4444';
+        p.textContent = (ok?'✓ ':'✗ ') + msg;
+        log.appendChild(p);
+        log.scrollTop = log.scrollHeight;
+      };
+
+      try {
+        addLog('กำลัง seed ทำเนียบบุคลากร...', true);
+        const personnel = PERSONNEL_RAW.map(p => ({ id: uid(), ...p }));
+        await setDoc(doc(db,'hr','personnel'), { data: personnel });
+        addLog(`ทำเนียบบุคลากร: ${personnel.length} คน ✓`, true);
+
+        addLog('กำลัง seed ตำแหน่งวิชาการ...', true);
+        const academic = ACADEMIC_RAW.map(a => ({ id: uid(), ...a }));
+        await setDoc(doc(db,'hr','academic_positions'), { data: academic });
+        addLog(`ตำแหน่งวิชาการ: ${academic.length} รายการ ✓`, true);
+
+        addLog('กำลัง seed แผนเกษียณอายุ...', true);
+        const retirement = RETIREMENT_RAW.map(r => ({ id: uid(), ...r }));
+        await setDoc(doc(db,'hr','retirement_plan'), { data: retirement });
+        addLog(`แผนเกษียณอายุ: ${retirement.length} รายการ ✓`, true);
+
+        addLog('กำลัง seed แผนตำแหน่งสายสนับสนุน...', true);
+        // match ชื่อกับ personnel ที่เพิ่ง seed เพื่อได้ personId ที่ถูกต้อง
+        const supportPlan = SUPPORT_PLAN_RAW.map(sp => {
+          const person = personnel.find(p => p.name === sp.name);
+          return { id: uid(), personId: person ? person.id : sp.name, personName: sp.name, year: sp.year, targetPosition: sp.targetPosition };
+        });
+        await setDoc(doc(db,'hr','support_position_plan'), { data: supportPlan, years: [2569, 2570, 2571] });
+        addLog(`แผนตำแหน่งสายสนับสนุน: ${supportPlan.length} รายการ ✓`, true);
+
+        addLog('', true);
+        addLog('🎉 Seed ข้อมูล HR สำเร็จทั้งหมด! ปิดหน้านี้แล้วเปิด hr-admin.html', true);
+        document.getElementById('done-msg').style.display = 'block';
+      } catch(e) {
+        addLog('Error: ' + e.message, false);
+        btn.disabled = false;
+      }
+    }
+
+    window.seedAll = seedAll;
+  </script>
+  <style>
+    body { font-family: 'Sarabun', sans-serif; background: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .card { background: white; border-radius: 16px; padding: 40px; max-width: 560px; width: 100%; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    h1 { color: #7c3aed; font-size: 22px; margin-bottom: 8px; }
+    p.sub { color: #64748b; font-size: 14px; margin-bottom: 24px; }
+    button { background: #7c3aed; color: white; border: none; border-radius: 10px; padding: 12px 28px; font-size: 15px; font-family: 'Sarabun', sans-serif; cursor: pointer; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #log { margin-top: 20px; background: #0f172a; color: #94a3b8; border-radius: 8px; padding: 16px; font-size: 13px; min-height: 80px; max-height: 300px; overflow-y: auto; font-family: monospace; }
+    #done-msg { display:none; margin-top:16px; background:#f3e8ff; color:#6b21a8; border-radius:8px; padding:12px 16px; font-size:14px; }
+    #done-msg a { color:#6b21a8; font-weight:600; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🔥 Seed ข้อมูล HR เข้า Firestore</h1>
+    <p class="sub">อัปโหลดข้อมูลบุคลากรจากไฟล์ "ข้อมูลสำหรับจัดทำระบบฐานข้อมูลเพื่อการบริหารจัดการทรัพยากรบุคคล.docx"<br>ทำเนียบบุคลากร 35 คน · ตำแหน่งวิชาการ 16 รายการ · แผนเกษียณ 31 รายการ · แผนสายสนับสนุน 8 รายการ</p>
+    <button id="btn" onclick="seedAll()">เริ่ม Seed ข้อมูล HR</button>
+    <div id="log"><p style="color:#475569">กด "เริ่ม Seed ข้อมูล HR" เพื่ออัปโหลด...</p></div>
+    <div id="done-msg">
+      ✅ ข้อมูลอยู่ใน Firestore แล้ว — ปิดหน้านี้แล้วเปิดใช้งาน
+      <a href="hr-admin.html">hr-admin.html</a>
+    </div>
+  </div>
+</body>
+</html>

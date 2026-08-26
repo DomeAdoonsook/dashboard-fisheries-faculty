@@ -63,6 +63,10 @@ _init();
 | `farm` | `sao_ponds` | `{ data: [...24 บ่อ] }` |
 | `farm` | `sab_cycles/logs/feed_cfg/...` | เหมือน dirt |
 | `farm` | `sao_cycles/logs/feed_cfg/...` | เหมือน dirt |
+| `hr` | `personnel` | `{ data: [...] }` — ทำเนียบบุคลากร |
+| `hr` | `academic_positions` | `{ data: [...] }` — ตำแหน่งวิชาการ |
+| `hr` | `retirement_plan` | `{ data: [...] }` — แผนเกษียณอายุ |
+| `hr` | `support_position_plan` | `{ data: [...], years: [2569,2570,2571] }` — แผนตำแหน่งสนับสนุน |
 
 ### Pattern: In-memory cache + async Firestore save
 ```js
@@ -134,10 +138,15 @@ async function initData() {
 - [x] หน้า 10: `farm-sab.html` — จัดการฟาร์ม SAB (27 บ่อ)
 - [x] หน้า 11: `farm-sao.html` — จัดการฟาร์ม SAO (24 บ่อ)
 - [x] หน้า 12: `seed-firestore.html` — Seeder (ใช้ครั้งเดียว)
+- [x] หน้า 13: `hr-admin.html` — จัดการข้อมูลบุคลากร (ทำเนียบ/ตำแหน่งวิชาการ/แผนเกษียณ/แผนตำแหน่งสนับสนุน)
+- [x] หน้า 14: `seed-hr.html` — Seeder ข้อมูล HR จากไฟล์ Word (ใช้ครั้งเดียว, seed แล้ว)
+
+หมายเหตุ: การ์ด "การเงินและบัญชี" เดิมในหน้า 2 (`dashboard-main.html`) ถูกแทนที่ด้วยการ์ด "ทรัพยากรบุคคล" ชี้ไป `hr-admin.html`
 
 ### สิ่งที่ยังต้องทำ
 - [ ] `mission-dashboard.html` — executive view ภาระกิจ (กราฟ Bar/Donut/Radar, traffic light, filter ยุทธศาสตร์)
 - [ ] `proactive-dashboard.html` — executive view เชิงรุก (คะแนน 1-5, กราฟ radar)
+- [ ] ผังองค์กรแบบ dynamic ในหน้าผู้บริหาร — ดึงชื่อ-ตำแหน่งจริงจาก `hr/personnel` (field `adminRole`) มาวาด org chart ตามโครงสร้างคงที่จาก "โครงสร้างส่วนงาน 69.pdf" (คณบดี → รองคณบดี 3 ฝ่าย + ผอ.สำนักงาน → หัวหน้างาน 5 งาน + ศูนย์ความเป็นเลิศ)
 
 ### กฎสำคัญสำหรับ Claude
 1. ทุก session อ่าน CLAUDE.md ก่อนเสมอ

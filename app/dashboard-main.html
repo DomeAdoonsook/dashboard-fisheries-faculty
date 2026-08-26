@@ -692,31 +692,32 @@
         </button>
       </div>
 
-      <!-- การเงินและบัญชี -->
-      <div class="system-card" onclick="goTo('finance-admin.html')">
+      <!-- ทรัพยากรบุคคล -->
+      <div class="system-card" onclick="goTo('hr-admin.html')">
         <div class="card-icon purple">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="5" width="20" height="14" rx="2"/>
-            <path d="M2 10h20"/>
-            <path d="M6 15h2M10 15h4"/>
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+            <path d="M16 3.13a4 4 0 010 7.75"/>
           </svg>
         </div>
-        <div class="card-title">การเงินและบัญชี</div>
-        <div class="card-desc">บันทึกรายรับ-รายจ่าย<br>งบประมาณและรายงานการเงิน</div>
+        <div class="card-title">ทรัพยากรบุคคล</div>
+        <div class="card-desc">ทำเนียบบุคลากร ตำแหน่งวิชาการ<br>แผนเกษียณอายุและแผนตำแหน่ง</div>
         <div class="card-stats">
           <div class="card-stat">
-            <div class="card-stat-num purple" id="fin-income-count">—</div>
-            <div class="card-stat-label">รายรับ</div>
+            <div class="card-stat-num purple" id="hr-total-count">—</div>
+            <div class="card-stat-label">บุคลากร</div>
           </div>
           <div class="card-divider"></div>
           <div class="card-stat">
-            <div class="card-stat-num purple" id="fin-expense-count">—</div>
-            <div class="card-stat-label">รายจ่าย</div>
+            <div class="card-stat-num purple" id="hr-academic-count">—</div>
+            <div class="card-stat-label">สายวิชาการ</div>
           </div>
           <div class="card-divider"></div>
           <div class="card-stat">
-            <div class="card-stat-num purple" id="fin-period-count">—</div>
-            <div class="card-stat-label">งวด</div>
+            <div class="card-stat-num purple" id="hr-support-count">—</div>
+            <div class="card-stat-label">สายสนับสนุน</div>
           </div>
         </div>
         <button class="card-btn purple">
@@ -933,6 +934,18 @@
       } catch(e) {}
     }
 
+    async function updateHrCardStats() {
+      try {
+        const personnelDoc = await window._fsGet('hr', 'personnel');
+        const personnel = personnelDoc?.data || [];
+        const academicCount = personnel.filter(p => p.track === 'วิชาการ').length;
+        const supportCount = personnel.filter(p => p.track === 'สนับสนุน').length;
+        document.getElementById('hr-total-count').textContent = personnel.length || '—';
+        document.getElementById('hr-academic-count').textContent = academicCount || '—';
+        document.getElementById('hr-support-count').textContent = supportCount || '—';
+      } catch(e) {}
+    }
+
     // ===== Init =====
     (async () => {
       if (!window._firebaseReady) {
@@ -943,6 +956,7 @@
       renderYearSelect();
       await updateCardStats(getCurrentYear());
       await updateFarmCardStats();
+      await updateHrCardStats();
     })();
   </script>
 

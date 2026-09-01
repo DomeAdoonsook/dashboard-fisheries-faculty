@@ -242,6 +242,110 @@
     }
     .farm-placeholder .material-symbols-outlined { font-size: 56px; color: var(--text-muted); opacity: 0.4; }
     .farm-placeholder p { color: var(--text-muted); margin-top: 12px; font-size: 14px; }
+
+    /* ===== Org chart (flex layout + SVG connectors) ===== */
+    #hr-org-chart:hover { transform: none; box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
+    .org-scroll { overflow-x: auto; padding: 16px 4px 8px; cursor: grab; }
+    .org-scroll.dragging { cursor: grabbing; user-select: none; }
+    .org-canvas { position: relative; min-width: max-content; padding: 8px 24px 12px; }
+    .org-canvas svg.org-links { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+    .org-canvas .org-row, .org-canvas .org-deans, .org-canvas .org-col { position: relative; z-index: 1; }
+
+    .org-dean-row { display: flex; justify-content: center; margin-bottom: 46px; }
+    .org-deans { display: flex; gap: 34px; justify-content: center; align-items: flex-start; }
+    .org-col { display: flex; flex-direction: column; align-items: center; }
+    .org-col > .org-node { margin-bottom: 30px; }
+    .org-children { display: flex; flex-direction: column; gap: 14px; align-self: stretch; padding-left: 26px; }
+
+    .org-node {
+      box-sizing: border-box; padding: 11px 16px; border-radius: 12px; position: relative;
+      background: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.9);
+      box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+      transition: transform 0.15s, box-shadow 0.15s; cursor: default; text-align: center;
+    }
+    .org-node .role { font-size: 12px; font-weight: 700; color: var(--primary); line-height: 1.4; }
+    .org-node .person { font-size: 11.5px; color: var(--text-muted); margin-top: 4px; }
+    .org-node .person.vacant { color: var(--danger); opacity: 0.75; }
+    .org-node.dean { background: linear-gradient(135deg,#1e3a5f,#2563eb); min-width: 240px; }
+    .org-node.dean .role { color: #fff; font-size: 15px; }
+    .org-node.dean .person { color: rgba(255,255,255,0.92); }
+    .org-node.deputy, .org-node.office { width: 210px; }
+    .org-node.deputy { border-left: 4px solid #2563eb; }
+    .org-node.office { border-left: 4px solid #7c3aed; }
+    .org-node.section, .org-node.unit { text-align: left; width: 100%; }
+    .org-node.section { background: rgba(219,234,254,0.6); border-left: 4px solid #0891b2; font-size: 12px; }
+    .org-node.unit { background: rgba(237,233,254,0.55); border-left: 4px solid #a78bfa; font-size: 11.5px; }
+    .org-node:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(37,99,235,0.15); z-index: 2; }
+    .org-anim { opacity: 0; transform: translateY(8px); animation: orgIn 0.4s ease forwards; }
+    @keyframes orgIn { to { opacity: 1; transform: translateY(0); } }
+
+    .org-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 18px; font-size: 12px; color: var(--text-muted); }
+    .org-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .org-legend i { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+
+    /* ===== Timeline (pin) component ===== */
+    .tl-scroll { overflow-x: auto; padding: 8px 4px 12px; cursor: grab; }
+    .tl-scroll.dragging { cursor: grabbing; user-select: none; }
+    .tl { position: relative; min-width: 980px; height: 300px; }
+    /* axis inset must exceed half a box width (48px) so edge pins never clip */
+    .tl-axis { position: absolute; left: 78px; right: 78px; top: 150px; height: 3px; background: #1f2937; border-radius: 3px; z-index: 1; }
+    .tl-tick { position: absolute; top: 150px; transform: translate(-50%,-50%);
+      width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 3px solid #1f2937; z-index: 4; }
+    /* year label: default just BELOW the tick; ".above" flips it above (used when a down-pin occupies the space below) */
+    .tl-yearlbl { position: absolute; top: 164px; transform: translateX(-50%);
+      font-size: 12px; font-weight: 700; color: var(--text-muted); white-space: nowrap; z-index: 4; }
+    .tl-yearlbl.above { top: 122px; }
+    /* connectors drawn as one SVG overlay */
+    .tl-stems { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
+    /* box: positioned by JS (left in px, clamped inside track) */
+    .tl-box {
+      position: absolute; background: #7a1f2b; color: #fff; border-radius: 10px; padding: 9px 14px;
+      font-size: 12.5px; font-weight: 700; text-align: center; width: 96px; line-height: 1.25;
+      box-shadow: 0 6px 16px rgba(122,31,43,0.28); cursor: pointer; z-index: 5;
+      transition: transform 0.15s;
+    }
+    .tl-box.up { bottom: 202px; }       /* above axis (year for these sits below the tick) */
+    .tl-box.down { top: 200px; }         /* below axis (year for these sits above the tick) */
+    .tl-box:hover { transform: translateY(-2px); }
+    .tl-box .sub { font-size: 10.5px; font-weight: 500; opacity: 0.9; margin-top: 2px; }
+    .tl-box.c-blue { background: #1e3a5f; box-shadow: 0 6px 16px rgba(30,58,95,0.3); }
+    .tl-box.c-teal { background: #0891b2; box-shadow: 0 6px 16px rgba(8,145,178,0.3); }
+    .tl-box.c-amber { background: #b45309; box-shadow: 0 6px 16px rgba(180,83,9,0.3); }
+    .tl-box .cnt {
+      position: absolute; top: -8px; right: -8px; background: #fff; color: #7a1f2b;
+      border-radius: 50%; width: 20px; height: 20px; font-size: 11px; line-height: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .tl-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; font-size: 12px; color: var(--text-muted); }
+    .tl-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .tl-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+    /* popup */
+    .hr-modal { position: fixed; inset: 0; background: rgba(15,23,42,0.4); backdrop-filter: blur(3px);
+      display: none; align-items: center; justify-content: center; z-index: 500; }
+    .hr-modal.open { display: flex; }
+    .hr-modal-card { background: #fff; border-radius: 16px; padding: 24px; max-width: 440px; width: 90%;
+      max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.25); }
+    .hr-modal-card h3 { font-size: 16px; color: var(--primary); margin-bottom: 4px; }
+    .hr-modal-card .close { float: right; cursor: pointer; color: var(--text-muted); font-size: 20px; line-height: 1; }
+    .hr-modal-card ul { list-style: none; margin-top: 12px; }
+    .hr-modal-card li { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .hr-modal-card li:last-child { border-bottom: 0; }
+
+    /* simple data table — single-line rows, drag to scroll horizontally */
+    .hr-tablewrap { overflow-x: auto; cursor: grab; border-radius: 10px; }
+    .hr-tablewrap.dragging { cursor: grabbing; user-select: none; }
+    .hr-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .hr-table th { text-align: left; padding: 10px 14px; background: rgba(30,58,95,0.06);
+      font-weight: 700; color: var(--primary); border-bottom: 2px solid rgba(30,58,95,0.12);
+      white-space: nowrap; position: sticky; top: 0; }
+    .hr-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
+    .hr-table td .muted { color: var(--text-muted); font-size: 11px; }
+    .hr-table tr:hover td { background: rgba(37,99,235,0.04); }
+    .sp-matrix th, .sp-matrix td { border-right: 1px solid var(--border); }
+    .sp-matrix th:last-child, .sp-matrix td:last-child { border-right: 0; }
+    .sp-mark { display: inline-block; background: #1e3a5f; color: #fff; font-size: 11px; font-weight: 700;
+      padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -303,6 +407,26 @@
         </button>
         <button class="sidebar-item" style="padding-left:28px;" onclick="showPage('farm-sao')">
           <div class="icon" style="color:#7c3aed"><span class="material-symbols-outlined">water</span></div>SAO
+        </button>
+      </div>
+
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section-label">ทรัพยากรบุคคล</div>
+      <div class="sidebar-section">
+        <button class="sidebar-item" onclick="showPage('hr-overview')">
+          <div class="icon"><span class="material-symbols-outlined">groups</span></div>ภาพรวมบุคลากร
+        </button>
+        <button class="sidebar-item" style="padding-left:28px;" onclick="showPage('hr-org')">
+          <div class="icon"><span class="material-symbols-outlined">account_tree</span></div>โครงสร้างผู้บริหาร
+        </button>
+        <button class="sidebar-item" style="padding-left:28px;" onclick="showPage('hr-academic')">
+          <div class="icon"><span class="material-symbols-outlined">school</span></div>แผนตำแหน่งวิชาการ
+        </button>
+        <button class="sidebar-item" style="padding-left:28px;" onclick="showPage('hr-retirement')">
+          <div class="icon"><span class="material-symbols-outlined">event_available</span></div>แผนเกษียณอายุ
+        </button>
+        <button class="sidebar-item" style="padding-left:28px;" onclick="showPage('hr-support')">
+          <div class="icon"><span class="material-symbols-outlined">grid_view</span></div>แผนสายสนับสนุน
         </button>
       </div>
     </div>
@@ -539,6 +663,80 @@
       <div id="farm-sao-pond-list"></div>
     </div>
 
+    <!-- ===== PAGE: ภาพรวมบุคลากร ===== -->
+    <div class="page" id="page-hr-overview">
+      <div class="page-header">
+        <h1><span class="material-symbols-outlined">groups</span>ภาพรวมบุคลากร</h1>
+        <p>ข้อมูลบุคลากรคณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ</p>
+      </div>
+      <div class="stat-grid" id="hr-ov-statGrid"></div>
+      <div class="chart-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="chart-card">
+          <div class="chart-title">จำแนกตามสายงาน</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="hr-ov-track"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">จำแนกตามตำแหน่งวิชาการ</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="hr-ov-position"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">จำแนกตามประเภทการจ้าง</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="hr-ov-emptype"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: โครงสร้างผู้บริหาร ===== -->
+    <div class="page" id="page-hr-org">
+      <div class="page-header">
+        <h1><span class="material-symbols-outlined">account_tree</span>โครงสร้างการบริหารส่วนงาน</h1>
+        <p>คณะเทคโนโลยีการประมงและทรัพยากรทางน้ำ มหาวิทยาลัยแม่โจ้</p>
+      </div>
+      <div class="chart-card" id="hr-org-chart"></div>
+    </div>
+
+    <!-- ===== PAGE: แผนตำแหน่งวิชาการ ===== -->
+    <div class="page" id="page-hr-academic">
+      <div class="page-header">
+        <h1><span class="material-symbols-outlined">school</span>แผนการเข้าสู่ตำแหน่งทางวิชาการ</h1>
+        <p>ปีที่คาดว่าจะยื่นขอตำแหน่งที่สูงขึ้นของอาจารย์ประจำ</p>
+      </div>
+      <div class="chart-card"><div id="hr-academic-timeline"></div></div>
+      <div class="chart-card" style="margin-top:16px;"><div id="hr-academic-table"></div></div>
+    </div>
+
+    <!-- ===== PAGE: แผนเกษียณอายุ ===== -->
+    <div class="page" id="page-hr-retirement">
+      <div class="page-header">
+        <h1><span class="material-symbols-outlined">event_available</span>แผนเกษียณอายุราชการ</h1>
+        <p>บุคลากรสายวิชาการและสายสนับสนุน (ปีปัจจุบัน พ.ศ. 2569)</p>
+      </div>
+      <div class="stat-grid" id="hr-ret-statGrid"></div>
+      <div class="chart-card"><div id="hr-ret-timeline"></div></div>
+      <div class="chart-card" style="margin-top:16px;">
+        <div class="chart-title">จำนวนผู้เกษียณรายปี</div>
+        <div class="chart-wrap" style="height:240px"><canvas id="hr-ret-bar"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: แผนสายสนับสนุน ===== -->
+    <div class="page" id="page-hr-support">
+      <div class="page-header">
+        <h1><span class="material-symbols-outlined">grid_view</span>แผนการเข้าสู่ตำแหน่งที่สูงขึ้น — สายสนับสนุนวิชาการ</h1>
+        <p>ตำแหน่งพนักงานมหาวิทยาลัย จำแนกตามปีงบประมาณ</p>
+      </div>
+      <div class="chart-card" id="hr-support-matrix"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="hr-modal" id="hr-modal" onclick="if(event.target===this)closeHrModal()">
+  <div class="hr-modal-card">
+    <span class="close" onclick="closeHrModal()">&times;</span>
+    <h3 id="hr-modal-title"></h3>
+    <div id="hr-modal-sub" style="font-size:12px;color:var(--text-muted);"></div>
+    <ul id="hr-modal-list"></ul>
   </div>
 </div>
 
@@ -574,7 +772,7 @@ function getCurrentYear() { return parseInt(document.getElementById('yearSelect'
 // ===== Page switching =====
 function showPage(page) {
   currentPage = page;
-  const pages = ['overview','mission','proactive','farm-overview','farm-dirt','farm-sab','farm-sao'];
+  const pages = ['overview','mission','proactive','farm-overview','farm-dirt','farm-sab','farm-sao','hr-overview','hr-org','hr-academic','hr-retirement','hr-support'];
   pages.forEach(p => {
     const el = document.getElementById(`page-${p}`);
     if (el) el.classList.toggle('active', p === page);
@@ -621,6 +819,19 @@ async function initData() {
     window._fsGet('farm', 'sao_cycles'),
     window._fsGet('farm', 'sao_logs'),
   ]);
+  const [hrPersonnel, hrAcademic, hrRetire, hrSupport] = await Promise.all([
+    window._fsGet('hr', 'personnel'),
+    window._fsGet('hr', 'academic_positions'),
+    window._fsGet('hr', 'retirement_plan'),
+    window._fsGet('hr', 'support_position_plan'),
+  ]);
+  _hrCache = {
+    personnel:  hrPersonnel?.data || [],
+    academic:   hrAcademic?.data  || [],
+    retirement: hrRetire?.data    || [],
+    support:    hrSupport?.data   || [],
+    supportYears: hrSupport?.years || [2569,2570,2571],
+  };
   if (ms && ms.kpis) _missionCache = ms;
   if (pr && pr.kpis) _proactiveCache = pr;
   if (msStrat && msStrat.list) _missionStrategiesCache = msStrat.list;
@@ -934,6 +1145,542 @@ function renderAll() {
   else if (currentPage === 'farm-dirt') renderFarmDetail('dirt');
   else if (currentPage === 'farm-sab') renderFarmDetail('sab');
   else if (currentPage === 'farm-sao') renderFarmDetail('sao');
+  else if (currentPage === 'hr-overview') renderHrOverview();
+  else if (currentPage === 'hr-org') renderHrOrg();
+  else if (currentPage === 'hr-academic') renderHrAcademic();
+  else if (currentPage === 'hr-retirement') renderHrRetirement();
+  else if (currentPage === 'hr-support') renderHrSupport();
+}
+
+// ===== HR data cache + render stubs (filled in next steps) =====
+let _hrCache = { personnel: [], academic: [], retirement: [], support: [] };
+function hrActivePersonnel() {
+  return (_hrCache.personnel || []).filter(p => {
+    const n = (p.name || '').trim();
+    return n && !n.includes('ว่าง') && !n.includes('อัตราว่าง');
+  });
+}
+
+function hrMkStatCard(label, value, sub, icon, color) {
+  return `<div class="stat-card">
+    <div class="stat-card-top">
+      <div class="stat-card-left">
+        <div class="stat-card-label">${label}</div>
+        <div class="stat-card-value">${value}</div>
+      </div>
+      <div class="stat-icon-box">${icon}</div>
+    </div>
+    <div style="font-size:12px;color:var(--text-muted);margin-top:10px;">${sub}</div>
+  </div>`;
+}
+
+function hrPieChart(canvasId, key, labels, data, colors) {
+  if (charts[key]) charts[key].destroy();
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  charts[key] = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { family: 'Sarabun', size: 12 }, padding: 12 } },
+        tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw} คน` } }
+      }
+    }
+  });
+}
+
+function hrBarChart(canvasId, key, labels, data, color) {
+  if (charts[key]) charts[key].destroy();
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  charts[key] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'จำนวน', data, backgroundColor: color, borderRadius: 8, borderSkipped: false }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 }, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false }, ticks: { font: { family: 'Sarabun', size: 11 } } } },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.raw} คน` } } }
+    }
+  });
+}
+
+function renderHrOverview() {
+  const people = hrActivePersonnel();
+  const total = people.length;
+  const acad = people.filter(p => p.track === 'วิชาการ').length;
+  const supp = people.filter(p => p.track === 'สนับสนุน').length;
+  const exec = people.filter(p => p.adminRole && p.adminRole !== 'ว่าง' && p.adminRole !== '').length;
+
+  document.getElementById('hr-ov-statGrid').innerHTML =
+    hrMkStatCard('บุคลากรทั้งหมด', total, 'ไม่รวมอัตราว่าง', '👥', '#2563eb') +
+    hrMkStatCard('สายวิชาการ', acad, total ? `คิดเป็น ${Math.round(acad/total*100)}%` : '', '🎓', '#10b981') +
+    hrMkStatCard('สายสนับสนุน', supp, total ? `คิดเป็น ${Math.round(supp/total*100)}%` : '', '🛠️', '#f59e0b') +
+    hrMkStatCard('ผู้บริหาร', exec, 'คณบดี/รองคณบดี/ผอ./หัวหน้างาน', '⭐', '#7c3aed');
+
+  hrPieChart('hr-ov-track', 'hr-ov-track', ['สายวิชาการ', 'สายสนับสนุน'], [acad, supp], ['#10b981', '#f59e0b']);
+
+  const POS_ORDER = ['อาจารย์', 'ผู้ช่วยศาสตราจารย์', 'รองศาสตราจารย์', 'ศาสตราจารย์'];
+  const posCount = POS_ORDER.map(p => people.filter(x => x.track === 'วิชาการ' && x.position === p).length);
+  hrBarChart('hr-ov-position', 'hr-ov-position', ['อ.', 'ผศ.', 'รศ.', 'ศ.'], posCount, '#2563eb');
+
+  const empTypes = [...new Set(people.map(p => p.empType).filter(Boolean))];
+  const empCount = empTypes.map(t => people.filter(p => p.empType === t).length);
+  hrBarChart('hr-ov-emptype', 'hr-ov-emptype', empTypes, empCount, '#0891b2');
+}
+function hrFindByRole(kw) {
+  const p = (_hrCache.personnel || []).find(x => (x.adminRole || '').includes(kw));
+  return p ? p.name : null;
+}
+
+function orgNode(cls, role, personName, extraClass) {
+  const person = personName
+    ? `<div class="person">${personName}</div>`
+    : `<div class="person vacant">— ยังไม่มีผู้ดำรงตำแหน่ง —</div>`;
+  const showPerson = (cls.includes('unit') || cls.includes('council')) ? '' : person;
+  return `<div class="org-node ${cls} org-anim ${extraClass||''}" data-org-id="${extraClass||''}">
+    <div class="role">${role}</div>${showPerson}
+  </div>`;
+}
+
+const ORG_COLUMNS = [
+  { id: 'depAcad', cls: 'deputy', role: 'รองคณบดี<br>ฝ่ายวิชาการและประกันคุณภาพการศึกษา', match: 'ฝ่ายวิชาการ',
+    children: [
+      'ป.เอก เทคโนโลยีการประมงและทรัพยากรทางน้ำ',
+      'วท.ม. เทคโนโลยีการประมงและทรัพยากรทางน้ำ',
+      'วท.บ. นวัตกรรมการจัดการธุรกิจประมง',
+      'วท.บ. การประมงและนวัตกรรมการผลิตสัตว์น้ำ',
+    ], childCls: 'unit' },
+  { id: 'depStu', cls: 'deputy', role: 'รองคณบดี<br>ฝ่ายพัฒนานักศึกษาและกิจการพิเศษ', match: 'พัฒนานักศึกษา',
+    children: ['งานพัฒนานักศึกษา', 'งานฟาร์มคณะ และสมาร์ทฟาร์ม'], childCls: 'unit' },
+  { id: 'depRes', cls: 'deputy', role: 'รองคณบดี<br>ฝ่ายวิจัยและบริการวิชาการ', match: 'ฝ่ายวิจัย',
+    children: [
+      'ผู้ช่วยคณบดี — งานบริการวิชาการและการต่างประเทศ',
+      'ศูนย์ความเป็นเลิศทางการประมงและทรัพยากรทางน้ำ (CEFAR)',
+      'ศูนย์ความเป็นเลิศด้านบริการสังคมปลาบึก',
+    ], childCls: 'unit' },
+  { id: 'office', cls: 'office', role: 'ผู้อำนวยการ<br>สำนักงานคณบดี', match: 'ผู้อำนวยการสำนักงาน',
+    children: [
+      { role: 'หัวหน้างานบริหารและธุรการ', match: 'หัวหน้างานบริหารและธุรการ' },
+      { role: 'หัวหน้างานคลังและพัสดุ', match: 'หัวหน้างานคลังและพัสดุ' },
+      { role: 'หัวหน้างานนโยบาย แผน และประกันคุณภาพ', match: 'นโยบายแผน' },
+      { role: 'หัวหน้างานบริการวิชาการและวิจัย', match: 'หัวหน้างานบริการวิชาการและวิจัย' },
+      { role: 'หัวหน้างานบริการการศึกษาและกิจการนักศึกษา', match: 'หัวหน้างานบริการการศึกษา' },
+    ], childCls: 'section' },
+];
+
+function renderHrOrg() {
+  const deanName = ((_hrCache.personnel || []).find(x => x.adminRole === 'คณบดี') || {}).name || null;
+
+  const colsHtml = ORG_COLUMNS.map((col, ci) => {
+    const head = orgNode(col.cls, col.role, hrFindByRole(col.match), `col-${ci}`);
+    const kids = col.children.map((c) => {
+      if (typeof c === 'string')
+        return `<div class="org-node ${col.childCls} org-anim"><div class="role">${c}</div></div>`;
+      const nm = hrFindByRole(c.match);
+      const person = nm ? `<div class="person">${nm}</div>` : `<div class="person vacant">— ยังไม่มีผู้ดำรงตำแหน่ง —</div>`;
+      return `<div class="org-node ${col.childCls} org-anim"><div class="role">${c.role}</div>${person}</div>`;
+    }).join('');
+    return `<div class="org-col" data-col="${ci}">
+      ${head}
+      <div class="org-children">${kids}</div>
+    </div>`;
+  }).join('');
+
+  const html = `
+  <div class="chart-title">โครงสร้างการบริหารส่วนงาน</div>
+  <div class="chart-sub">โครงสร้างคงที่ตามผังคณะ · ชื่อผู้ดำรงตำแหน่งดึงจากฐานข้อมูลบุคลากร (real-time)</div>
+  <div class="org-scroll">
+    <div class="org-canvas" id="org-canvas">
+      <svg class="org-links" id="org-links"></svg>
+      <div class="org-dean-row">${orgNode('dean', 'คณบดี', deanName, 'dean')}</div>
+      <div class="org-deans">${colsHtml}</div>
+    </div>
+  </div>
+  <div class="org-legend">
+    <span><i style="background:linear-gradient(135deg,#1e3a5f,#2563eb)"></i> คณบดี</span>
+    <span><i style="background:#fff;border:1px solid #ddd;border-left:4px solid #2563eb"></i> รองคณบดี</span>
+    <span><i style="background:#fff;border:1px solid #ddd;border-left:4px solid #7c3aed"></i> ผอ.สำนักงานคณบดี</span>
+    <span><i style="background:rgba(219,234,254,0.8);border-left:4px solid #0891b2"></i> หัวหน้างาน</span>
+    <span><i style="background:rgba(237,233,254,0.7);border-left:4px solid #a78bfa"></i> หน่วยงาน/หลักสูตร</span>
+  </div>`;
+
+  const el = document.getElementById('hr-org-chart');
+  el.innerHTML = html;
+  el.querySelectorAll('.org-anim').forEach((n, i) => { n.style.animationDelay = (i * 40) + 'ms'; });
+  initDragScroll();
+
+  const draw = () => drawOrgLinks();
+  requestAnimationFrame(() => requestAnimationFrame(draw));
+  // redraw after entry animation settles + on resize
+  setTimeout(draw, 700);
+  if (window._orgResizeHandler) window.removeEventListener('resize', window._orgResizeHandler);
+  window._orgResizeHandler = draw;
+  window.addEventListener('resize', window._orgResizeHandler);
+}
+
+function drawOrgLinks() {
+  const canvas = document.getElementById('org-canvas');
+  const svg = document.getElementById('org-links');
+  if (!canvas || !svg) return;
+  const cr = canvas.getBoundingClientRect();
+  svg.setAttribute('viewBox', `0 0 ${cr.width} ${cr.height}`);
+  const STROKE = 'rgba(30,58,95,0.28)';
+  const paths = [];
+  const pt = (elm, side) => {
+    const r = elm.getBoundingClientRect();
+    const x = side === 'bottom' || side === 'top' ? r.left + r.width / 2 - cr.left
+            : side === 'left' ? r.left - cr.left : r.right - cr.left;
+    const y = side === 'bottom' ? r.bottom - cr.top
+            : side === 'top' ? r.top - cr.top : r.top + r.height / 2 - cr.top;
+    return { x, y };
+  };
+
+  const dean = canvas.querySelector('.org-node.dean');
+  const cols = [...canvas.querySelectorAll('.org-col')];
+  if (!dean || !cols.length) { svg.innerHTML = ''; return; }
+
+  // 1) dean -> each column head (orthogonal: down, across bus, down)
+  const deanB = pt(dean, 'bottom');
+  const heads = cols.map(c => c.querySelector(':scope > .org-node'));
+  const headTops = heads.map(h => pt(h, 'top'));
+  const busY = deanB.y + Math.max(18, (Math.min(...headTops.map(h => h.y)) - deanB.y) / 2);
+  paths.push(`M ${deanB.x} ${deanB.y} V ${busY}`);
+  const minX = Math.min(...headTops.map(h => h.x)), maxX = Math.max(...headTops.map(h => h.x));
+  paths.push(`M ${minX} ${busY} H ${maxX}`);
+  headTops.forEach(h => paths.push(`M ${h.x} ${busY} V ${h.y}`));
+
+  // 2) each column head -> its children (vertical trunk on the left + elbows)
+  cols.forEach(col => {
+    const head = col.querySelector(':scope > .org-node');
+    const kids = [...col.querySelectorAll('.org-children > .org-node')];
+    if (!kids.length) return;
+    const hb = pt(head, 'bottom');
+    const trunkX = kids[0].getBoundingClientRect().left - cr.left - 14;
+    const lastMid = pt(kids[kids.length - 1], 'left');
+    // head bottom -> short drop -> jog left to trunk -> down -> elbow into each child
+    paths.push(`M ${hb.x} ${hb.y} V ${hb.y + 14} H ${trunkX} V ${lastMid.y}`);
+    kids.forEach(k => {
+      const kl = pt(k, 'left');
+      paths.push(`M ${trunkX} ${kl.y} H ${kl.x}`);
+    });
+  });
+
+  svg.innerHTML = paths.map(d =>
+    `<path d="${d}" fill="none" stroke="${STROKE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`
+  ).join('');
+}
+// ===== Shared modal =====
+function openHrModal(title, sub, items) {
+  document.getElementById('hr-modal-title').textContent = title;
+  document.getElementById('hr-modal-sub').textContent = sub || '';
+  document.getElementById('hr-modal-list').innerHTML = items.map(t => `<li>${t}</li>`).join('') || '<li>—</li>';
+  document.getElementById('hr-modal').classList.add('open');
+}
+function closeHrModal() { document.getElementById('hr-modal').classList.remove('open'); }
+
+// ===== Shared timeline (pin) builder =====
+// events: [{ year:Number, label, sub, color, people:[names] }]
+function buildTimeline(containerId, events, opts) {
+  opts = opts || {};
+  const el = document.getElementById(containerId);
+  const valid = events.filter(e => e.year && !isNaN(e.year));
+  if (!valid.length) { el.innerHTML = '<p style="color:var(--text-muted);font-size:13px;">ยังไม่มีข้อมูล</p>'; return; }
+  const years = valid.map(e => e.year);
+  let minY = opts.minYear || Math.min(...years);
+  let maxY = opts.maxYear || Math.max(...years);
+  if (minY === maxY) maxY = minY + 1;
+  const span = maxY - minY;
+  const pct = y => ((y - minY) / span) * 100;
+
+  // group events sharing the same year
+  const byYear = {};
+  valid.forEach(e => { (byYear[e.year] = byYear[e.year] || []).push(e); });
+
+  const AX = 78; // must match .tl-axis left/right inset in CSS
+  const tx = y => `calc(${AX}px + (100% - ${AX * 2}px) * ${(pct(y) / 100).toFixed(5)})`;
+
+  // decide up/down per group first (alternating), so tick labels can dodge the down pins
+  const groupYears = Object.keys(byYear).sort();
+  const dirByYear = {};
+  groupYears.forEach((y, idx) => { dirByYear[y] = (idx % 2 === 0) ? 'up' : 'down'; });
+
+  const ticks = [];
+  for (let y = minY; y <= maxY; y++) ticks.push(y);
+  const tickHtml = ticks.map(y => {
+    const lblCls = dirByYear[y] === 'down' ? 'tl-yearlbl above' : 'tl-yearlbl';
+    return `<div class="tl-tick" style="left:${tx(y)}"></div>
+     <div class="${lblCls}" style="left:${tx(y)}">${y}</div>`;
+  }).join('');
+
+  const pinHtml = groupYears.map(y => {
+    const group = byYear[y];
+    const up = dirByYear[y] === 'up';
+    const totalPeople = group.reduce((a, g) => a + (g.people ? g.people.length : 1), 0);
+    const main = group[0];
+    const cnt = totalPeople > 1 ? `<span class="cnt">${totalPeople}</span>` : '';
+    const label = `${totalPeople} ราย`;
+    const sub = '';
+    // colour: if all events in this year share a colour use it, else neutral maroon
+    const colours = [...new Set(group.map(g => g.color).filter(Boolean))];
+    const colorCls = colours.length === 1 ? `c-${colours[0]}` : '';
+    return `<div class="tl-box ${up ? 'up' : 'down'} ${colorCls}" data-year="${y}"
+        data-tx="${(pct(+y) / 100).toFixed(5)}" data-dir="${up ? 'up' : 'down'}" data-color="${colours.length === 1 ? colours[0] : ''}"
+        onclick='__tlClick(${JSON.stringify(y)})'>${label}${sub}${cnt}</div>`;
+  }).join('');
+
+  const legendHtml = (opts.legend && opts.legend.length)
+    ? `<div class="tl-legend">${opts.legend.map(l =>
+        `<span><i style="background:${l.color}"></i> ${l.label}</span>`).join('')}</div>`
+    : '';
+
+  // ~110px per year so ticks/boxes don't crowd; never below the 980px base
+  const trackW = Math.max(980, (maxY - minY + 1) * 110 + AX * 2);
+  el.innerHTML = `<div class="tl-scroll"><div class="tl" id="${containerId}-tl" style="min-width:${trackW}px">
+    <svg class="tl-stems" id="${containerId}-stems"></svg>
+    <div class="tl-axis"></div>${tickHtml}${pinHtml}
+  </div></div>${legendHtml}`;
+  initDragScroll();
+
+  const STEM_COL = { blue: '#1e3a5f', teal: '#0891b2', amber: '#b45309', '': '#7a1f2b' };
+  const AXIS_Y = 150;
+
+  // position each box (centred on its tick, clamped inside the track) then draw its connector
+  const place = () => {
+    const tl = document.getElementById(`${containerId}-tl`);
+    const svg = document.getElementById(`${containerId}-stems`);
+    if (!tl || !svg) return;
+    const W = tl.clientWidth, H = tl.clientHeight;
+    const usable = W - AX * 2;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const segs = [];
+    tl.querySelectorAll('.tl-box').forEach(box => {
+      const frac = parseFloat(box.dataset.tx);
+      const tickX = AX + usable * frac;
+      const bw = box.offsetWidth;
+      let left = tickX - bw / 2;
+      left = Math.max(6, Math.min(left, W - bw - 6));
+      box.style.left = left + 'px';
+      const boxCX = left + bw / 2;
+      const col = STEM_COL[box.dataset.color] || STEM_COL[''];
+      const dir = box.dataset.dir;
+      const cs = getComputedStyle(box);
+      // straight vertical connector: box-facing edge -> axis. (edge pins no longer clamp,
+      // so boxCX ≈ tickX; use tickX to stay pixel-exact on the tick)
+      const y0 = dir === 'up' ? (H - parseFloat(cs.bottom)) : (parseFloat(cs.top) + box.offsetHeight);
+      segs.push(`M ${tickX} ${y0} V ${AXIS_Y}`);
+      box.dataset._col = col;
+    });
+    svg.innerHTML = [...tl.querySelectorAll('.tl-box')].map((box, k) =>
+      `<path d="${segs[k]}" fill="none" stroke="${box.dataset._col}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`
+    ).join('');
+  };
+  requestAnimationFrame(place);
+  setTimeout(place, 60);
+  if (window['_tlResize_' + containerId]) window.removeEventListener('resize', window['_tlResize_' + containerId]);
+  window['_tlResize_' + containerId] = place;
+  window.addEventListener('resize', place);
+
+  // click handler: open modal listing people for that year
+  window.__tlClick = (y) => {
+    const group = byYear[y] || [];
+    const items = [];
+    group.forEach(g => {
+      (g.people && g.people.length ? g.people : [g.label]).forEach(p =>
+        items.push(g.sub ? `${p} <span style="color:var(--text-muted)">— ${g.sub}</span>` : p));
+    });
+    openHrModal(`${opts.modalTitle || 'รายการ'} ปี พ.ศ. ${y}`, `${items.length} รายการ`, items);
+  };
+}
+
+// parse a Buddhist-era year (25xx) from a string
+function parseBEYear(s) {
+  if (!s) return null;
+  const m = String(s).match(/25\d{2}/g);
+  return m ? parseInt(m[m.length - 1]) : null;
+}
+
+function renderHrAcademic() {
+  const list = (_hrCache.academic || []);
+  // target year: year in nextPosition parenthetical, else end of nextYear range
+  const events = list.map(a => {
+    const yr = parseBEYear(a.nextPosition) || parseBEYear(a.nextYear);
+    const target = (a.nextPosition || '').split('(')[0].trim() || 'ตำแหน่งที่สูงขึ้น';
+    return {
+      year: yr,
+      label: a.name,
+      sub: `→ ${target}`,
+      color: /รศ|รองศาสตราจารย์/.test(target) ? 'blue' : /ผศ|ผู้ช่วยศาสตราจารย์/.test(target) ? 'teal' : 'amber',
+      people: [a.name],
+      _row: a,
+    };
+  });
+
+  buildTimeline('hr-academic-timeline',
+    events.filter(e => e.year),
+    { modalTitle: 'ผู้วางแผนขอตำแหน่ง', minYear: 2569,
+      legend: [
+        { color: '#0891b2', label: 'ขอ ผศ.' },
+        { color: '#1e3a5f', label: 'ขอ รศ.' },
+        { color: '#7a1f2b', label: 'ปนกัน / อื่น ๆ' },
+      ] });
+
+  // table
+  const rows = list.slice().sort((a, b) =>
+    (parseBEYear(a.nextPosition) || parseBEYear(a.nextYear) || 9999) -
+    (parseBEYear(b.nextPosition) || parseBEYear(b.nextYear) || 9999)
+  ).map(a => `<tr>
+    <td>${a.name}</td>
+    <td>${a.field || '—'}</td>
+    <td>${a.currentPosition || '—'}${a.currentDate ? ` <span class="muted">(${a.currentDate})</span>` : ''}</td>
+    <td>${a.nextPosition || '—'}</td>
+    <td>${a.nextYear || '—'}</td>
+    <td>${a.program || '—'}</td>
+  </tr>`).join('');
+
+  document.getElementById('hr-academic-table').innerHTML = `
+    <div class="chart-title">รายละเอียดแผนการขอตำแหน่ง (${list.length} คน)</div>
+    <div class="chart-sub">เรียงตามปีที่คาดว่าจะยื่นขอ · ลากซ้าย–ขวาเพื่อดูคอลัมน์เพิ่ม</div>
+    <div class="hr-tablewrap">
+      <table class="hr-table">
+        <thead><tr>
+          <th>ชื่อ-สกุล</th><th>สาขา</th><th>ตำแหน่งปัจจุบัน</th>
+          <th>ตำแหน่งถัดไป</th><th>ช่วงเวลาผลงาน (พ.ศ.)</th><th>หลักสูตร/สังกัด</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  initDragScroll();
+}
+
+// drag-to-scroll for wide scroll containers (tables, org chart)
+function initDragScroll() {
+  document.querySelectorAll('.hr-tablewrap, .org-scroll, .tl-scroll').forEach(el => {
+    if (el._dragInit) return;
+    el._dragInit = true;
+    let down = false, sx = 0, sl = 0, moved = false;
+    el.addEventListener('mousedown', e => {
+      if (e.target.closest('.org-node') || e.target.closest('.tl-box')) return; // let node/pin clicks work
+      down = true; moved = false; el.classList.add('dragging'); sx = e.pageX; sl = el.scrollLeft;
+    });
+    window.addEventListener('mouseup', () => { down = false; el.classList.remove('dragging'); });
+    window.addEventListener('mousemove', e => {
+      if (!down) return; e.preventDefault(); moved = true; el.scrollLeft = sl - (e.pageX - sx);
+    });
+  });
+}
+
+function renderHrRetirement() {
+  const CUR = 2569;
+  const list = (_hrCache.retirement || []);
+  const withYear = list.filter(r => r.year && !isNaN(r.year));
+  const noYear = list.filter(r => !r.year || isNaN(r.year));
+
+  const acad = withYear.filter(r => r.track === 'วิชาการ');
+  const supp = withYear.filter(r => r.track === 'สนับสนุน');
+  const in5  = withYear.filter(r => r.year <= CUR + 5).length;
+  const in10 = withYear.filter(r => r.year <= CUR + 10).length;
+
+  document.getElementById('hr-ret-statGrid').innerHTML =
+    hrMkStatCard('มีแผนเกษียณ', withYear.length, `สายวิชาการ ${acad.length} · สายสนับสนุน ${supp.length}`, '📅', '#2563eb') +
+    hrMkStatCard('เกษียณใน 5 ปี', in5, `พ.ศ. ${CUR}–${CUR + 5}`, '⏳', '#f59e0b') +
+    hrMkStatCard('เกษียณใน 10 ปี', in10, `พ.ศ. ${CUR}–${CUR + 10}`, '📆', '#0891b2') +
+    hrMkStatCard('จ้างรายปี (ไม่ระบุปี)', noYear.length, 'พนักงานส่วนงาน', '📝', '#7c3aed');
+
+  // timeline — one pin per year, colour by dominant track
+  const byYear = {};
+  withYear.forEach(r => { (byYear[r.year] = byYear[r.year] || []).push(r); });
+  const events = Object.keys(byYear).map(y => {
+    const g = byYear[y];
+    const a = g.filter(x => x.track === 'วิชาการ').length;
+    const s = g.length - a;
+    return {
+      year: +y,
+      label: `${g.length} คน`,
+      color: a && s ? '' : a ? 'blue' : 'teal',
+      people: g.map(x => `${x.name} <span style="color:var(--text-muted)">(${x.track}${x.position ? ' · ' + x.position : ''})</span>`),
+    };
+  });
+
+  buildTimeline('hr-ret-timeline', events, {
+    modalTitle: 'ผู้เกษียณอายุ',
+    minYear: Math.min(CUR, ...events.map(e => e.year)),
+    legend: [
+      { color: '#1e3a5f', label: 'สายวิชาการ' },
+      { color: '#0891b2', label: 'สายสนับสนุน' },
+      { color: '#7a1f2b', label: 'ทั้งสองสาย' },
+    ],
+  });
+
+  // bar chart — count per year, stacked by track
+  const years = [];
+  const minY = Math.min(...withYear.map(r => r.year)), maxY = Math.max(...withYear.map(r => r.year));
+  for (let y = minY; y <= maxY; y++) years.push(y);
+  const acadData = years.map(y => acad.filter(r => r.year === y).length);
+  const suppData = years.map(y => supp.filter(r => r.year === y).length);
+
+  if (charts['hr-ret-bar']) charts['hr-ret-bar'].destroy();
+  charts['hr-ret-bar'] = new Chart(document.getElementById('hr-ret-bar').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: years,
+      datasets: [
+        { label: 'สายวิชาการ', data: acadData, backgroundColor: '#1e3a5f', borderRadius: 6 },
+        { label: 'สายสนับสนุน', data: suppData, backgroundColor: '#0891b2', borderRadius: 6 },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        x: { stacked: true, grid: { display: false }, ticks: { font: { family: 'Sarabun', size: 11 } } },
+        y: { stacked: true, beginAtZero: true, ticks: { precision: 0, stepSize: 1 }, grid: { color: 'rgba(0,0,0,0.05)' } },
+      },
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { family: 'Sarabun', size: 12 }, padding: 12 } },
+        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.raw} คน` } },
+      },
+    },
+  });
+}
+
+function renderHrSupport() {
+  const el = document.getElementById('hr-support-matrix');
+  const list = (_hrCache.support || []).filter(r => r && r.name);
+  const years = (_hrCache.supportYears || [2569, 2570, 2571]).slice().sort();
+
+  if (!list.length) {
+    el.innerHTML = `<div class="chart-title">แผนการเข้าสู่ตำแหน่งที่สูงขึ้น — สายสนับสนุนวิชาการ</div>
+      <p style="color:var(--text-muted);font-size:13px;margin-top:8px;">ยังไม่มีข้อมูลในฐานข้อมูล (hr/support_position_plan)</p>`;
+    return;
+  }
+
+  // sort people by their target year, then name
+  const rows = list.slice().sort((a, b) =>
+    (Number(a.year) || 9999) - (Number(b.year) || 9999) || String(a.name).localeCompare(String(b.name), 'th'));
+  const perYear = years.map(y => rows.filter(r => Number(r.year) === y).length);
+
+  const bodyRows = rows.map(r => `<tr>
+    <td>${r.name}</td>
+    ${years.map(y => Number(r.year) === y
+      ? `<td style="text-align:center;"><span class="sp-mark">${r.targetPosition || 'วางแผน'}</span></td>`
+      : `<td style="text-align:center;color:var(--border);">·</td>`).join('')}
+  </tr>`).join('');
+
+  el.innerHTML = `
+    <div class="chart-title">แผนการเข้าสู่ตำแหน่งที่สูงขึ้น — สายสนับสนุนวิชาการ (${rows.length} คน)</div>
+    <div class="chart-sub">ตำแหน่งพนักงานมหาวิทยาลัย · ปีที่วางแผนยื่นขอตามปีงบประมาณ</div>
+    <div class="stat-grid" style="grid-template-columns:repeat(${years.length},1fr);margin:16px 0;">
+      ${years.map((y, i) => hrMkStatCard(`ปีงบประมาณ ${y}`, perYear[i], 'คน', '📈', '#2563eb')).join('')}
+    </div>
+    <div class="hr-tablewrap">
+      <table class="hr-table sp-matrix">
+        <thead><tr>
+          <th>ชื่อ-สกุล</th>
+          ${years.map(y => `<th style="text-align:center;">${y}</th>`).join('')}
+        </tr></thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+    </div>`;
+  initDragScroll();
 }
 
 // ===== Farm helpers =====

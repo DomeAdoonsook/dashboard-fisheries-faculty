@@ -121,9 +121,10 @@ async function initData() {
 - เชิงรุก → `proactive-admin.html`
 - ฟาร์มประมง → `farm-admin.html` / `farm-sab.html` / `farm-sao.html`
 
-**ผู้บริหาร (executive)** → `executive-main.html` → เลือก dashboard
-- ภาระกิจประจำ → `mission-dashboard.html`
-- เชิงรุก → `proactive-dashboard.html`
+**ผู้บริหาร (executive)** → `executive-main.html` (SPA, sidebar หลายหมวด)
+- ตัวชี้วัด: ภาพรวมองค์กร / ภาระกิจประจำ / เชิงรุก
+- ฟาร์มประมง: ภาพรวมฟาร์ม / Earthen Pond / SAB / SAO
+- ทรัพยากรบุคคล: ภาพรวมบุคลากร / โครงสร้างผู้บริหาร / แผนตำแหน่งวิชาการ / แผนเกษียณอายุ / แผนสายสนับสนุน
 
 ### หน้าทั้งหมด
 - [x] หน้า 1: `index.html` — Login (admin / executive)
@@ -144,9 +145,31 @@ async function initData() {
 หมายเหตุ: การ์ด "การเงินและบัญชี" เดิมในหน้า 2 (`dashboard-main.html`) ถูกแทนที่ด้วยการ์ด "ทรัพยากรบุคคล" ชี้ไป `hr-admin.html`
 
 ### สิ่งที่ยังต้องทำ
+
+**mission-dashboard / proactive-dashboard**
 - [ ] `mission-dashboard.html` — executive view ภาระกิจ (กราฟ Bar/Donut/Radar, traffic light, filter ยุทธศาสตร์)
 - [ ] `proactive-dashboard.html` — executive view เชิงรุก (คะแนน 1-5, กราฟ radar)
-- [ ] ผังองค์กรแบบ dynamic ในหน้าผู้บริหาร — ดึงชื่อ-ตำแหน่งจริงจาก `hr/personnel` (field `adminRole`) มาวาด org chart ตามโครงสร้างคงที่จาก "โครงสร้างส่วนงาน 69.pdf" (คณบดี → รองคณบดี 3 ฝ่าย + ผอ.สำนักงาน → หัวหน้างาน 5 งาน + ศูนย์ความเป็นเลิศ)
+
+**ระบบบุคลากรในหน้าผู้บริหาร (`executive-main.html` หมวด "ทรัพยากรบุคคล")**
+- [x] ขั้น 1: เพิ่มหมวด sidebar + 5 หน้า + โหลด `hr/*` เข้า `_hrCache` ตอน init
+- [x] ขั้น 2: หน้า "ภาพรวมบุคลากร" — stat cards 4 + donut สายงาน + bar ตำแหน่งวิชาการ + bar ประเภทจ้าง
+      (helper: `hrActivePersonnel()` กรองอัตราว่าง, `hrMkStatCard/hrPieChart/hrBarChart`)
+- [x] ขั้น 3: หน้า "โครงสร้างผู้บริหาร" — flex layout + SVG overlay วาดเส้นเชื่อม (`drawOrgLinks()`),
+      ชื่อดึงจาก `hr/personnel.adminRole` (จับคู่ด้วย keyword ใน `ORG_COLUMNS`), card ลูกเรียงแนวตั้ง,
+      drag-to-scroll, animation stagger. โครงสร้าง: คณบดี → รองคณบดี 3 ฝ่าย + ผอ.สนง. → หัวหน้างาน 5
+- [x] ขั้น 4: หน้า "แผนตำแหน่งวิชาการ" — timeline หมุด (`buildTimeline()`) + ตาราง `.hr-table` drag-scroll
+      (ปีดึงจาก `parseBEYear(nextPosition)` → fallback `nextYear`), legend สีอยู่ใต้ timeline
+- [x] ขั้น 5: หน้า "แผนเกษียณอายุ" — stat cards 4 + timeline (สีตามสาย) + bar chart stacked รายปีแยกสาย
+- [x] ขั้น 6: หน้า "แผนสายสนับสนุน" — stat cards รายปีงบ + matrix (แถว=คน, คอลัมน์=ปี, badge ที่ตรงปี)
+- [ ] ขั้น 7: ทดสอบทุกหน้ากับ browser จริง (ยังไม่ครบ — support matrix อาจว่างถ้า `year` ใน Firestore เป็น string,
+      แก้แล้วด้วย `Number(r.year)` แต่ยังไม่ได้ยืนยันบน browser)
+- [ ] (เฟส 2) เพิ่ม field วุฒิการศึกษา + วันเกิด ใน hr-admin → กราฟ "จำแนกวุฒิ" + "ช่วงอายุ"
+
+**Timeline component (`buildTimeline(containerId, events, opts)`)** — ใช้ซ้ำหน้า 4 และ 5
+- events: `[{ year, label, color, people:[html] }]` · opts: `{ minYear, maxYear, modalTitle, legend:[{color,label}] }`
+- เส้นแกน + tick รายปี + หมุดสลับบน/ล่าง, เส้นก้านวาดด้วย SVG (`.tl-stems`), กล่อง clamp ในกรอบ,
+  คลิกหมุด → `openHrModal()` แสดงรายชื่อ, กว้าง ~110px/ปี + drag-to-scroll (`.tl-scroll`)
+- `initDragScroll()` ผูก drag ให้ `.hr-tablewrap`, `.org-scroll`, `.tl-scroll` (กัน bind ซ้ำด้วย `_dragInit`)
 
 ### กฎสำคัญสำหรับ Claude
 1. ทุก session อ่าน CLAUDE.md ก่อนเสมอ

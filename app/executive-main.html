@@ -1644,7 +1644,8 @@ function renderHrRetirement() {
 
 function renderHrSupport() {
   const el = document.getElementById('hr-support-matrix');
-  const list = (_hrCache.support || []).filter(r => r && r.name);
+  // hr-admin stores each record as { id, personId, personName, year, targetPosition }
+  const list = (_hrCache.support || []).filter(r => r && (r.personName || r.name));
   const years = (_hrCache.supportYears || [2569, 2570, 2571]).slice().sort();
 
   if (!list.length) {
@@ -1655,11 +1656,12 @@ function renderHrSupport() {
 
   // sort people by their target year, then name
   const rows = list.slice().sort((a, b) =>
-    (Number(a.year) || 9999) - (Number(b.year) || 9999) || String(a.name).localeCompare(String(b.name), 'th'));
+    (Number(a.year) || 9999) - (Number(b.year) || 9999) ||
+    String(a.personName || a.name).localeCompare(String(b.personName || b.name), 'th'));
   const perYear = years.map(y => rows.filter(r => Number(r.year) === y).length);
 
   const bodyRows = rows.map(r => `<tr>
-    <td>${r.name}</td>
+    <td>${r.personName || r.name}</td>
     ${years.map(y => Number(r.year) === y
       ? `<td style="text-align:center;"><span class="sp-mark">${r.targetPosition || 'วางแผน'}</span></td>`
       : `<td style="text-align:center;color:var(--border);">·</td>`).join('')}
